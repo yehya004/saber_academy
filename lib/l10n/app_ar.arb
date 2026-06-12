@@ -1,0 +1,925 @@
+{
+  "@@locale": "ar",
+  "appTitle": "دروس الأستاذ صابر - القرآن والعربية",
+  "home": "الرئيسية",
+  "quizzes": "الاختبارات",
+  "login": "تسجيل الدخول",
+  "email": "البريد الإلكتروني",
+  "password": "كلمة المرور",
+  "emailValidationError": "يرجى إدخال بريد إلكتروني صحيح.",
+  "passwordValidationError": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.",
+  "dashboard": "لوحة التحكم",
+  "students": "الطلاب",
+  "attendance": "الحضور والغياب",
+  "homework": "الواجبات",
+  "messages": "الرسائل",
+  "mushaf": "المصحف",
+  "settings": "الإعدادات",
+  "signOut": "تسجيل الخروج",
+  "myProgress": "تقدمي",
+  "level": "المستوى",
+  "sessionsOf": "{done} / {total} جلسة",
+  "@sessionsOf": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "totalAttended": "إجمالي الحضور: {count}",
+  "@totalAttended": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "present": "حاضر",
+  "absent": "غائب",
+  "absenceExcuse": "عذر الغياب",
+  "pending": "قيد الانتظار",
+  "submitted": "مُسلَّم",
+  "corrected": "مُصحَّح",
+  "assignHomework": "تعيين واجب",
+  "submitHomework": "تسليم الواجب",
+  "markCorrected": "تحديد كمُصحَّح",
+  "uploadImage": "رفع صورة",
+  "chatWithTeacher": "محادثة مع المعلم",
+  "typeMessage": "اكتب رسالة...",
+  "language": "Language / اللغة",
+  "languageArabic": "العربية (AR)",
+  "languageEnglish": "الإنجليزية (EN)",
+  "languageTurkish": "التركية (TR)",
+  "mushafVersion1": "النسخة الأولى",
+  "mushafVersion2": "النسخة الثانية",
+  "mushafModeNormal": "عادي",
+  "mushafModeSepia": "بيج / حماية العين",
+  "mushafModeDark": "الوضع الداكن",
+  "welcomeMessage": "السلام عليكم، {name}",
+  "@welcomeMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "welcomeTeacher": "أهلاً بك، {name}",
+  "@welcomeTeacher": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentStatus": "حالة الدفع",
+  "paid": "تم الدفع",
+  "notPaid": "لم يتم الدفع حتى الآن",
+  "paymentAccessBlocked": "الاشتراك غير نشط حالياً. يرجى إتمام الدفع لتتمكن من تصفح محتوى الدورة.",
+  "contactTeacher": "تواصل مع المعلم",
+  "paymentReminder": "تنبيه: لم يتم دفع رسوم الكورس الحالي بعد. يرجى مراجعة المعلم لتأكيد الدفع.",
+  "accountBlocked": "الحساب معطل",
+  "accountBlockedReason": "تم حظر حسابك مؤقتاً من قبل المعلم. يرجى التواصل مع الأستاذ صابر للتفعيل.",
+  "statusBlocked": "محظور",
+  "loginSubtitle": "تعلم القرآن والعربية الدراسات الإسلامية",
+  "upcomingLesson": "موعد درسك القادم",
+  "quickActions": "الإجراءات السريعة",
+  "viewSubmitHomework": "عرض وتسليم الواجبات",
+  "pendingQuizzesCount": "لديك {count} اختبار بانتظارك",
+  "@pendingQuizzesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "viewAssignedQuizzes": "عرض الاختبارات المعيّنة",
+  "quranMushaf": "مصحف القرآن",
+  "browseReadMushaf": "تصفح وقراءة المصحف الشريف",
+  "recentSessions": "جلساتك الأخيرة",
+  "noTeacherAssigned": "لم يتم تعيين أستاذ بعد",
+  "chatWithTeacherTooltip": "المحادثة مع الأستاذ",
+  "chatWithPartner": "تواصل مع {name}",
+  "@chatWithPartner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "chatWithTeacherDirectly": "تواصل مع المعلم مباشرةً",
+  "timeSyncedOnline": "التوقيت مُزامَن من الإنترنت يومياً",
+  "selectCountryForTimezone": "يرجى تحديد دولتك في الإعدادات لعرض التوقيت الصحيح",
+  "todayAt": "اليوم الساعة {time}",
+  "@todayAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "tomorrowAt": "غداً الساعة {time}",
+  "@tomorrowAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "dayAt": "يوم {day} الساعة {time}",
+  "@dayAt": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "fileHomeworks": "واجبات الملفات",
+  "noFileHomeworks": "لا توجد واجبات ملفات بعد",
+  "assignedQuizzes": "اختبارات مُعيَّنة",
+  "noAssignedQuizzes": "لا توجد اختبارات مُعيَّنة بعد",
+  "pendingStatus": "قيد الانتظار",
+  "submittedStatus": "مُسلَّم",
+  "quiz": "اختبار",
+  "quizPoints": "{earned} / {total} نقطة",
+  "@quizPoints": {
+    "placeholders": {
+      "earned": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "cancel": "إلغاء",
+  "confirm": "تأكيد",
+  "deleteFile": "حذف الملف",
+  "confirmDeleteFile": "هل تريد حذف \"{fileName}\"؟",
+  "@confirmDeleteFile": {
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "resubmit": "إعادة التسليم",
+  "confirmResubmit": "سيتم حذف جميع الملفات المرفوعة. هل تريد المتابعة؟",
+  "fileUploadedSuccessfully": "تم رفع الملف بنجاح",
+  "filesUploadedSuccessfully": "تم رفع {count} ملفات بنجاح",
+  "@filesUploadedSuccessfully": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "failedToOpenFile": "تعذّر فتح الملف",
+  "failedToLoadFile": "فشل تحميل الملف: {error}",
+  "@failedToLoadFile": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToUpload": "فشل الرفع: {error}",
+  "@failedToUpload": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToDelete": "فشل الحذف: {error}",
+  "@failedToDelete": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "homeworkResetSuccess": "تم إعادة تعيين الواجب. يمكنك رفع ملفات جديدة.",
+  "operationFailed": "فشلت العملية: {error}",
+  "@operationFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "profileNotFound": "لم يتم العثور على ملف شخصي. تواصل مع المسؤول.",
+  "questionsCount": "{count} سؤال",
+  "@questionsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "maxFileSizeError": "الملف \"{fileName}\" يتجاوز {maxSize} ميجابايت. اختر ملفاً أصغر.",
+  "@maxFileSizeError": {
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      },
+      "maxSize": {
+        "type": "String"
+      }
+    }
+  },
+  "quizReview": "مراجعة الاختبار",
+  "scoreBannerMsgExcellent": "ممتاز!",
+  "scoreBannerMsgVeryGood": "جيد جداً!",
+  "scoreBannerMsgGood": "جيد!",
+  "scoreBannerMsgNeedsReview": "يحتاج مراجعة",
+  "studentAnswerLabel": "إجابتك",
+  "correctAnswerLabel": "الإجابة الصحيحة",
+  "pointsLabel": "{points} نقطة",
+  "@pointsLabel": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "unansweredLabel": "لم تُجب",
+  "previousButton": "السابق",
+  "nextButton": "التالي",
+  "submitQuizButton": "إرسال الاختبار",
+  "sendQuizFailed": "فشل إرسال الاختبار: {error}",
+  "@sendQuizFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "hintLabel": "تلميح",
+  "okLabel": "حسناً",
+  "noQuestions": "لا توجد أسئلة",
+  "questionOutOf": "سؤال {current} من {total}",
+  "@questionOutOf": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "secondsAbbr": "{seconds} ث",
+  "@secondsAbbr": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "quizResultTitle": "نتيجة الاختبار",
+  "trueLabel": "صح",
+  "falseLabel": "خطأ",
+  "typeAnswerHint": "اكتب إجابتك هنا…",
+  "topicCovered": "ما أخذنا",
+  "resourceLabel": "المصدر",
+  "attendanceSession": "جلسة حضور",
+  "teacherNoSchedule": "لم يُحدَّد المعلم موعد الدرس بعد",
+  "nextLesson": "الدرس القادم",
+  "teacherHome": "الرئيسية",
+  "teacherStudents": "الطلاب",
+  "teacherQuizzes": "الأسئلة",
+  "teacherMushaf": "المصحف",
+  "teacherSettings": "الإعدادات",
+  "newStudent": "طالب جديد",
+  "welcomeTeacherPrefix": "مرحباً،",
+  "studentCount": "{count} طالب",
+  "@studentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "todaySessions": "حصص اليوم",
+  "newMessages": "رسائل جديدة",
+  "needsCorrection": "تحتاج تصحيح",
+  "mainSections": "الأقسام الرئيسية",
+  "homeworkInbox": "صندوق الواجبات",
+  "communication": "التواصل",
+  "viewAll": "عرض الكل",
+  "noStudentsRegistered": "لا يوجد طلاب مسجلون بعد",
+  "studentLevelAbbr": "م{level}",
+  "@studentLevelAbbr": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "studentLessonAbbr": "د{lesson}",
+  "@studentLessonAbbr": {
+    "placeholders": {
+      "lesson": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceTooltip": "الحضور",
+  "homeworkTooltip": "الواجبات",
+  "chatTooltip": "المحادثة",
+  "searchForStudent": "ابحث عن طالب…",
+  "noResults": "لا توجد نتائج",
+  "recordSession": "تسجيل جلسة جديدة",
+  "sessionTopicLabel": "موضوع الجلسة (ماذا أخذنا؟)",
+  "sessionTopicHint": "مثال: الحروف الهجائية، سورة الفاتحة...",
+  "homeworkType": "نوع الواجب",
+  "homeworkTypeText": "نصي",
+  "homeworkTypeFile": "ملف / صورة",
+  "homeworkTypeQuiz": "اختبار",
+  "noQuizzesInBank": "لا توجد اختبارات في البنك بعد. أنشئ اختباراً أولاً.",
+  "selectQuizFromBank": "اختر اختباراً من البنك",
+  "quizPointsAndQuestions": "{title}  ({points} نقطة، {questions} س)",
+  "@quizPointsAndQuestions": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "points": {
+        "type": "int"
+      },
+      "questions": {
+        "type": "int"
+      }
+    }
+  },
+  "homeworkNoteOptional": "ملاحظة إضافية (اختياري)…",
+  "homeworkNoteFileHint": "مثال: تصوير صفحة من الكتاب وإرسالها…",
+  "homeworkNoteTextHint": "مثال: مراجعة الدرس، حفظ الآيات 1-5...",
+  "referenceLinkOptional": "رابط مرجعي (كتاب / موقع / فيديو)",
+  "saveSession": "حفظ الجلسة",
+  "sessionHistory": "سجل الجلسات",
+  "noSessionsYet": "لا توجد جلسات بعد",
+  "createStudentAccount": "إنشاء حساب طالب",
+  "enterStudentDetails": "أدخل بيانات الطالب وحدد كلمة مروره",
+  "loginDetailsSection": "بيانات الدخول",
+  "fullName": "الاسم الكامل",
+  "studentNameRequired": "اسم الطالب مطلوب",
+  "emailRequired": "البريد الإلكتروني مطلوب",
+  "invalidEmail": "بريد غير صالح",
+  "passwordRequired": "كلمة المرور مطلوبة",
+  "passwordMinLength": "يجب أن تكون 6 أحرف على الأقل",
+  "confirmPassword": "تأكيد كلمة المرور",
+  "passwordsDoNotMatch": "كلمتا المرور غير متطابقتين",
+  "countryAndContactSection": "الدولة والتواصل",
+  "selectStudentCountry": "اختر دولة الطالب",
+  "whatsappNumber": "رقم الواتساب",
+  "whatsappNumberHint": "مثال: +966501234567",
+  "messengerLinkOptional": "رابط الماسنجر (اختياري)",
+  "levelAndInitialLessonSection": "المستوى والدرس الابتدائي",
+  "initialLessonInLevel": "الدرس في المستوى",
+  "initialCoursePaymentStatus": "حالة اشتراك الكورس الأول",
+  "paidInAdvance": "تم الدفع مقدماً",
+  "accountActivationPaid": "تم تفعيل الحساب فورياً للوصول للمحتوى",
+  "accountActivationUnpaid": "سيكون حساب الطالب معطلاً حتى يتم الدفع",
+  "creatingAccount": "جارٍ الإنشاء…",
+  "createAccount": "إنشاء الحساب",
+  "accountCreatedSuccess": "تم إنشاء الحساب ✓",
+  "shareDetailsWithStudent": "شارك هذه البيانات مع الطالب:",
+  "credName": "الاسم",
+  "credEmail": "البريد",
+  "countryLabel": "الدولة",
+  "whatsappLabel": "واتساب",
+  "copyLoginDetails": "نسخ بيانات الدخول",
+  "copiedToClipboard": "تم نسخ البيانات إلى الحافظة ✓",
+  "close": "إغلاق",
+  "chooseStudentCountry": "اختر دولتك",
+  "otherCountry": "دولة أخرى",
+  "lessonsScheduleTitle": "موعد دروس {name}",
+  "@lessonsScheduleTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "teacherCountryNotSet": "لم تحدد دولتك في الملف الشخصي.\nيتم استخدام توقيت مصر (Africa/Cairo) افتراضياً.",
+  "studentCountryNotSet": "لم يتم تحديد دولة الطالب — لن يتمكن النظام من تحويل التوقيت تلقائياً.",
+  "daysAndLessonTimes": "أيام ومواعيد الدرس",
+  "teacherTimezoneTime": "بتوقيتك ({timezone})",
+  "@teacherTimezoneTime": {
+    "placeholders": {
+      "timezone": {
+        "type": "String"
+      }
+    }
+  },
+  "clickToAdd": "اضغط للإضافة",
+  "timezoneUpdatedOnline": "التوقيت مُحدَّث من الإنترنت",
+  "savingSchedule": "جارٍ الحفظ...",
+  "saveSchedule": "حفظ المواعيد",
+  "scheduleSavedSuccess": "تم حفظ مواعيد الدروس ✓",
+  "selectAtLeastOneDay": "اختر يوماً واحداً على الأقل",
+  "studentDetailsTitle": "بيانات الطالب",
+  "academicLevelSection": "المستوى الدراسي",
+  "manuallyBlocked": "محظور يدوياً",
+  "activeCanEnter": "نشط (يستطيع الدخول)",
+  "levelLessonsProgress": "{lesson} / 20 درس",
+  "@levelLessonsProgress": {
+    "placeholders": {
+      "lesson": {
+        "type": "int"
+      }
+    }
+  },
+  "editLevelAndLesson": "تعديل المستوى والدرس",
+  "weeklyLessonsSchedule": "مواعيد الدروس الأسبوعية",
+  "noScheduleSetYet": "لم يُحدَّد موعد بعد",
+  "nextLessonPrefix": "الدرس القادم: ",
+  "roleStudentLabel": "(الطالب)",
+  "setLessonTime": "تحديد موعد الدرس",
+  "editLessonTime": "تعديل الموعد",
+  "contactDetailsSection": "بيانات التواصل",
+  "editContactDetailsTooltip": "تعديل بيانات التواصل",
+  "quickActionsSection": "الإجراءات السريعة",
+  "attendanceLog": "سجل الحضور",
+  "resetPassword": "إعادة تعيين كلمة المرور",
+  "resetPasswordEmailInstructionsSent": "تم إرسال رابط إعادة التعيين إلى البريد الإلكتروني",
+  "editLevelAndPaymentTitle": "تعديل المستوى والاشتراك",
+  "courseStatusCurrent": "حالة الكورس الحالي",
+  "accountStatus": "حالة الحساب",
+  "blockStudentAccount": "حظر حساب الطالب",
+  "saveChanges": "حفظ التغييرات",
+  "editProfile": "تعديل الملف الشخصي",
+  "personalInfoSection": "المعلومات الشخصية",
+  "changePhoto": "اضغط لتغيير الصورة",
+  "profileSavedSuccess": "تم حفظ الملف الشخصي بنجاح ✓",
+  "mushafTypeLabel": "اختر نوع المصحف",
+  "mushafTypeStandard": "المصحف المعياري (المدينة المنورة)",
+  "mushafTypeTajweed": "مصحف التجويد الملون",
+  "mushafTypeDiyanet": "مصحف ديانت التركي",
+  "downloadsTitle": "إدارة التنزيلات",
+  "downloadsTabMushafs": "المصاحف",
+  "downloadsTabTafsirs": "التفاسير والترجمات",
+  "downloadsTabReciters": "القراء والأصوات",
+  "downloadButton": "تحميل",
+  "downloadingStatus": "جاري التحميل...",
+  "downloadedStatus": "محمل",
+  "notDownloadedStatus": "غير محمل",
+  "deleteButton": "حذف",
+  "deleteConfirmTitle": "تأكيد الحذف",
+  "deleteConfirmMessage": "هل أنت متأكد من حذف هذا المحتوى؟",
+  "cancelButton": "إلغاء",
+  "madinaMushafName": "مصحف المدينة المنورة",
+  "diyanetMushafName": "مصحف ديانت التركي",
+  "muyassarTafsirName": "التفسير الميسر (عربي)",
+  "englishTranslationName": "الترجمة الإنجليزية (Sahih)",
+  "turkishTranslationName": "الترجمة التركية (Diyanet)",
+  "downloadProgress": "تحميل: {progress}%",
+  "@downloadProgress": {
+    "placeholders": {
+      "progress": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadedPagesCount": "تم تحميل {count} من {total} صفحة",
+  "@downloadedPagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "downloadedAyahsCount": "تم تحميل {count} من {total} آية",
+  "@downloadedAyahsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "bookmarkRemoved": "تم إزالة العلامة",
+  "savedBookmarkTitle": "علامة محفوظة",
+  "savedBookmarkBody": "لديك علامة محفوظة على صفحة {page}\nماذا تريد؟",
+  "@savedBookmarkBody": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "goToPage": "انتقل إلى صفحة {page}",
+  "@goToPage": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "bookmarkPlaced": "تم وضع علامة على صفحة {page}",
+  "@bookmarkPlaced": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "placeBookmark": "ضع علامة هنا",
+  "noBookmarkSaved": "لا توجد علامة محفوظة",
+  "goToPageTitle": "انتقال إلى صفحة",
+  "goToPageHint": "١ – ٦٠٤",
+  "mushafIndexTitle": "فهرس القرآن الكريم",
+  "mushafIndexSurahs": "السور",
+  "mushafIndexJuzs": "الأجزاء",
+  "mushafIndexHazbs": "الأحزاب",
+  "surahLabel": "سورة {name}",
+  "@surahLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pageAbbr": "ص {page}",
+  "@pageAbbr": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "juzLabel": "الجزء {number}",
+  "@juzLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "tafsirPanelTitle": "الصفحة {page}",
+  "@tafsirPanelTitle": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "tafsirTabQuran": "القرآن",
+  "tafsirTabTafsir": "التفسير",
+  "failedToLoadData": "تعذّر تحميل البيانات",
+  "retryButton": "إعادة المحاولة",
+  "notAvailable": "غير متاح",
+  "ayahLabel": "{surah} – آية {ayah}",
+  "@ayahLabel": {
+    "placeholders": {
+      "surah": {
+        "type": "String"
+      },
+      "ayah": {
+        "type": "String"
+      }
+    }
+  },
+  "selectReciterTitle": "اختيار القارئ",
+  "startChatConversation": "ابدأ المحادثة",
+  "failedToLoadMessages": "تعذّر تحميل الرسائل",
+  "sendImageTooltip": "إرسال صورة",
+  "sendImageFailed": "فشل إرسال الصورة: {error}",
+  "@sendImageFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noQuizzesInBankShort": "لا توجد اختبارات في بنك الأسئلة. أنشئ اختباراً أولاً.",
+  "chooseQuizToAssign": "اختر اختباراً للتعيين",
+  "quizAssignmentTitle": "الاختبارات",
+  "assignQuizTooltip": "تعيين اختبار",
+  "noQuizzesAssigned": "لا توجد اختبارات مُعيَّنة",
+  "clickPlusToAssignQuiz": "اضغط + لتعيين اختبار للطالب",
+  "quizStatusAssigned": "معلق",
+  "pointsEarnedOutOf": "{earned} / {total} نقطة",
+  "@pointsEarnedOutOf": {
+    "placeholders": {
+      "earned": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteQuizTitle": "حذف الاختبار",
+  "deleteQuizConfirmation": "هل تريد حذف \"{title}\"؟\nسيتم حذف كل الأسئلة والتعيينات المرتبطة به.",
+  "@deleteQuizConfirmation": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "quizBankTitle": "بنك الأسئلة",
+  "newQuizButton": "اختبار جديد",
+  "noQuizzesYet": "لا توجد اختبارات بعد",
+  "clickPlusToCreateQuiz": "اضغط + لإنشاء اختبارك الأول",
+  "createQuizTitle": "إنشاء اختبار جديد",
+  "editQuizTitle": "تعديل الاختبار",
+  "quizDetailsSection": "تفاصيل الاختبار",
+  "quizNameLabel": "اسم الاختبار",
+  "quizNameRequired": "اسم الاختبار مطلوب",
+  "addQuestionButton": "إضافة سؤال",
+  "questionsSection": "الأسئلة",
+  "questionNumberTitle": "سؤال {number}",
+  "@questionNumberTitle": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "questionTypeLabel": "نوع السؤال",
+  "questionTypeMultipleChoice": "اختيار من متعدد",
+  "questionTypeTrueFalse": "صح / خطأ",
+  "questionTypeTextAnswer": "إجابة كتابية",
+  "questionTextLabel": "نص السؤال",
+  "questionTextRequired": "نص السؤال مطلوب",
+  "pointsValueLabel": "النقاط",
+  "optionsSection": "الخيارات",
+  "addOptionButton": "إضافة خيار",
+  "optionNumberLabel": "الخيار {number}",
+  "@optionNumberLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "optionRequired": "الخيار مطلوب",
+  "chooseCorrectOption": "اختر الخيار الصحيح",
+  "explanationOptional": "التفسير / التلميح (اختياري)",
+  "pleaseAddQuestions": "يرجى إضافة سؤال واحد على الأقل",
+  "pleaseChooseCorrectOption": "يرجى تحديد الخيار الصحيح للسؤال {number}",
+  "@pleaseChooseCorrectOption": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "savingQuiz": "جارٍ الحفظ...",
+  "saveQuizButton": "حفظ الاختبار",
+  "quizSavedSuccess": "تم حفظ الاختبار بنجاح ✓",
+  "quizReviewTitle": "مراجعة الاختبار",
+  "totalScoreLabel": "النتيجة الإجمالية",
+  "studentAnswerReview": "إجابة الطالب",
+  "correctAnswerReview": "الإجابة الصحيحة",
+  "noHomeworksToCorrect": "لا توجد واجبات تنتظر التصحيح",
+  "allSubmittedHomeworksCorrected": "جميع الواجبات المُسلَّمة تم تصحيحها",
+  "unknownStudent": "طالب غير معروف",
+  "daysAgo": "منذ {count} يوم",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "منذ {count} ساعة",
+  "@hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "minutesAgo": "منذ {count} دقيقة",
+  "@minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeworkInboxTitle": "صندوق الواجبات",
+  "studentListTitle": "قائمة الطلاب",
+  "studentInboxTitle": "واجبات {name}",
+  "@studentInboxTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeworkCorrectedBanner": "تم التصحيح ✓",
+  "homeworkSubmittedBanner": "تحتاج تصحيح",
+  "homeworkPendingBanner": "معلق",
+  "daysAbbr": "{days}ي",
+  "@daysAbbr": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAbbr": "{hours}س",
+  "@hoursAbbr": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "minutesAbbr": "{minutes}د",
+  "@minutesAbbr": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "topicsMain": "ما تم أخذه",
+  "totalAttendanceLabel": "إجمالي الحضور",
+  "levelProgress": "التقدم في المستوى",
+  "messengerLabel": "ماسنجر",
+  "chatLabel": "المحادثة",
+  "editLevelForStudent": "تعديل مستوى – {name}",
+  "@editLevelForStudent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "coursePaymentStatus": "حالة دفع الكورس الحالي",
+  "blockedFromApp": "محظور من دخول التطبيق",
+  "whatsappPhoneLabel": "واتساب (رقم الهاتف)",
+  "messengerLinkLabel": "رابط الماسنجر",
+  "saveLabel": "حفظ",
+  "sessionSavedSuccess": "تم تسجيل الجلسة بنجاح ✓",
+  "resetPasswordEmailInstructions": "سيتم إرسال رابط إعادة تعيين كلمة المرور إلى:\n{email}",
+  "@resetPasswordEmailInstructions": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "noEmailForStudent": "لا يوجد بريد إلكتروني لهذا الطالب",
+  "sendLabel": "إرسال",
+  "homeworkAssignedSuccess": "تم تعيين الواجب بنجاح",
+  "assignQuizToStudent": "تعيين اختبار للطالب",
+  "selectQuiz": "اختر اختباراً",
+  "assign": "تعيين",
+  "quizAssignedSuccess": "تم تعيين اختبار \"{title}\" بنجاح",
+  "@quizAssignedSuccess": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "correctHomework": "تصحيح الواجب",
+  "correctionNotesHint": "اكتب ملاحظات التصحيح للطالب… (اختياري)",
+  "confirmCorrection": "تأكيد التصحيح",
+  "homeworkCorrectedSuccess": "تم تحديد الواجب كمصحَّح",
+  "editCorrection": "تعديل التصحيح",
+  "editNotesHint": "الملاحظات المعدَّلة…",
+  "deleteCorrection": "حذف التصحيح",
+  "deleteCorrectionConfirm": "هل تريد إزالة التصحيح وإعادة الواجب لحالة \"مُسلَّم\"؟",
+  "delete": "حذف",
+  "assignTextOrFileHomework": "تعيين واجب نصي / ملفات",
+  "typeHomeworkTextHint": "اكتب نص الواجب هنا…",
+  "manage": "إدارة",
+  "profileSaveError": "حدث خطأ أثناء الحفظ. تأكد من إعدادات حسابك.",
+  "nameRequired": "الاسم مطلوب",
+  "phoneNumber": "رقم الهاتف",
+  "filesCount": "{count} ملف",
+  "@filesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "edit": "تعديل",
+  "quizDescriptionOptional": "وصف الاختبار (اختياري)",
+  "questionTextHint": "اكتب السؤال هنا…",
+  "imageUploadAdd": "إضافة صورة",
+  "imageUploadChange": "تغيير الصورة",
+  "imageUploaded": "تم رفع الصورة",
+  "imageUploadFailed": "فشل رفع الصورة",
+  "addOptionLabel": "إضافة خيار",
+  "optionIndexHint": "الخيار {number}",
+  "@optionIndexHint": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "correctAnswerFillBlank": "الإجابة الصحيحة *",
+  "correctAnswerFillBlankHint": "اكتب الإجابة الصحيحة…",
+  "timeSecondsOptional": "وقت (ثانية، اختياري)",
+  "timeSecondsHint": "مثلاً 30",
+  "hintOptional": "تلميح (اختياري)",
+  "hintPlaceholder": "اكتب تلميحاً للطالب إن أراد…",
+  "addLabel": "إضافة",
+  "saveEditLabel": "حفظ التعديل",
+  "noQuestionsYet": "لم تُضَف أسئلة بعد",
+  "enterQuizTitleError": "الرجاء إدخال عنوان الاختبار",
+  "enterQuestionTextError": "الرجاء إدخال نص السؤال",
+  "selectOneCorrectAnswerError": "يجب تحديد إجابة صحيحة واحدة",
+  "selectAtLeastOneCorrectAnswerError": "يجب تحديد إجابة صحيحة واحدة على الأقل",
+  "enterCorrectAnswerFillBlankError": "الرجاء إدخال الإجابة الصحيحة",
+  "questionTypeSingleChoice": "اختيار واحد",
+  "questionTypeFillBlank": "ملء الفراغ",
+  "pageLabel": "صفحة",
+  "bookmarkLabel": "علامة",
+  "tafsirLabel": "تفسير",
+  "listenLabel": "استماع",
+  "indexLabel": "الفهرس",
+  "hizbLabel": "الحزب {number}",
+  "@hizbLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "hizbQuarter": "ربع الحزب {number}",
+  "@hizbQuarter": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "hizbHalf": "نصف الحزب {number}",
+  "@hizbHalf": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "hizbThreeQuarters": "ثلاثة أرباع الحزب {number}",
+  "@hizbThreeQuarters": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "passageLabel": "الفقرة المشتركة (اختياري)",
+  "passageHint": "اكتب الفقرة أو القطعة التي تندرج تحتها الأسئلة هنا...",
+  "importFromQuestionBank": "استيراد من بنك الأسئلة",
+  "importFromBankButton": "استيراد أسئلة",
+  "noQuestionsToImport": "لا توجد أسئلة سابقة للاستيراد منها.",
+  "importSelectedButton": "استيراد الأسئلة المحددة ({count})",
+  "@importSelectedButton": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchQuestionsHint": "ابحث في الأسئلة...",
+  "assignToStudentsTitle": "تعيين الاختبار للطلاب",
+  "assignButton": "تعيين للطلاب",
+  "assignmentSuccess": "تم تعيين الاختبار للطلاب المحددين بنجاح",
+  "sendFileTooltip": "إرسال ملف",
+  "fileSizeLimitError": "حجم الملف يتجاوز الحد المسموح به (10 ميجابايت).",
+  "fileUploadFailed": "فشل رفع الملف: {error}",
+  "@fileUploadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadFile": "تحميل الملف",
+  "downloadMushafOffline": "تحميل المصحف الحالي أوفلاين",
+  "mushafDownloaded": "✓ المصحف الحالي محمل بالكامل للعمل أوفلاين",
+  "downloadingMushaf": "تنزيل المصحف... {percent}%",
+  "@downloadingMushaf": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadFailed": "فشل التحميل. يرجى إعادة المحاولة."
+}

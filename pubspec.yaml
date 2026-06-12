@@ -1,0 +1,117 @@
+name: saber_academy
+description: A 1-on-1 management app for teaching Quran, Arabic, and Islamic Studies.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Backend
+  supabase_flutter: ^2.5.0
+
+  # State & Navigation
+  provider: ^6.1.2
+  go_router: ^17.3.0
+
+  # Localization
+  intl: ^0.20.2
+
+  # Media
+  image_picker: ^1.1.2
+  file_picker: ^11.0.2
+  cached_network_image: ^3.3.1
+
+  # UI
+  percent_indicator: ^4.2.3
+
+  # Config
+  flutter_dotenv: ^6.0.1
+
+  # Browser launcher
+  url_launcher: ^6.3.0
+
+  # HTTP client — Quran API + file uploads
+  dio: ^5.4.3
+
+  # Timezone database (offline, handles DST correctly)
+  timezone: ^0.11.0
+
+  # Local key-value store — persists last-read Mushaf page
+  shared_preferences: ^2.3.0
+
+  # Audio playback — Quran recitation from CDN
+  audioplayers: ^6.1.0
+
+  # Firebase & FCM Push Notifications
+  firebase_core: ^4.10.0
+  firebase_messaging: ^16.3.0
+  flutter_local_notifications: ^22.0.0
+
+  # Audio recording for Voice Notes
+  record: ^7.0.0
+
+  # Path provider for file paths & permissions
+  path_provider: ^2.1.3
+  permission_handler: ^12.0.3
+
+  # SQLite local database caching
+  sqflite: ^2.3.3
+  path: ^1.9.0
+
+  # MIME type detection — used for file upload validation
+  mime: ^2.0.0
+  sqflite_common_ffi: ^2.4.1
+  sqlite3_flutter_libs: ^0.6.0+eol
+  local_notifier: ^0.1.6
+  qcf_quran_plus: ^0.0.7
+  youtube_player_iframe: ^6.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter:
+  uses-material-design: true
+
+  # Triggers ARB → Dart code generation (requires l10n.yaml)
+  generate: true
+
+  assets:
+    - .env
+    - assets/images/
+    - assets/mushaf/diyanet/diyanet_coordinates.json
+    - assets/quran/database.sqlite
+
+  fonts:
+    - family: Cairo
+      fonts:
+        - asset: assets/fonts/Cairo-Regular.ttf
+        - asset: assets/fonts/Cairo-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Cairo-Bold.ttf
+          weight: 700
+    - family: Outfit
+      fonts:
+        - asset: assets/fonts/Outfit-Regular.ttf
+        - asset: assets/fonts/Outfit-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Outfit-Bold.ttf
+          weight: 700
+    - family: Amiri
+      fonts:
+        - asset: assets/fonts/Amiri-Regular.ttf
+        - asset: assets/fonts/Amiri-Bold.ttf
+          weight: 700
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/logo.png"

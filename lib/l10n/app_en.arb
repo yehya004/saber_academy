@@ -1,0 +1,1981 @@
+{
+  "@@locale": "en",
+  "appTitle": "Saber Courses Qur’an & Arabic",
+  "@appTitle": {
+    "description": "The application name."
+  },
+  "home": "Home",
+  "@home": {
+    "description": "Home tab title."
+  },
+  "quizzes": "Quizzes",
+  "@quizzes": {
+    "description": "Quizzes tab title."
+  },
+  "login": "Sign In",
+  "@login": {
+    "description": "Translation key for login"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Translation key for email"
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Translation key for password"
+  },
+  "emailValidationError": "Please enter a valid email address.",
+  "@emailValidationError": {
+    "description": "Translation key for emailValidationError"
+  },
+  "passwordValidationError": "Password must be at least 6 characters.",
+  "@passwordValidationError": {
+    "description": "Translation key for passwordValidationError"
+  },
+  "dashboard": "Dashboard",
+  "@dashboard": {
+    "description": "Translation key for dashboard"
+  },
+  "students": "Students",
+  "@students": {
+    "description": "Translation key for students"
+  },
+  "attendance": "Attendance",
+  "@attendance": {
+    "description": "Translation key for attendance"
+  },
+  "homework": "Homework",
+  "@homework": {
+    "description": "Translation key for homework"
+  },
+  "messages": "Messages",
+  "@messages": {
+    "description": "Translation key for messages"
+  },
+  "mushaf": "Mushaf",
+  "@mushaf": {
+    "description": "Translation key for mushaf"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Translation key for settings"
+  },
+  "signOut": "Sign Out",
+  "@signOut": {
+    "description": "Translation key for signOut"
+  },
+  "myProgress": "My Progress",
+  "@myProgress": {
+    "description": "Translation key for myProgress"
+  },
+  "level": "Level",
+  "@level": {
+    "description": "Translation key for level"
+  },
+  "sessionsOf": "{done} / {total} sessions",
+  "@sessionsOf": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "totalAttended": "Total attended: {count}",
+  "@totalAttended": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "present": "Present",
+  "@present": {
+    "description": "Translation key for present"
+  },
+  "absent": "Absent",
+  "@absent": {
+    "description": "Translation key for absent"
+  },
+  "absenceExcuse": "Absence excuse",
+  "@absenceExcuse": {
+    "description": "Translation key for absenceExcuse"
+  },
+  "pending": "Pending",
+  "@pending": {
+    "description": "Translation key for pending"
+  },
+  "submitted": "Submitted",
+  "@submitted": {
+    "description": "Translation key for submitted"
+  },
+  "corrected": "Corrected",
+  "@corrected": {
+    "description": "Translation key for corrected"
+  },
+  "assignHomework": "Assign Homework",
+  "@assignHomework": {
+    "description": "Translation key for assignHomework"
+  },
+  "submitHomework": "Submit Homework",
+  "@submitHomework": {
+    "description": "Translation key for submitHomework"
+  },
+  "markCorrected": "Mark as Corrected",
+  "@markCorrected": {
+    "description": "Translation key for markCorrected"
+  },
+  "uploadImage": "Upload Image",
+  "@uploadImage": {
+    "description": "Translation key for uploadImage"
+  },
+  "chatWithTeacher": "Chat with Teacher",
+  "@chatWithTeacher": {
+    "description": "Translation key for chatWithTeacher"
+  },
+  "typeMessage": "Type a message...",
+  "@typeMessage": {
+    "description": "Translation key for typeMessage"
+  },
+  "language": "Language / اللغة",
+  "@language": {
+    "description": "Translation key for language"
+  },
+  "languageArabic": "Arabic (AR)",
+  "@languageArabic": {
+    "description": "Translation key for languageArabic"
+  },
+  "languageEnglish": "English (EN)",
+  "@languageEnglish": {
+    "description": "Translation key for languageEnglish"
+  },
+  "languageTurkish": "Turkish (TR)",
+  "@languageTurkish": {
+    "description": "Translation key for languageTurkish"
+  },
+  "mushafVersion1": "Version 1",
+  "@mushafVersion1": {
+    "description": "Translation key for mushafVersion1"
+  },
+  "mushafVersion2": "Version 2",
+  "@mushafVersion2": {
+    "description": "Translation key for mushafVersion2"
+  },
+  "mushafModeNormal": "Normal",
+  "@mushafModeNormal": {
+    "description": "Translation key for mushafModeNormal"
+  },
+  "mushafModeSepia": "Sepia / Eye-care",
+  "@mushafModeSepia": {
+    "description": "Translation key for mushafModeSepia"
+  },
+  "mushafModeDark": "Dark Mode",
+  "@mushafModeDark": {
+    "description": "Translation key for mushafModeDark"
+  },
+  "welcomeMessage": "Assalamu Alaykum, {name}",
+  "@welcomeMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "welcomeTeacher": "Welcome, {name}",
+  "@welcomeTeacher": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentStatus": "Payment Status",
+  "@paymentStatus": {
+    "description": "Translation key for paymentStatus"
+  },
+  "paid": "Paid",
+  "@paid": {
+    "description": "Translation key for paid"
+  },
+  "notPaid": "Not Paid yet",
+  "@notPaid": {
+    "description": "Translation key for notPaid"
+  },
+  "paymentAccessBlocked": "Your subscription is currently inactive. Please complete the payment to access the course content.",
+  "@paymentAccessBlocked": {
+    "description": "Translation key for paymentAccessBlocked"
+  },
+  "contactTeacher": "Contact Teacher",
+  "@contactTeacher": {
+    "description": "Translation key for contactTeacher"
+  },
+  "paymentReminder": "Reminder: The payment for the current course has not been confirmed yet. Please contact your teacher.",
+  "@paymentReminder": {
+    "description": "Translation key for paymentReminder"
+  },
+  "accountBlocked": "Account Restricted",
+  "@accountBlocked": {
+    "description": "Translation key for accountBlocked"
+  },
+  "accountBlockedReason": "Your account has been restricted by the teacher. Please contact Mr. Saber for activation.",
+  "@accountBlockedReason": {
+    "description": "Translation key for accountBlockedReason"
+  },
+  "statusBlocked": "Blocked",
+  "@statusBlocked": {
+    "description": "Translation key for statusBlocked"
+  },
+  "loginSubtitle": "Learn Quran, Arabic, and Islamic Studies",
+  "@loginSubtitle": {
+    "description": "Translation key for loginSubtitle"
+  },
+  "upcomingLesson": "Upcoming Lesson",
+  "@upcomingLesson": {
+    "description": "Translation key for upcomingLesson"
+  },
+  "quickActions": "Quick Actions",
+  "@quickActions": {
+    "description": "Translation key for quickActions"
+  },
+  "viewSubmitHomework": "View and submit homework",
+  "@viewSubmitHomework": {
+    "description": "Translation key for viewSubmitHomework"
+  },
+  "pendingQuizzesCount": "You have {count} pending quizzes",
+  "@pendingQuizzesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "viewAssignedQuizzes": "View assigned quizzes",
+  "@viewAssignedQuizzes": {
+    "description": "Translation key for viewAssignedQuizzes"
+  },
+  "quranMushaf": "Quran Mushaf",
+  "@quranMushaf": {
+    "description": "Translation key for quranMushaf"
+  },
+  "browseReadMushaf": "Browse and read the Holy Quran",
+  "@browseReadMushaf": {
+    "description": "Translation key for browseReadMushaf"
+  },
+  "recentSessions": "Recent Sessions",
+  "@recentSessions": {
+    "description": "Translation key for recentSessions"
+  },
+  "noTeacherAssigned": "No teacher assigned yet",
+  "@noTeacherAssigned": {
+    "description": "Translation key for noTeacherAssigned"
+  },
+  "chatWithTeacherTooltip": "Chat with the teacher",
+  "@chatWithTeacherTooltip": {
+    "description": "Translation key for chatWithTeacherTooltip"
+  },
+  "chatWithPartner": "Chat with {name}",
+  "@chatWithPartner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "chatWithTeacherDirectly": "Chat with teacher directly",
+  "@chatWithTeacherDirectly": {
+    "description": "Translation key for chatWithTeacherDirectly"
+  },
+  "timeSyncedOnline": "Time is synced online daily",
+  "@timeSyncedOnline": {
+    "description": "Translation key for timeSyncedOnline"
+  },
+  "selectCountryForTimezone": "Please set your country in settings to show the correct time",
+  "@selectCountryForTimezone": {
+    "description": "Translation key for selectCountryForTimezone"
+  },
+  "todayAt": "Today at {time}",
+  "@todayAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "tomorrowAt": "Tomorrow at {time}",
+  "@tomorrowAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "dayAt": "{day} at {time}",
+  "@dayAt": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "fileHomeworks": "File Homeworks",
+  "@fileHomeworks": {
+    "description": "Translation key for fileHomeworks"
+  },
+  "noFileHomeworks": "No file homeworks yet",
+  "@noFileHomeworks": {
+    "description": "Translation key for noFileHomeworks"
+  },
+  "assignedQuizzes": "Assigned Quizzes",
+  "@assignedQuizzes": {
+    "description": "Translation key for assignedQuizzes"
+  },
+  "noAssignedQuizzes": "No assigned quizzes yet",
+  "@noAssignedQuizzes": {
+    "description": "Translation key for noAssignedQuizzes"
+  },
+  "pendingStatus": "Pending",
+  "@pendingStatus": {
+    "description": "Translation key for pendingStatus"
+  },
+  "submittedStatus": "Submitted",
+  "@submittedStatus": {
+    "description": "Translation key for submittedStatus"
+  },
+  "quiz": "Quiz",
+  "@quiz": {
+    "description": "Translation key for quiz"
+  },
+  "quizPoints": "{earned} / {total} points",
+  "@quizPoints": {
+    "placeholders": {
+      "earned": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Translation key for cancel"
+  },
+  "confirm": "Confirm",
+  "@confirm": {
+    "description": "Translation key for confirm"
+  },
+  "deleteFile": "Delete File",
+  "@deleteFile": {
+    "description": "Translation key for deleteFile"
+  },
+  "confirmDeleteFile": "Do you want to delete \"{fileName}\"?",
+  "@confirmDeleteFile": {
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "resubmit": "Resubmit",
+  "@resubmit": {
+    "description": "Translation key for resubmit"
+  },
+  "confirmResubmit": "All uploaded files will be deleted. Do you want to proceed?",
+  "@confirmResubmit": {
+    "description": "Translation key for confirmResubmit"
+  },
+  "fileUploadedSuccessfully": "File uploaded successfully",
+  "@fileUploadedSuccessfully": {
+    "description": "Translation key for fileUploadedSuccessfully"
+  },
+  "filesUploadedSuccessfully": "Uploaded {count} files successfully",
+  "@filesUploadedSuccessfully": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "failedToOpenFile": "Failed to open file",
+  "@failedToOpenFile": {
+    "description": "Translation key for failedToOpenFile"
+  },
+  "failedToLoadFile": "Failed to load file: {error}",
+  "@failedToLoadFile": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToUpload": "Failed to upload: {error}",
+  "@failedToUpload": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToDelete": "Failed to delete: {error}",
+  "@failedToDelete": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "homeworkResetSuccess": "Homework resubmission enabled. You can upload new files.",
+  "@homeworkResetSuccess": {
+    "description": "Translation key for homeworkResetSuccess"
+  },
+  "operationFailed": "Operation failed: {error}",
+  "@operationFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "profileNotFound": "Profile not found. Please contact the administrator.",
+  "@profileNotFound": {
+    "description": "Translation key for profileNotFound"
+  },
+  "questionsCount": "{count} questions",
+  "@questionsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "maxFileSizeError": "The file \"{fileName}\" exceeds {maxSize} MB. Please choose a smaller file.",
+  "@maxFileSizeError": {
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      },
+      "maxSize": {
+        "type": "String"
+      }
+    }
+  },
+  "quizReview": "Quiz Review",
+  "@quizReview": {
+    "description": "Translation key for quizReview"
+  },
+  "scoreBannerMsgExcellent": "Excellent!",
+  "@scoreBannerMsgExcellent": {
+    "description": "Translation key for scoreBannerMsgExcellent"
+  },
+  "scoreBannerMsgVeryGood": "Very Good!",
+  "@scoreBannerMsgVeryGood": {
+    "description": "Translation key for scoreBannerMsgVeryGood"
+  },
+  "scoreBannerMsgGood": "Good!",
+  "@scoreBannerMsgGood": {
+    "description": "Translation key for scoreBannerMsgGood"
+  },
+  "scoreBannerMsgNeedsReview": "Needs Review",
+  "@scoreBannerMsgNeedsReview": {
+    "description": "Translation key for scoreBannerMsgNeedsReview"
+  },
+  "studentAnswerLabel": "Your Answer",
+  "@studentAnswerLabel": {
+    "description": "Translation key for studentAnswerLabel"
+  },
+  "correctAnswerLabel": "Correct Answer",
+  "@correctAnswerLabel": {
+    "description": "Translation key for correctAnswerLabel"
+  },
+  "pointsLabel": "{points} points",
+  "@pointsLabel": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "unansweredLabel": "Not Answered",
+  "@unansweredLabel": {
+    "description": "Translation key for unansweredLabel"
+  },
+  "previousButton": "Previous",
+  "@previousButton": {
+    "description": "Translation key for previousButton"
+  },
+  "nextButton": "Next",
+  "@nextButton": {
+    "description": "Translation key for nextButton"
+  },
+  "submitQuizButton": "Submit Quiz",
+  "@submitQuizButton": {
+    "description": "Translation key for submitQuizButton"
+  },
+  "sendQuizFailed": "Failed to submit quiz: {error}",
+  "@sendQuizFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "hintLabel": "Hint",
+  "@hintLabel": {
+    "description": "Translation key for hintLabel"
+  },
+  "okLabel": "OK",
+  "@okLabel": {
+    "description": "Translation key for okLabel"
+  },
+  "noQuestions": "No questions",
+  "@noQuestions": {
+    "description": "Translation key for noQuestions"
+  },
+  "questionOutOf": "Question {current} of {total}",
+  "@questionOutOf": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "secondsAbbr": "{seconds}s",
+  "@secondsAbbr": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "quizResultTitle": "Quiz Result",
+  "@quizResultTitle": {
+    "description": "Translation key for quizResultTitle"
+  },
+  "trueLabel": "True",
+  "@trueLabel": {
+    "description": "Translation key for trueLabel"
+  },
+  "falseLabel": "False",
+  "@falseLabel": {
+    "description": "Translation key for falseLabel"
+  },
+  "typeAnswerHint": "Type your answer here...",
+  "@typeAnswerHint": {
+    "description": "Translation key for typeAnswerHint"
+  },
+  "topicCovered": "Topic Covered",
+  "@topicCovered": {
+    "description": "Translation key for topicCovered"
+  },
+  "resourceLabel": "Resource",
+  "@resourceLabel": {
+    "description": "Translation key for resourceLabel"
+  },
+  "attendanceSession": "Attendance Session",
+  "@attendanceSession": {
+    "description": "Translation key for attendanceSession"
+  },
+  "teacherNoSchedule": "Teacher hasn't scheduled a lesson yet",
+  "@teacherNoSchedule": {
+    "description": "Translation key for teacherNoSchedule"
+  },
+  "nextLesson": "Next Lesson",
+  "@nextLesson": {
+    "description": "Translation key for nextLesson"
+  },
+  "teacherHome": "Home",
+  "@teacherHome": {
+    "description": "Translation key for teacherHome"
+  },
+  "teacherStudents": "Students",
+  "@teacherStudents": {
+    "description": "Translation key for teacherStudents"
+  },
+  "teacherQuizzes": "Quizzes",
+  "@teacherQuizzes": {
+    "description": "Translation key for teacherQuizzes"
+  },
+  "teacherMushaf": "Mushaf",
+  "@teacherMushaf": {
+    "description": "Translation key for teacherMushaf"
+  },
+  "teacherSettings": "Settings",
+  "@teacherSettings": {
+    "description": "Translation key for teacherSettings"
+  },
+  "newStudent": "New Student",
+  "@newStudent": {
+    "description": "Translation key for newStudent"
+  },
+  "welcomeTeacherPrefix": "Welcome,",
+  "@welcomeTeacherPrefix": {
+    "description": "Translation key for welcomeTeacherPrefix"
+  },
+  "studentCount": "{count} Student(s)",
+  "@studentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "todaySessions": "Today's Lessons",
+  "@todaySessions": {
+    "description": "Translation key for todaySessions"
+  },
+  "newMessages": "New Messages",
+  "@newMessages": {
+    "description": "Translation key for newMessages"
+  },
+  "needsCorrection": "Needs Grading",
+  "@needsCorrection": {
+    "description": "Translation key for needsCorrection"
+  },
+  "mainSections": "Main Sections",
+  "@mainSections": {
+    "description": "Translation key for mainSections"
+  },
+  "homeworkInbox": "Homework Box",
+  "@homeworkInbox": {
+    "description": "Translation key for homeworkInbox"
+  },
+  "communication": "Communication",
+  "@communication": {
+    "description": "Translation key for communication"
+  },
+  "viewAll": "View All",
+  "@viewAll": {
+    "description": "Translation key for viewAll"
+  },
+  "noStudentsRegistered": "No students registered yet",
+  "@noStudentsRegistered": {
+    "description": "Translation key for noStudentsRegistered"
+  },
+  "studentLevelAbbr": "L{level}",
+  "@studentLevelAbbr": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "studentLessonAbbr": "L{lesson}",
+  "@studentLessonAbbr": {
+    "placeholders": {
+      "lesson": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceTooltip": "Attendance",
+  "@attendanceTooltip": {
+    "description": "Translation key for attendanceTooltip"
+  },
+  "homeworkTooltip": "Homework",
+  "@homeworkTooltip": {
+    "description": "Translation key for homeworkTooltip"
+  },
+  "chatTooltip": "Chat",
+  "@chatTooltip": {
+    "description": "Translation key for chatTooltip"
+  },
+  "searchForStudent": "Search for a student...",
+  "@searchForStudent": {
+    "description": "Translation key for searchForStudent"
+  },
+  "noResults": "No results found",
+  "@noResults": {
+    "description": "Translation key for noResults"
+  },
+  "recordSession": "Record New Session",
+  "@recordSession": {
+    "description": "Translation key for recordSession"
+  },
+  "sessionTopicLabel": "Session Topic (What did we study?)",
+  "@sessionTopicLabel": {
+    "description": "Translation key for sessionTopicLabel"
+  },
+  "sessionTopicHint": "Example: Alphabet, Surah Al-Fatihah...",
+  "@sessionTopicHint": {
+    "description": "Translation key for sessionTopicHint"
+  },
+  "homeworkType": "Homework Type",
+  "@homeworkType": {
+    "description": "Translation key for homeworkType"
+  },
+  "homeworkTypeText": "Text",
+  "@homeworkTypeText": {
+    "description": "Translation key for homeworkTypeText"
+  },
+  "homeworkTypeFile": "File / Image",
+  "@homeworkTypeFile": {
+    "description": "Translation key for homeworkTypeFile"
+  },
+  "homeworkTypeQuiz": "Quiz",
+  "@homeworkTypeQuiz": {
+    "description": "Translation key for homeworkTypeQuiz"
+  },
+  "noQuizzesInBank": "No quizzes in the bank yet. Create a quiz first.",
+  "@noQuizzesInBank": {
+    "description": "Translation key for noQuizzesInBank"
+  },
+  "selectQuizFromBank": "Select quiz from bank",
+  "@selectQuizFromBank": {
+    "description": "Translation key for selectQuizFromBank"
+  },
+  "quizPointsAndQuestions": "{title} ({points} pts, {questions} q)",
+  "@quizPointsAndQuestions": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "points": {
+        "type": "int"
+      },
+      "questions": {
+        "type": "int"
+      }
+    }
+  },
+  "homeworkNoteOptional": "Additional note (optional)...",
+  "@homeworkNoteOptional": {
+    "description": "Translation key for homeworkNoteOptional"
+  },
+  "homeworkNoteFileHint": "Example: Take a photo of the book page and send it...",
+  "@homeworkNoteFileHint": {
+    "description": "Translation key for homeworkNoteFileHint"
+  },
+  "homeworkNoteTextHint": "Example: Review the lesson, memorize verses 1-5...",
+  "@homeworkNoteTextHint": {
+    "description": "Translation key for homeworkNoteTextHint"
+  },
+  "referenceLinkOptional": "Reference Link (book / website / video)",
+  "@referenceLinkOptional": {
+    "description": "Translation key for referenceLinkOptional"
+  },
+  "saveSession": "Save Session",
+  "@saveSession": {
+    "description": "Translation key for saveSession"
+  },
+  "sessionHistory": "Session History",
+  "@sessionHistory": {
+    "description": "Translation key for sessionHistory"
+  },
+  "noSessionsYet": "No sessions recorded yet",
+  "@noSessionsYet": {
+    "description": "Translation key for noSessionsYet"
+  },
+  "createStudentAccount": "Create Student Account",
+  "@createStudentAccount": {
+    "description": "Translation key for createStudentAccount"
+  },
+  "enterStudentDetails": "Enter student details and set password",
+  "@enterStudentDetails": {
+    "description": "Translation key for enterStudentDetails"
+  },
+  "loginDetailsSection": "Login Details",
+  "@loginDetailsSection": {
+    "description": "Translation key for loginDetailsSection"
+  },
+  "fullName": "Full Name",
+  "@fullName": {
+    "description": "Translation key for fullName"
+  },
+  "studentNameRequired": "Student name is required",
+  "@studentNameRequired": {
+    "description": "Translation key for studentNameRequired"
+  },
+  "emailRequired": "Email is required",
+  "@emailRequired": {
+    "description": "Translation key for emailRequired"
+  },
+  "invalidEmail": "Invalid email",
+  "@invalidEmail": {
+    "description": "Translation key for invalidEmail"
+  },
+  "passwordRequired": "Password is required",
+  "@passwordRequired": {
+    "description": "Translation key for passwordRequired"
+  },
+  "passwordMinLength": "Must be at least 6 characters",
+  "@passwordMinLength": {
+    "description": "Translation key for passwordMinLength"
+  },
+  "confirmPassword": "Confirm Password",
+  "@confirmPassword": {
+    "description": "Translation key for confirmPassword"
+  },
+  "passwordsDoNotMatch": "Passwords do not match",
+  "@passwordsDoNotMatch": {
+    "description": "Translation key for passwordsDoNotMatch"
+  },
+  "countryAndContactSection": "Country & Contact",
+  "@countryAndContactSection": {
+    "description": "Translation key for countryAndContactSection"
+  },
+  "selectStudentCountry": "Select student country",
+  "@selectStudentCountry": {
+    "description": "Translation key for selectStudentCountry"
+  },
+  "whatsappNumber": "WhatsApp Number",
+  "@whatsappNumber": {
+    "description": "Translation key for whatsappNumber"
+  },
+  "whatsappNumberHint": "Example: +966501234567",
+  "@whatsappNumberHint": {
+    "description": "Translation key for whatsappNumberHint"
+  },
+  "messengerLinkOptional": "Messenger Link (optional)",
+  "@messengerLinkOptional": {
+    "description": "Translation key for messengerLinkOptional"
+  },
+  "levelAndInitialLessonSection": "Level & Initial Lesson",
+  "@levelAndInitialLessonSection": {
+    "description": "Translation key for levelAndInitialLessonSection"
+  },
+  "initialLessonInLevel": "Lesson in Level",
+  "@initialLessonInLevel": {
+    "description": "Translation key for initialLessonInLevel"
+  },
+  "initialCoursePaymentStatus": "Initial Course Payment Status",
+  "@initialCoursePaymentStatus": {
+    "description": "Translation key for initialCoursePaymentStatus"
+  },
+  "paidInAdvance": "Paid in Advance",
+  "@paidInAdvance": {
+    "description": "Translation key for paidInAdvance"
+  },
+  "accountActivationPaid": "Account activated immediately for content access",
+  "@accountActivationPaid": {
+    "description": "Translation key for accountActivationPaid"
+  },
+  "accountActivationUnpaid": "Student account will be inactive until payment",
+  "@accountActivationUnpaid": {
+    "description": "Translation key for accountActivationUnpaid"
+  },
+  "creatingAccount": "Creating...",
+  "@creatingAccount": {
+    "description": "Translation key for creatingAccount"
+  },
+  "createAccount": "Create Account",
+  "@createAccount": {
+    "description": "Translation key for createAccount"
+  },
+  "accountCreatedSuccess": "Account created successfully ✓",
+  "@accountCreatedSuccess": {
+    "description": "Translation key for accountCreatedSuccess"
+  },
+  "shareDetailsWithStudent": "Share these credentials with the student:",
+  "@shareDetailsWithStudent": {
+    "description": "Translation key for shareDetailsWithStudent"
+  },
+  "credName": "Name",
+  "@credName": {
+    "description": "Translation key for credName"
+  },
+  "credEmail": "Email",
+  "@credEmail": {
+    "description": "Translation key for credEmail"
+  },
+  "countryLabel": "Country",
+  "@countryLabel": {
+    "description": "Translation key for countryLabel"
+  },
+  "whatsappLabel": "WhatsApp",
+  "@whatsappLabel": {
+    "description": "Translation key for whatsappLabel"
+  },
+  "copyLoginDetails": "Copy Login Credentials",
+  "@copyLoginDetails": {
+    "description": "Translation key for copyLoginDetails"
+  },
+  "copiedToClipboard": "Credentials copied to clipboard ✓",
+  "@copiedToClipboard": {
+    "description": "Translation key for copiedToClipboard"
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Translation key for close"
+  },
+  "chooseStudentCountry": "Select Your Country",
+  "@chooseStudentCountry": {
+    "description": "Translation key for chooseStudentCountry"
+  },
+  "otherCountry": "Other Country",
+  "@otherCountry": {
+    "description": "Translation key for otherCountry"
+  },
+  "lessonsScheduleTitle": "Lesson Schedule of {name}",
+  "@lessonsScheduleTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "teacherCountryNotSet": "You have not set your country in profile.\nEgypt time (Africa/Cairo) is used by default.",
+  "@teacherCountryNotSet": {
+    "description": "Translation key for teacherCountryNotSet"
+  },
+  "studentCountryNotSet": "Student's country is not set — automatic timezone conversion is disabled.",
+  "@studentCountryNotSet": {
+    "description": "Translation key for studentCountryNotSet"
+  },
+  "daysAndLessonTimes": "Days & Lesson Times",
+  "@daysAndLessonTimes": {
+    "description": "Translation key for daysAndLessonTimes"
+  },
+  "teacherTimezoneTime": "In your timezone ({timezone})",
+  "@teacherTimezoneTime": {
+    "placeholders": {
+      "timezone": {
+        "type": "String"
+      }
+    }
+  },
+  "clickToAdd": "Tap to Add",
+  "@clickToAdd": {
+    "description": "Translation key for clickToAdd"
+  },
+  "timezoneUpdatedOnline": "Time synced online daily",
+  "@timezoneUpdatedOnline": {
+    "description": "Translation key for timezoneUpdatedOnline"
+  },
+  "savingSchedule": "Saving...",
+  "@savingSchedule": {
+    "description": "Translation key for savingSchedule"
+  },
+  "saveSchedule": "Save Schedule",
+  "@saveSchedule": {
+    "description": "Translation key for saveSchedule"
+  },
+  "scheduleSavedSuccess": "Lesson schedule saved ✓",
+  "@scheduleSavedSuccess": {
+    "description": "Translation key for scheduleSavedSuccess"
+  },
+  "selectAtLeastOneDay": "Select at least one day",
+  "@selectAtLeastOneDay": {
+    "description": "Translation key for selectAtLeastOneDay"
+  },
+  "studentDetailsTitle": "Student Details",
+  "@studentDetailsTitle": {
+    "description": "Translation key for studentDetailsTitle"
+  },
+  "academicLevelSection": "Academic Level",
+  "@academicLevelSection": {
+    "description": "Translation key for academicLevelSection"
+  },
+  "manuallyBlocked": "Blocked Manually",
+  "@manuallyBlocked": {
+    "description": "Translation key for manuallyBlocked"
+  },
+  "activeCanEnter": "Active (Can access)",
+  "@activeCanEnter": {
+    "description": "Translation key for activeCanEnter"
+  },
+  "levelLessonsProgress": "{lesson} / 20 Lessons",
+  "@levelLessonsProgress": {
+    "placeholders": {
+      "lesson": {
+        "type": "int"
+      }
+    }
+  },
+  "editLevelAndLesson": "Edit Level and Lesson",
+  "@editLevelAndLesson": {
+    "description": "Translation key for editLevelAndLesson"
+  },
+  "weeklyLessonsSchedule": "Weekly Lesson Schedule",
+  "@weeklyLessonsSchedule": {
+    "description": "Translation key for weeklyLessonsSchedule"
+  },
+  "noScheduleSetYet": "No schedule set yet",
+  "@noScheduleSetYet": {
+    "description": "Translation key for noScheduleSetYet"
+  },
+  "nextLessonPrefix": "Next Lesson: ",
+  "@nextLessonPrefix": {
+    "description": "Translation key for nextLessonPrefix"
+  },
+  "roleStudentLabel": "(Student)",
+  "@roleStudentLabel": {
+    "description": "Translation key for roleStudentLabel"
+  },
+  "setLessonTime": "Set Lesson Schedule",
+  "@setLessonTime": {
+    "description": "Translation key for setLessonTime"
+  },
+  "editLessonTime": "Edit Schedule",
+  "@editLessonTime": {
+    "description": "Translation key for editLessonTime"
+  },
+  "contactDetailsSection": "Contact Info",
+  "@contactDetailsSection": {
+    "description": "Translation key for contactDetailsSection"
+  },
+  "editContactDetailsTooltip": "Edit Contact Info",
+  "@editContactDetailsTooltip": {
+    "description": "Translation key for editContactDetailsTooltip"
+  },
+  "quickActionsSection": "Quick Actions",
+  "@quickActionsSection": {
+    "description": "Translation key for quickActionsSection"
+  },
+  "attendanceLog": "Attendance Log",
+  "@attendanceLog": {
+    "description": "Translation key for attendanceLog"
+  },
+  "resetPassword": "Reset Password",
+  "@resetPassword": {
+    "description": "Translation key for resetPassword"
+  },
+  "resetPasswordEmailInstructionsSent": "Reset link sent to the email address",
+  "@resetPasswordEmailInstructionsSent": {
+    "description": "Translation key for resetPasswordEmailInstructionsSent"
+  },
+  "editLevelAndPaymentTitle": "Edit Level & Subscription",
+  "@editLevelAndPaymentTitle": {
+    "description": "Translation key for editLevelAndPaymentTitle"
+  },
+  "courseStatusCurrent": "Current Course Status",
+  "@courseStatusCurrent": {
+    "description": "Translation key for courseStatusCurrent"
+  },
+  "accountStatus": "Account Status",
+  "@accountStatus": {
+    "description": "Translation key for accountStatus"
+  },
+  "blockStudentAccount": "Block Student Account",
+  "@blockStudentAccount": {
+    "description": "Translation key for blockStudentAccount"
+  },
+  "saveChanges": "Save Changes",
+  "@saveChanges": {
+    "description": "Translation key for saveChanges"
+  },
+  "editProfile": "Edit Profile",
+  "@editProfile": {
+    "description": "Translation key for editProfile"
+  },
+  "personalInfoSection": "Personal Info",
+  "@personalInfoSection": {
+    "description": "Translation key for personalInfoSection"
+  },
+  "changePhoto": "Tap to change photo",
+  "@changePhoto": {
+    "description": "Translation key for changePhoto"
+  },
+  "profileSavedSuccess": "Profile saved successfully ✓",
+  "@profileSavedSuccess": {
+    "description": "Translation key for profileSavedSuccess"
+  },
+  "mushafTypeLabel": "Select Mushaf Type",
+  "@mushafTypeLabel": {
+    "description": "Translation key for mushafTypeLabel"
+  },
+  "mushafTypeStandard": "Standard Mushaf (Madinah)",
+  "@mushafTypeStandard": {
+    "description": "Translation key for mushafTypeStandard"
+  },
+  "mushafTypeTajweed": "Colored Tajweed Mushaf",
+  "@mushafTypeTajweed": {
+    "description": "Translation key for mushafTypeTajweed"
+  },
+  "mushafTypeDiyanet": "Turkish Diyanet Mushaf",
+  "@mushafTypeDiyanet": {
+    "description": "Translation key for mushafTypeDiyanet"
+  },
+  "downloadsTitle": "Downloads Manager",
+  "downloadsTabMushafs": "Mushafs",
+  "downloadsTabTafsirs": "Tafsir & Translations",
+  "downloadsTabReciters": "Reciters Audio",
+  "downloadButton": "Download",
+  "downloadingStatus": "Downloading...",
+  "downloadedStatus": "Downloaded",
+  "notDownloadedStatus": "Not Downloaded",
+  "deleteButton": "Delete",
+  "deleteConfirmTitle": "Confirm Delete",
+  "deleteConfirmMessage": "Are you sure you want to delete this content?",
+  "cancelButton": "Cancel",
+  "madinaMushafName": "Madina Mushaf",
+  "diyanetMushafName": "Turkish Diyanet Mushaf",
+  "muyassarTafsirName": "Al-Muyassar Tafsir (Arabic)",
+  "englishTranslationName": "English Translation (Sahih)",
+  "turkishTranslationName": "Turkish Translation (Diyanet)",
+  "downloadProgress": "Progress: {progress}",
+  "@downloadProgress": {
+    "placeholders": {
+      "progress": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadedPagesCount": "Downloaded {count} of {total} pages",
+  "@downloadedPagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "downloadedAyahsCount": "Downloaded {count} of {total} verses",
+  "@downloadedAyahsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "bookmarkRemoved": "Bookmark removed",
+  "@bookmarkRemoved": {
+    "description": "Translation key for bookmarkRemoved"
+  },
+  "savedBookmarkTitle": "Saved Bookmark",
+  "@savedBookmarkTitle": {
+    "description": "Translation key for savedBookmarkTitle"
+  },
+  "savedBookmarkBody": "You have a saved bookmark on page {page}\nWhat do you want?",
+  "@savedBookmarkBody": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "goToPage": "Go to page {page}",
+  "@goToPage": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "bookmarkPlaced": "Bookmark set on page {page}",
+  "@bookmarkPlaced": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "placeBookmark": "Place bookmark here",
+  "@placeBookmark": {
+    "description": "Translation key for placeBookmark"
+  },
+  "noBookmarkSaved": "No bookmark saved",
+  "@noBookmarkSaved": {
+    "description": "Translation key for noBookmarkSaved"
+  },
+  "goToPageTitle": "Go to Page",
+  "@goToPageTitle": {
+    "description": "Translation key for goToPageTitle"
+  },
+  "goToPageHint": "1 – 604",
+  "@goToPageHint": {
+    "description": "Translation key for goToPageHint"
+  },
+  "mushafIndexTitle": "Quran Index",
+  "@mushafIndexTitle": {
+    "description": "Translation key for mushafIndexTitle"
+  },
+  "mushafIndexSurahs": "Surahs",
+  "@mushafIndexSurahs": {
+    "description": "Translation key for mushafIndexSurahs"
+  },
+  "mushafIndexJuzs": "Juzs",
+  "@mushafIndexJuzs": {
+    "description": "Translation key for mushafIndexJuzs"
+  },
+  "mushafIndexHazbs": "Hizbs",
+  "@mushafIndexHazbs": {
+    "description": "Translation key for mushafIndexHazbs"
+  },
+  "surahLabel": "Surah {name}",
+  "@surahLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pageAbbr": "p. {page}",
+  "@pageAbbr": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "juzLabel": "Juz {number}",
+  "@juzLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "tafsirPanelTitle": "Page {page}",
+  "@tafsirPanelTitle": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "tafsirTabQuran": "Quran",
+  "@tafsirTabQuran": {
+    "description": "Translation key for tafsirTabQuran"
+  },
+  "tafsirTabTafsir": "Tafsir",
+  "@tafsirTabTafsir": {
+    "description": "Translation key for tafsirTabTafsir"
+  },
+  "failedToLoadData": "Failed to load data",
+  "@failedToLoadData": {
+    "description": "Translation key for failedToLoadData"
+  },
+  "retryButton": "Retry",
+  "@retryButton": {
+    "description": "Translation key for retryButton"
+  },
+  "notAvailable": "Not available",
+  "@notAvailable": {
+    "description": "Translation key for notAvailable"
+  },
+  "ayahLabel": "{surah} – Ayah {ayah}",
+  "@ayahLabel": {
+    "placeholders": {
+      "surah": {
+        "type": "String"
+      },
+      "ayah": {
+        "type": "String"
+      }
+    }
+  },
+  "selectReciterTitle": "Select Reciter",
+  "@selectReciterTitle": {
+    "description": "Translation key for selectReciterTitle"
+  },
+  "startChatConversation": "Start conversation",
+  "@startChatConversation": {
+    "description": "Translation key for startChatConversation"
+  },
+  "failedToLoadMessages": "Failed to load messages",
+  "@failedToLoadMessages": {
+    "description": "Translation key for failedToLoadMessages"
+  },
+  "sendImageTooltip": "Send Image",
+  "@sendImageTooltip": {
+    "description": "Translation key for sendImageTooltip"
+  },
+  "sendImageFailed": "Failed to send image: {error}",
+  "@sendImageFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noQuizzesInBankShort": "No quizzes in the question bank. Create a quiz first.",
+  "@noQuizzesInBankShort": {
+    "description": "Translation key for noQuizzesInBankShort"
+  },
+  "chooseQuizToAssign": "Choose a quiz to assign",
+  "@chooseQuizToAssign": {
+    "description": "Translation key for chooseQuizToAssign"
+  },
+  "quizAssignmentTitle": "Quizzes",
+  "@quizAssignmentTitle": {
+    "description": "Translation key for quizAssignmentTitle"
+  },
+  "assignQuizTooltip": "Assign Quiz",
+  "@assignQuizTooltip": {
+    "description": "Translation key for assignQuizTooltip"
+  },
+  "noQuizzesAssigned": "No quizzes assigned yet",
+  "@noQuizzesAssigned": {
+    "description": "Translation key for noQuizzesAssigned"
+  },
+  "clickPlusToAssignQuiz": "Press + to assign a quiz to this student",
+  "@clickPlusToAssignQuiz": {
+    "description": "Translation key for clickPlusToAssignQuiz"
+  },
+  "quizStatusAssigned": "Assigned",
+  "@quizStatusAssigned": {
+    "description": "Translation key for quizStatusAssigned"
+  },
+  "pointsEarnedOutOf": "{earned} / {total} points",
+  "@pointsEarnedOutOf": {
+    "placeholders": {
+      "earned": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteQuizTitle": "Delete Quiz",
+  "@deleteQuizTitle": {
+    "description": "Translation key for deleteQuizTitle"
+  },
+  "deleteQuizConfirmation": "Do you want to delete \"{title}\"?\nAll associated questions and assignments will be deleted.",
+  "@deleteQuizConfirmation": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "quizBankTitle": "Question Bank",
+  "@quizBankTitle": {
+    "description": "Translation key for quizBankTitle"
+  },
+  "newQuizButton": "New Quiz",
+  "@newQuizButton": {
+    "description": "Translation key for newQuizButton"
+  },
+  "noQuizzesYet": "No quizzes created yet",
+  "@noQuizzesYet": {
+    "description": "Translation key for noQuizzesYet"
+  },
+  "clickPlusToCreateQuiz": "Press + to create your first quiz",
+  "@clickPlusToCreateQuiz": {
+    "description": "Translation key for clickPlusToCreateQuiz"
+  },
+  "createQuizTitle": "Create New Quiz",
+  "@createQuizTitle": {
+    "description": "Translation key for createQuizTitle"
+  },
+  "editQuizTitle": "Edit Quiz",
+  "@editQuizTitle": {
+    "description": "Translation key for editQuizTitle"
+  },
+  "quizDetailsSection": "Quiz Details",
+  "@quizDetailsSection": {
+    "description": "Translation key for quizDetailsSection"
+  },
+  "quizNameLabel": "Quiz Title",
+  "@quizNameLabel": {
+    "description": "Translation key for quizNameLabel"
+  },
+  "quizNameRequired": "Quiz title is required",
+  "@quizNameRequired": {
+    "description": "Translation key for quizNameRequired"
+  },
+  "addQuestionButton": "Add Question",
+  "@addQuestionButton": {
+    "description": "Translation key for addQuestionButton"
+  },
+  "questionsSection": "Questions",
+  "@questionsSection": {
+    "description": "Translation key for questionsSection"
+  },
+  "questionNumberTitle": "Question {number}",
+  "@questionNumberTitle": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "questionTypeLabel": "Question Type",
+  "@questionTypeLabel": {
+    "description": "Translation key for questionTypeLabel"
+  },
+  "questionTypeMultipleChoice": "Multiple Choice",
+  "@questionTypeMultipleChoice": {
+    "description": "Translation key for questionTypeMultipleChoice"
+  },
+  "questionTypeTrueFalse": "True / False",
+  "@questionTypeTrueFalse": {
+    "description": "Translation key for questionTypeTrueFalse"
+  },
+  "questionTypeTextAnswer": "Text Answer",
+  "@questionTypeTextAnswer": {
+    "description": "Translation key for questionTypeTextAnswer"
+  },
+  "questionTextLabel": "Question Text",
+  "@questionTextLabel": {
+    "description": "Translation key for questionTextLabel"
+  },
+  "questionTextRequired": "Question text is required",
+  "@questionTextRequired": {
+    "description": "Translation key for questionTextRequired"
+  },
+  "pointsValueLabel": "Points",
+  "@pointsValueLabel": {
+    "description": "Translation key for pointsValueLabel"
+  },
+  "optionsSection": "Options",
+  "@optionsSection": {
+    "description": "Translation key for optionsSection"
+  },
+  "addOptionButton": "Add Option",
+  "@addOptionButton": {
+    "description": "Translation key for addOptionButton"
+  },
+  "optionNumberLabel": "Option {number}",
+  "@optionNumberLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "optionRequired": "Option is required",
+  "@optionRequired": {
+    "description": "Translation key for optionRequired"
+  },
+  "chooseCorrectOption": "Select Correct Option",
+  "@chooseCorrectOption": {
+    "description": "Translation key for chooseCorrectOption"
+  },
+  "explanationOptional": "Explanation / Hint (optional)",
+  "@explanationOptional": {
+    "description": "Translation key for explanationOptional"
+  },
+  "pleaseAddQuestions": "Please add at least one question",
+  "@pleaseAddQuestions": {
+    "description": "Translation key for pleaseAddQuestions"
+  },
+  "pleaseChooseCorrectOption": "Please select a correct option for question {number}",
+  "@pleaseChooseCorrectOption": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "savingQuiz": "Saving...",
+  "@savingQuiz": {
+    "description": "Translation key for savingQuiz"
+  },
+  "saveQuizButton": "Save Quiz",
+  "@saveQuizButton": {
+    "description": "Translation key for saveQuizButton"
+  },
+  "quizSavedSuccess": "Quiz saved successfully ✓",
+  "@quizSavedSuccess": {
+    "description": "Translation key for quizSavedSuccess"
+  },
+  "quizReviewTitle": "Quiz Review",
+  "@quizReviewTitle": {
+    "description": "Translation key for quizReviewTitle"
+  },
+  "totalScoreLabel": "Total Score",
+  "@totalScoreLabel": {
+    "description": "Translation key for totalScoreLabel"
+  },
+  "studentAnswerReview": "Student's Answer",
+  "@studentAnswerReview": {
+    "description": "Translation key for studentAnswerReview"
+  },
+  "correctAnswerReview": "Correct Answer",
+  "@correctAnswerReview": {
+    "description": "Translation key for correctAnswerReview"
+  },
+  "noHomeworksToCorrect": "No homeworks pending grading",
+  "@noHomeworksToCorrect": {
+    "description": "Translation key for noHomeworksToCorrect"
+  },
+  "allSubmittedHomeworksCorrected": "All submitted homeworks have been graded",
+  "@allSubmittedHomeworksCorrected": {
+    "description": "Translation key for allSubmittedHomeworksCorrected"
+  },
+  "unknownStudent": "Unknown Student",
+  "@unknownStudent": {
+    "description": "Translation key for unknownStudent"
+  },
+  "daysAgo": "{count} days ago",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{count} hours ago",
+  "@hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "minutesAgo": "{count} minutes ago",
+  "@minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeworkInboxTitle": "Homework Box",
+  "@homeworkInboxTitle": {
+    "description": "Translation key for homeworkInboxTitle"
+  },
+  "studentListTitle": "Student List",
+  "@studentListTitle": {
+    "description": "Translation key for studentListTitle"
+  },
+  "studentInboxTitle": "Homework of {name}",
+  "@studentInboxTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeworkCorrectedBanner": "Graded ✓",
+  "@homeworkCorrectedBanner": {
+    "description": "Translation key for homeworkCorrectedBanner"
+  },
+  "homeworkSubmittedBanner": "Needs Grading",
+  "@homeworkSubmittedBanner": {
+    "description": "Translation key for homeworkSubmittedBanner"
+  },
+  "homeworkPendingBanner": "Pending",
+  "@homeworkPendingBanner": {
+    "description": "Translation key for homeworkPendingBanner"
+  },
+  "daysAbbr": "{days}d",
+  "@daysAbbr": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAbbr": "{hours}h",
+  "@hoursAbbr": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "minutesAbbr": "{minutes}m",
+  "@minutesAbbr": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "topicsMain": "Topics Studied",
+  "@topicsMain": {
+    "description": "Translation key for topicsMain"
+  },
+  "totalAttendanceLabel": "Total Attendance",
+  "@totalAttendanceLabel": {
+    "description": "Translation key for totalAttendanceLabel"
+  },
+  "levelProgress": "Level Progress",
+  "@levelProgress": {
+    "description": "Translation key for levelProgress"
+  },
+  "messengerLabel": "Messenger",
+  "@messengerLabel": {
+    "description": "Translation key for messengerLabel"
+  },
+  "chatLabel": "Chat",
+  "@chatLabel": {
+    "description": "Translation key for chatLabel"
+  },
+  "editLevelForStudent": "Edit Level - {name}",
+  "@editLevelForStudent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "coursePaymentStatus": "Current Course Payment Status",
+  "@coursePaymentStatus": {
+    "description": "Translation key for coursePaymentStatus"
+  },
+  "blockedFromApp": "Blocked from entering the app",
+  "@blockedFromApp": {
+    "description": "Translation key for blockedFromApp"
+  },
+  "whatsappPhoneLabel": "WhatsApp (Phone number)",
+  "@whatsappPhoneLabel": {
+    "description": "Translation key for whatsappPhoneLabel"
+  },
+  "messengerLinkLabel": "Messenger Link",
+  "@messengerLinkLabel": {
+    "description": "Translation key for messengerLinkLabel"
+  },
+  "saveLabel": "Save",
+  "@saveLabel": {
+    "description": "Translation key for saveLabel"
+  },
+  "sessionSavedSuccess": "Session recorded successfully ✓",
+  "@sessionSavedSuccess": {
+    "description": "Translation key for sessionSavedSuccess"
+  },
+  "resetPasswordEmailInstructions": "A password reset link will be sent to:\n{email}",
+  "@resetPasswordEmailInstructions": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "noEmailForStudent": "No email address found for this student",
+  "@noEmailForStudent": {
+    "description": "Translation key for noEmailForStudent"
+  },
+  "sendLabel": "Send",
+  "@sendLabel": {
+    "description": "Translation key for sendLabel"
+  },
+  "homeworkAssignedSuccess": "Homework assigned successfully",
+  "@homeworkAssignedSuccess": {
+    "description": "Translation key for homeworkAssignedSuccess"
+  },
+  "assignQuizToStudent": "Assign Quiz to Student",
+  "@assignQuizToStudent": {
+    "description": "Translation key for assignQuizToStudent"
+  },
+  "selectQuiz": "Select Quiz",
+  "@selectQuiz": {
+    "description": "Translation key for selectQuiz"
+  },
+  "assign": "Assign",
+  "@assign": {
+    "description": "Translation key for assign"
+  },
+  "quizAssignedSuccess": "Quiz \"{title}\" assigned successfully",
+  "@quizAssignedSuccess": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "correctHomework": "Grade Homework",
+  "@correctHomework": {
+    "description": "Translation key for correctHomework"
+  },
+  "correctionNotesHint": "Write correction notes for the student... (optional)",
+  "@correctionNotesHint": {
+    "description": "Translation key for correctionNotesHint"
+  },
+  "confirmCorrection": "Confirm Grading",
+  "@confirmCorrection": {
+    "description": "Translation key for confirmCorrection"
+  },
+  "homeworkCorrectedSuccess": "Homework marked as graded",
+  "@homeworkCorrectedSuccess": {
+    "description": "Translation key for homeworkCorrectedSuccess"
+  },
+  "editCorrection": "Edit Grading",
+  "@editCorrection": {
+    "description": "Translation key for editCorrection"
+  },
+  "editNotesHint": "Updated notes...",
+  "@editNotesHint": {
+    "description": "Translation key for editNotesHint"
+  },
+  "deleteCorrection": "Delete Grading",
+  "@deleteCorrection": {
+    "description": "Translation key for deleteCorrection"
+  },
+  "deleteCorrectionConfirm": "Do you want to delete the grading and reset the homework to \"Submitted\"?",
+  "@deleteCorrectionConfirm": {
+    "description": "Translation key for deleteCorrectionConfirm"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Translation key for delete"
+  },
+  "assignTextOrFileHomework": "Assign Text / File Homework",
+  "@assignTextOrFileHomework": {
+    "description": "Translation key for assignTextOrFileHomework"
+  },
+  "typeHomeworkTextHint": "Type homework text here...",
+  "@typeHomeworkTextHint": {
+    "description": "Translation key for typeHomeworkTextHint"
+  },
+  "manage": "Manage",
+  "@manage": {
+    "description": "Translation key for manage"
+  },
+  "profileSaveError": "An error occurred while saving. Please make sure the profiles table is correct.",
+  "@profileSaveError": {
+    "description": "Translation key for profileSaveError"
+  },
+  "nameRequired": "Name is required",
+  "@nameRequired": {
+    "description": "Translation key for nameRequired"
+  },
+  "phoneNumber": "Phone Number",
+  "@phoneNumber": {
+    "description": "Translation key for phoneNumber"
+  },
+  "filesCount": "{count} file(s)",
+  "@filesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "edit": "Edit",
+  "@edit": {
+    "description": "Translation key for edit"
+  },
+  "quizDescriptionOptional": "Description (optional)",
+  "@quizDescriptionOptional": {
+    "description": "Translation key for quizDescriptionOptional"
+  },
+  "questionTextHint": "Type question here...",
+  "@questionTextHint": {
+    "description": "Translation key for questionTextHint"
+  },
+  "imageUploadAdd": "Add Image",
+  "@imageUploadAdd": {
+    "description": "Translation key for imageUploadAdd"
+  },
+  "imageUploadChange": "Change Image",
+  "@imageUploadChange": {
+    "description": "Translation key for imageUploadChange"
+  },
+  "imageUploaded": "Image uploaded successfully",
+  "@imageUploaded": {
+    "description": "Translation key for imageUploaded"
+  },
+  "imageUploadFailed": "Image upload failed",
+  "@imageUploadFailed": {
+    "description": "Translation key for imageUploadFailed"
+  },
+  "addOptionLabel": "Add Option",
+  "@addOptionLabel": {
+    "description": "Translation key for addOptionLabel"
+  },
+  "optionIndexHint": "Option {number}",
+  "@optionIndexHint": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "correctAnswerFillBlank": "Correct Answer *",
+  "@correctAnswerFillBlank": {
+    "description": "Translation key for correctAnswerFillBlank"
+  },
+  "correctAnswerFillBlankHint": "Type correct answer...",
+  "@correctAnswerFillBlankHint": {
+    "description": "Translation key for correctAnswerFillBlankHint"
+  },
+  "timeSecondsOptional": "Time (seconds, optional)",
+  "@timeSecondsOptional": {
+    "description": "Translation key for timeSecondsOptional"
+  },
+  "timeSecondsHint": "e.g., 30",
+  "@timeSecondsHint": {
+    "description": "Translation key for timeSecondsHint"
+  },
+  "hintOptional": "Hint (optional)",
+  "@hintOptional": {
+    "description": "Translation key for hintOptional"
+  },
+  "hintPlaceholder": "Type hint for the student...",
+  "@hintPlaceholder": {
+    "description": "Translation key for hintPlaceholder"
+  },
+  "addLabel": "Add",
+  "@addLabel": {
+    "description": "Translation key for addLabel"
+  },
+  "saveEditLabel": "Save Changes",
+  "@saveEditLabel": {
+    "description": "Translation key for saveEditLabel"
+  },
+  "noQuestionsYet": "No questions added yet",
+  "@noQuestionsYet": {
+    "description": "Translation key for noQuestionsYet"
+  },
+  "enterQuizTitleError": "Please enter quiz title",
+  "@enterQuizTitleError": {
+    "description": "Translation key for enterQuizTitleError"
+  },
+  "enterQuestionTextError": "Please enter question text",
+  "@enterQuestionTextError": {
+    "description": "Translation key for enterQuestionTextError"
+  },
+  "selectOneCorrectAnswerError": "Please select one correct answer",
+  "@selectOneCorrectAnswerError": {
+    "description": "Translation key for selectOneCorrectAnswerError"
+  },
+  "selectAtLeastOneCorrectAnswerError": "Please select at least one correct answer",
+  "@selectAtLeastOneCorrectAnswerError": {
+    "description": "Translation key for selectAtLeastOneCorrectAnswerError"
+  },
+  "enterCorrectAnswerFillBlankError": "Please enter the correct answer",
+  "@enterCorrectAnswerFillBlankError": {
+    "description": "Translation key for enterCorrectAnswerFillBlankError"
+  },
+  "questionTypeSingleChoice": "Single Choice",
+  "@questionTypeSingleChoice": {
+    "description": "Translation key for questionTypeSingleChoice"
+  },
+  "questionTypeFillBlank": "Fill in the Blank",
+  "@questionTypeFillBlank": {
+    "description": "Translation key for questionTypeFillBlank"
+  },
+  "pageLabel": "Page",
+  "@pageLabel": {
+    "description": "Translation key for pageLabel"
+  },
+  "bookmarkLabel": "Bookmark",
+  "@bookmarkLabel": {
+    "description": "Translation key for bookmarkLabel"
+  },
+  "tafsirLabel": "Tafsir",
+  "@tafsirLabel": {
+    "description": "Translation key for tafsirLabel"
+  },
+  "listenLabel": "Listen",
+  "@listenLabel": {
+    "description": "Translation key for listenLabel"
+  },
+  "indexLabel": "Index",
+  "@indexLabel": {
+    "description": "Translation key for indexLabel"
+  },
+  "hizbLabel": "Hizb {number}",
+  "@hizbLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "hizbQuarter": "Quarter Hizb {number}",
+  "@hizbQuarter": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "hizbHalf": "Half Hizb {number}",
+  "@hizbHalf": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "hizbThreeQuarters": "Three Quarters Hizb {number}",
+  "@hizbThreeQuarters": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "passageLabel": "Shared Passage (Optional)",
+  "@passageLabel": {
+    "description": "Translation key for passageLabel"
+  },
+  "passageHint": "Type the passage or text that the questions belong to here...",
+  "@passageHint": {
+    "description": "Translation key for passageHint"
+  },
+  "importFromQuestionBank": "Import from Question Bank",
+  "@importFromQuestionBank": {
+    "description": "Translation key for importFromQuestionBank"
+  },
+  "importFromBankButton": "Import Questions",
+  "@importFromBankButton": {
+    "description": "Translation key for importFromBankButton"
+  },
+  "noQuestionsToImport": "No previous questions to import from.",
+  "@noQuestionsToImport": {
+    "description": "Translation key for noQuestionsToImport"
+  },
+  "importSelectedButton": "Import Selected ({count})",
+  "@importSelectedButton": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchQuestionsHint": "Search questions...",
+  "@searchQuestionsHint": {
+    "description": "Translation key for searchQuestionsHint"
+  },
+  "assignToStudentsTitle": "Assign Quiz to Students",
+  "@assignToStudentsTitle": {
+    "description": "Translation key for assignToStudentsTitle"
+  },
+  "assignButton": "Assign to Students",
+  "@assignButton": {
+    "description": "Translation key for assignButton"
+  },
+  "assignmentSuccess": "Quiz assigned to selected students successfully",
+  "@assignmentSuccess": {
+    "description": "Translation key for assignmentSuccess"
+  },
+  "sendFileTooltip": "Send file",
+  "@sendFileTooltip": {
+    "description": "Translation key for sendFileTooltip"
+  },
+  "fileSizeLimitError": "File size exceeds the limit (10 MB).",
+  "@fileSizeLimitError": {
+    "description": "Translation key for fileSizeLimitError"
+  },
+  "fileUploadFailed": "Failed to upload file: {error}",
+  "@fileUploadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadFile": "Download File",
+  "@downloadFile": {
+    "description": "Translation key for downloadFile"
+  },
+  "downloadMushafOffline": "Download Current Mushaf Offline",
+  "@downloadMushafOffline": {
+    "description": "Translation key for downloadMushafOffline"
+  },
+  "mushafDownloaded": "✓ Current Mushaf is fully downloaded offline",
+  "@mushafDownloaded": {
+    "description": "Translation key for mushafDownloaded"
+  },
+  "downloadingMushaf": "Downloading Mushaf... {percent}%",
+  "@downloadingMushaf": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadFailed": "Download failed. Please try again.",
+  "@downloadFailed": {
+    "description": "Translation key for downloadFailed"
+  }
+}

@@ -1,0 +1,934 @@
+{
+  "@@locale": "tr",
+  "appTitle": "Saber Hoca Dersleri - Kur'an ve Arapça",
+  "@appTitle": {
+    "description": "The application name."
+  },
+  "home": "Ana Sayfa",
+  "@home": {
+    "description": "Home tab title."
+  },
+  "quizzes": "Sınavlar",
+  "@quizzes": {
+    "description": "Quizzes tab title."
+  },
+  "login": "Giriş Yap",
+  "email": "E-posta",
+  "password": "Şifre",
+  "emailValidationError": "Lütfen geçerli bir e-posta adresi girin.",
+  "passwordValidationError": "Şifre en az 6 karakter olmalıdır.",
+  "dashboard": "Kontrol Paneli",
+  "students": "Öğrenciler",
+  "attendance": "Katılım",
+  "homework": "Ödevler",
+  "messages": "Mesajlar",
+  "mushaf": "Mushaf",
+  "settings": "Ayarlar",
+  "signOut": "Çıkış Yap",
+  "myProgress": "İlerlemem",
+  "level": "Seviye",
+  "sessionsOf": "{done} / {total} ders",
+  "@sessionsOf": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "totalAttended": "Toplam katılım: {count}",
+  "@totalAttended": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "present": "Katıldı",
+  "absent": "Katılmadı",
+  "absenceExcuse": "Mazeret",
+  "pending": "Beklemede",
+  "submitted": "Gönderildi",
+  "corrected": "Düzeltildi",
+  "assignHomework": "Ödev Tanımla",
+  "submitHomework": "Ödev Teslim Et",
+  "markCorrected": "Düzeltildi Olarak İşaretle",
+  "uploadImage": "Fotoğraf Yükle",
+  "chatWithTeacher": "Öğretmenle Sohbet",
+  "typeMessage": "Mesaj yazın...",
+  "language": "Dil / Language",
+  "languageArabic": "Arapça (AR)",
+  "languageEnglish": "İngilizce (EN)",
+  "languageTurkish": "Türkçe (TR)",
+  "mushafVersion1": "Versiyon 1",
+  "mushafVersion2": "Versiyon 2",
+  "mushafModeNormal": "Normal",
+  "mushafModeSepia": "Sepya / Göz Koruma",
+  "mushafModeDark": "Karanlık Mod",
+  "welcomeMessage": "Selamun Aleykum, {name}",
+  "@welcomeMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "welcomeTeacher": "Hoş geldiniz, {name}",
+  "@welcomeTeacher": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentStatus": "Ödeme Durumu",
+  "paid": "Ödendi",
+  "notPaid": "Henüz Ödenmedi",
+  "paymentAccessBlocked": "Aboneliğiniz şu anda aktif değil. Kurs içeriğine erişmek için lütfen ödemenizi tamamlayın.",
+  "contactTeacher": "Öğretmenle İletişime Geç",
+  "paymentReminder": "Hatırlatma: Mevcut kurs ödemesi henüz onaylanmadı. Lütfen öğretmeninizle iletişime geçin.",
+  "accountBlocked": "Hesap Kısıtlandı",
+  "accountBlockedReason": "Hesabınız öğretmen tarafından kısıtlanmıştır. Etkinleştirmek için lütfen Saber Hoca ile iletişime geçin.",
+  "statusBlocked": "Engellendi",
+  "loginSubtitle": "Kur'an, Arapça ve İslami İlimler Öğrenin",
+  "upcomingLesson": "Gelecek Ders Zamanı",
+  "quickActions": "Hızlı İşlemler",
+  "viewSubmitHomework": "Ödevleri görüntüle ve teslim et",
+  "pendingQuizzesCount": "Bekleyen {count} sınavınız var",
+  "@pendingQuizzesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "viewAssignedQuizzes": "Tanımlanan sınavları görüntüle",
+  "quranMushaf": "Kur'an Mushafı",
+  "browseReadMushaf": "Kur'an-ı Kerim'i oku ve incele",
+  "recentSessions": "Son Dersleriniz",
+  "noTeacherAssigned": "Henüz öğretmen tanımlanmadı",
+  "chatWithTeacherTooltip": "Öğretmenle Sohbet Et",
+  "chatWithPartner": "{name} ile sohbet et",
+  "@chatWithPartner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "chatWithTeacherDirectly": "Doğrudan öğretmenle sohbet et",
+  "timeSyncedOnline": "Zaman her gün internetten senkronize edilir",
+  "selectCountryForTimezone": "Doğru saati görmek için lütfen ayarlardan ülkenizi seçin",
+  "todayAt": "Bugün saat {time}",
+  "@todayAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "tomorrowAt": "Yarın saat {time}",
+  "@tomorrowAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "dayAt": "{day} saat {time}",
+  "@dayAt": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "fileHomeworks": "Dosya Ödevleri",
+  "noFileHomeworks": "Henüz dosya ödevi yok",
+  "assignedQuizzes": "Tanımlanan Sınavlar",
+  "noAssignedQuizzes": "Henüz tanımlanan sınav yok",
+  "pendingStatus": "Beklemede",
+  "submittedStatus": "Teslim Edildi",
+  "quiz": "Sınav",
+  "quizPoints": "{earned} / {total} puan",
+  "@quizPoints": {
+    "placeholders": {
+      "earned": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "cancel": "İptal",
+  "confirm": "Onayla",
+  "deleteFile": "Dosyayı Sil",
+  "confirmDeleteFile": "\"{fileName}\" dosyasını silmek istiyor musunuz?",
+  "@confirmDeleteFile": {
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "resubmit": "Yeniden Gönder",
+  "confirmResubmit": "Yüklenen tüm dosyalar silinecektir. Devam etmek istiyor musunuz?",
+  "fileUploadedSuccessfully": "Dosya başarıyla yüklendi",
+  "filesUploadedSuccessfully": "{count} dosya başarıyla yüklendi",
+  "@filesUploadedSuccessfully": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "failedToOpenFile": "Dosya açılamadı",
+  "failedToLoadFile": "Dosya yüklenemedi: {error}",
+  "@failedToLoadFile": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToUpload": "Yükleme başarısız: {error}",
+  "@failedToUpload": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToDelete": "Silme başarısız: {error}",
+  "@failedToDelete": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "homeworkResetSuccess": "Ödev sıfırlandı. Yeni dosya yükleyebilirsiniz.",
+  "operationFailed": "İşlem başarısız oldu: {error}",
+  "@operationFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "profileNotFound": "Profil bulunamadı. Lütfen yöneticiyle iletişime geçin.",
+  "questionsCount": "{count} soru",
+  "@questionsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "maxFileSizeError": "\"{fileName}\" dosyası {maxSize} MB boyutunu aşıyor. Lütfen daha küçük bir dosya seçin.",
+  "@maxFileSizeError": {
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      },
+      "maxSize": {
+        "type": "String"
+      }
+    }
+  },
+  "quizReview": "Sınav Değerlendirmesi",
+  "scoreBannerMsgExcellent": "Mükemmel!",
+  "scoreBannerMsgVeryGood": "Çok İyi!",
+  "scoreBannerMsgGood": "İyi!",
+  "scoreBannerMsgNeedsReview": "Tekrar Edilmeli",
+  "studentAnswerLabel": "Cevabınız",
+  "correctAnswerLabel": "Doğru Cevap",
+  "pointsLabel": "{points} puan",
+  "@pointsLabel": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "unansweredLabel": "Cevaplanmadı",
+  "previousButton": "Önceki",
+  "nextButton": "Sonraki",
+  "submitQuizButton": "Sınavı Gönder",
+  "sendQuizFailed": "Sınav gönderilemedi: {error}",
+  "@sendQuizFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "hintLabel": "İpucu",
+  "okLabel": "Tamam",
+  "noQuestions": "Soru yok",
+  "questionOutOf": "Soru {current} / {total}",
+  "@questionOutOf": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "secondsAbbr": "{seconds}sn",
+  "@secondsAbbr": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "quizResultTitle": "Sınav Sonucu",
+  "trueLabel": "Doğru",
+  "falseLabel": "Yanlış",
+  "typeAnswerHint": "Cevabınızı buraya yazın...",
+  "topicCovered": "İşlenen Konu",
+  "resourceLabel": "Kaynak",
+  "attendanceSession": "Katılım Dersi",
+  "teacherNoSchedule": "Öğretmen henüz ders saati belirlemedi",
+  "nextLesson": "Gelecek Ders",
+  "teacherHome": "Ana Sayfa",
+  "teacherStudents": "Öğrenciler",
+  "teacherQuizzes": "Sorular",
+  "teacherMushaf": "Mushaf",
+  "teacherSettings": "Ayarlar",
+  "newStudent": "Yeni Öğrenci",
+  "welcomeTeacherPrefix": "Merhaba,",
+  "studentCount": "{count} Öğrenci",
+  "@studentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "todaySessions": "Bugünkü Dersler",
+  "newMessages": "Yeni Mesajlar",
+  "needsCorrection": "Düzeltme Gerekiyor",
+  "mainSections": "Ana Bölümler",
+  "homeworkInbox": "Ödev Kutusu",
+  "communication": "İletişim",
+  "viewAll": "Hepsini Göster",
+  "noStudentsRegistered": "Henüz kayıtlı öğrenci yok",
+  "studentLevelAbbr": "S{level}",
+  "@studentLevelAbbr": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "studentLessonAbbr": "D{lesson}",
+  "@studentLessonAbbr": {
+    "placeholders": {
+      "lesson": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceTooltip": "Katılım",
+  "homeworkTooltip": "Ödevler",
+  "chatTooltip": "Sohbet",
+  "searchForStudent": "Öğrenci ara...",
+  "noResults": "Sonuç bulunamadı",
+  "recordSession": "Yeni Ders Kaydet",
+  "sessionTopicLabel": "Ders Konusu (Ne işledik?)",
+  "sessionTopicHint": "Örnek: Harfler, Fatiha Suresi...",
+  "homeworkType": "Ödev Türü",
+  "homeworkTypeText": "Metin",
+  "homeworkTypeFile": "Dosya / Resim",
+  "homeworkTypeQuiz": "Sınav",
+  "noQuizzesInBank": "Havuzda henüz sınav yok. Önce bir sınav oluşturun.",
+  "selectQuizFromBank": "Havuzdan bir sınav seçin",
+  "quizPointsAndQuestions": "{title} ({points} puan, {questions} s)",
+  "@quizPointsAndQuestions": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "points": {
+        "type": "int"
+      },
+      "questions": {
+        "type": "int"
+      }
+    }
+  },
+  "homeworkNoteOptional": "Ek not (isteğe bağlı)...",
+  "homeworkNoteFileHint": "Örnek: Kitap sayfasının fotoğrafını çekip gönderin...",
+  "homeworkNoteTextHint": "Örnek: Dersi tekrar edin, 1-5. ayetleri ezberleyin...",
+  "referenceLinkOptional": "Referans Bağlantısı (kitap / web sitesi / video)",
+  "saveSession": "Dersi Kaydet",
+  "sessionHistory": "Ders Geçmişi",
+  "noSessionsYet": "Henüz kaydedilmiş ders yok",
+  "createStudentAccount": "Öğrenci Hesabı Oluştur",
+  "enterStudentDetails": "Öğrenci bilgilerini girin ve şifre belirleyin",
+  "loginDetailsSection": "Giriş Bilgileri",
+  "fullName": "Ad Soyad",
+  "studentNameRequired": "Öğrenci adı gerekli",
+  "emailRequired": "E-posta adresi gerekli",
+  "invalidEmail": "Geçersiz e-posta",
+  "passwordRequired": "Şifre gerekli",
+  "passwordMinLength": "En az 6 karakter olmalıdır",
+  "confirmPassword": "Şifreyi Onayla",
+  "passwordsDoNotMatch": "Şifreler eşleşmiyor",
+  "countryAndContactSection": "Ülke ve İletişim",
+  "selectStudentCountry": "Öğrenci ülkesini seçin",
+  "whatsappNumber": "WhatsApp Numarası",
+  "whatsappNumberHint": "Örnek: +966501234567",
+  "messengerLinkOptional": "Messenger Bağlantısı (isteğe bağlı)",
+  "levelAndInitialLessonSection": "Seviye ve Başlangıç Dersi",
+  "initialLessonInLevel": "Seviyedeki Ders",
+  "initialCoursePaymentStatus": "İlk Kurs Ödeme Durumu",
+  "paidInAdvance": "Peşin Ödendi",
+  "accountActivationPaid": "Hesap içerik erişimi için anında aktif edildi",
+  "accountActivationUnpaid": "Öğrenci hesabı ödeme yapılana kadar aktif olmayacaktır",
+  "creatingAccount": "Oluşturuluyor...",
+  "createAccount": "Hesap Oluştur",
+  "accountCreatedSuccess": "Hesap başarıyla oluşturuldu ✓",
+  "shareDetailsWithStudent": "Bu giriş bilgilerini öğrenciyle paylaşın:",
+  "credName": "İsim",
+  "credEmail": "E-posta",
+  "countryLabel": "Ülke",
+  "whatsappLabel": "WhatsApp",
+  "copyLoginDetails": "Giriş Bilgilerini Kopyala",
+  "copiedToClipboard": "Giriş bilgileri panoya kopyalandı ✓",
+  "close": "Kapat",
+  "chooseStudentCountry": "Ülkenizi Seçin",
+  "otherCountry": "Diğer Ülke",
+  "lessonsScheduleTitle": "{name} Ders Saatleri",
+  "@lessonsScheduleTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "teacherCountryNotSet": "Profilinizde ülkenizi belirtmediniz.\nMısır saati (Africa/Cairo) varsayılan olarak kullanılır.",
+  "studentCountryNotSet": "Öğrenci ülkesi seçilmedi — otomatik saat dilimi dönüşümü devre dışı.",
+  "daysAndLessonTimes": "Ders Günleri ve Saatleri",
+  "teacherTimezoneTime": "Sizin saat diliminizde ({timezone})",
+  "@teacherTimezoneTime": {
+    "placeholders": {
+      "timezone": {
+        "type": "String"
+      }
+    }
+  },
+  "clickToAdd": "Ekle",
+  "timezoneUpdatedOnline": "Saat günlük olarak internetten güncellenir",
+  "savingSchedule": "Kaydediliyor...",
+  "saveSchedule": "Saatleri Kaydet",
+  "scheduleSavedSuccess": "Ders saatleri kaydedildi ✓",
+  "selectAtLeastOneDay": "En az bir gün seçin",
+  "studentDetailsTitle": "Öğrenci Bilgileri",
+  "academicLevelSection": "Akademik Seviye",
+  "manuallyBlocked": "Manuel Engellendi",
+  "activeCanEnter": "Aktif (Erişebilir)",
+  "levelLessonsProgress": "{lesson} / 20 Ders",
+  "@levelLessonsProgress": {
+    "placeholders": {
+      "lesson": {
+        "type": "int"
+      }
+    }
+  },
+  "editLevelAndLesson": "Seviye ve Dersi Düzenle",
+  "weeklyLessonsSchedule": "Haftalık Ders Saatleri",
+  "noScheduleSetYet": "Henüz saat belirlenmedi",
+  "nextLessonPrefix": "Sonraki Ders: ",
+  "roleStudentLabel": "(Öğrenci)",
+  "setLessonTime": "Ders Saatini Belirle",
+  "editLessonTime": "Saati Düzenle",
+  "contactDetailsSection": "İletişim Bilgileri",
+  "editContactDetailsTooltip": "İletişim Bilgilerini Düzenle",
+  "quickActionsSection": "Hızlı İşlemler",
+  "attendanceLog": "Katılım Geçmişi",
+  "resetPassword": "Şifreyi Sıfırla",
+  "resetPasswordEmailInstructionsSent": "Sıfırlama bağlantısı e-posta adresine gönderildi",
+  "editLevelAndPaymentTitle": "Seviye ve Abonelik Düzenle",
+  "courseStatusCurrent": "Mevcut Kurs Durumu",
+  "accountStatus": "Hesap Durumu",
+  "blockStudentAccount": "Öğrenci Hesabını Engelle",
+  "saveChanges": "Değişiklikleri Kaydet",
+  "editProfile": "Profili Düzenle",
+  "personalInfoSection": "Kişisel Bilgiler",
+  "changePhoto": "Fotoğrafı değiştirmek için dokunun",
+  "profileSavedSuccess": "Profil başarıyla kaydedildi ✓",
+  "mushafTypeLabel": "Mushaf Türü Seçin",
+  "mushafTypeStandard": "Standart Mushaf (Medine)",
+  "mushafTypeTajweed": "Renkli Tecvidli Mushaf",
+  "mushafTypeDiyanet": "Diyanet Mealli Mushaf",
+  "downloadsTitle": "İndirme Yöneticisi",
+  "downloadsTabMushafs": "Mushaflar",
+  "downloadsTabTafsirs": "Tefsir ve Mealler",
+  "downloadsTabReciters": "Kâriler ve Sesler",
+  "downloadButton": "İndir",
+  "downloadingStatus": "İndiriliyor...",
+  "downloadedStatus": "İndirildi",
+  "notDownloadedStatus": "İndirilmedi",
+  "deleteButton": "Sil",
+  "deleteConfirmTitle": "Silmeyi Onayla",
+  "deleteConfirmMessage": "Bu içeriği silmek istediğinizden emin misiniz?",
+  "cancelButton": "İptal",
+  "madinaMushafName": "Medine Mushafı",
+  "diyanetMushafName": "Diyanet Mushafı",
+  "muyassarTafsirName": "El-Müyesser Tefsiri (Arapça)",
+  "englishTranslationName": "İngilizce Meal (Sahih)",
+  "turkishTranslationName": "Türkçe Meal (Diyanet)",
+  "downloadProgress": "İlerleme: {progress}",
+  "@downloadProgress": {
+    "placeholders": {
+      "progress": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadedPagesCount": "{count} / {total} sayfa indirildi",
+  "@downloadedPagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "downloadedAyahsCount": "{count} / {total} ayet indirildi",
+  "@downloadedAyahsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "bookmarkRemoved": "Ayraç kaldırıldı",
+  "savedBookmarkTitle": "Kaydedilen Ayraç",
+  "savedBookmarkBody": "{page}. sayfada kayıtlı bir ayracınız var\nNe yapmak istersiniz?",
+  "@savedBookmarkBody": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "goToPage": "{page}. sayfaya git",
+  "@goToPage": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "bookmarkPlaced": "{page}. sayfaya ayraç eklendi",
+  "@bookmarkPlaced": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "placeBookmark": "Ayracı buraya koy",
+  "noBookmarkSaved": "Kaydedilmiş ayraç yok",
+  "goToPageTitle": "Sayfaya Git",
+  "goToPageHint": "1 – 604",
+  "mushafIndexTitle": "Kur'an Fihristi",
+  "mushafIndexSurahs": "Sureler",
+  "mushafIndexJuzs": "Cüzler",
+  "mushafIndexHazbs": "Hizipler",
+  "surahLabel": "{name} Suresi",
+  "@surahLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pageAbbr": "s. {page}",
+  "@pageAbbr": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "juzLabel": "{number}. Cüz",
+  "@juzLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "tafsirPanelTitle": "Sayfa {page}",
+  "@tafsirPanelTitle": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "tafsirTabQuran": "Kur'an",
+  "tafsirTabTafsir": "Tefsir",
+  "failedToLoadData": "Veriler yüklenemedi",
+  "retryButton": "Tekrar Dene",
+  "notAvailable": "Mevcut değil",
+  "ayahLabel": "{surah} – Ayet {ayah}",
+  "@ayahLabel": {
+    "placeholders": {
+      "surah": {
+        "type": "String"
+      },
+      "ayah": {
+        "type": "String"
+      }
+    }
+  },
+  "selectReciterTitle": "Hafız Seçin",
+  "startChatConversation": "Sohbeti başlat",
+  "failedToLoadMessages": "Mesajlar yüklenemedi",
+  "sendImageTooltip": "Resim Gönder",
+  "sendImageFailed": "Resim gönderilemedi: {error}",
+  "@sendImageFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noQuizzesInBankShort": "Soru bankasında henüz sınav yok. Önce bir sınav oluşturun.",
+  "chooseQuizToAssign": "Tanımlamak için bir sınav seçin",
+  "quizAssignmentTitle": "Sınavlar",
+  "assignQuizTooltip": "Sınav Ata",
+  "noQuizzesAssigned": "Henüz tanımlanmış sınav yok",
+  "clickPlusToAssignQuiz": "Öğrenciye sınav atamak için + işaretine basın",
+  "quizStatusAssigned": "Tanımlandı",
+  "pointsEarnedOutOf": "{earned} / {total} puan",
+  "@pointsEarnedOutOf": {
+    "placeholders": {
+      "earned": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteQuizTitle": "Sınavı Sil",
+  "deleteQuizConfirmation": "\"{title}\" sınavını silmek istiyor musunuz?\nİlişkili tüm sorular ve atamalar silinecektir.",
+  "@deleteQuizConfirmation": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "quizBankTitle": "Soru Bankası",
+  "newQuizButton": "Yeni Sınav",
+  "noQuizzesYet": "Henüz oluşturulmuş sınav yok",
+  "clickPlusToCreateQuiz": "İlk sınavınızı oluşturmak için + işaretine basın",
+  "createQuizTitle": "Yeni Sınav Oluştur",
+  "editQuizTitle": "Sınavı Düzenle",
+  "quizDetailsSection": "Sınav Detayları",
+  "quizNameLabel": "Sınav Başlığı",
+  "quizNameRequired": "Sınav başlığı gerekli",
+  "addQuestionButton": "Soru Ekle",
+  "questionsSection": "Sorular",
+  "questionNumberTitle": "{number}. Soru",
+  "@questionNumberTitle": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "questionTypeLabel": "Soru Tipi",
+  "questionTypeMultipleChoice": "Çoktan Seçmeli",
+  "questionTypeTrueFalse": "Doğru / Yanlış",
+  "questionTypeTextAnswer": "Yazılı Cevap",
+  "questionTextLabel": "Soru Metni",
+  "questionTextRequired": "Soru metni gerekli",
+  "pointsValueLabel": "Puanlar",
+  "optionsSection": "Seçenekler",
+  "addOptionButton": "Seçenek Ekle",
+  "optionNumberLabel": "{number}. Seçenek",
+  "@optionNumberLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "optionRequired": "Seçenek gerekli",
+  "chooseCorrectOption": "Doğru Seçeneği Seçin",
+  "explanationOptional": "Açıklama / İpucu (isteğe bağlı)",
+  "pleaseAddQuestions": "Lütfen en az bir soru ekleyin",
+  "pleaseChooseCorrectOption": "Lütfen {number}. soru için bir doğru seçenek belirleyin",
+  "@pleaseChooseCorrectOption": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "savingQuiz": "Kaydediliyor...",
+  "saveQuizButton": "Sınavı Kaydet",
+  "quizSavedSuccess": "Sınav başarıyla kaydedildi ✓",
+  "quizReviewTitle": "Sınav Değerlendirmesi",
+  "totalScoreLabel": "Toplam Puan",
+  "studentAnswerReview": "Öğrencinin Cevabı",
+  "correctAnswerReview": "Doğru Cevap",
+  "noHomeworksToCorrect": "Düzeltilmeyi bekleyen ödev yok",
+  "allSubmittedHomeworksCorrected": "Gönderilen tüm ödevler düzeltildi",
+  "unknownStudent": "Bilinmeyen Öğrenci",
+  "daysAgo": "{count} gün önce",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{count} saat önce",
+  "@hoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "minutesAgo": "{count} dakika önce",
+  "@minutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeworkInboxTitle": "Ödev Kutusu",
+  "studentListTitle": "Öğrenci Listesi",
+  "studentInboxTitle": "{name} Ödevleri",
+  "@studentInboxTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeworkCorrectedBanner": "Düzeltildi ✓",
+  "homeworkSubmittedBanner": "Düzeltme Bekliyor",
+  "homeworkPendingBanner": "Beklemede",
+  "daysAbbr": "{days}g",
+  "@daysAbbr": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAbbr": "{hours}s",
+  "@hoursAbbr": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "minutesAbbr": "{minutes}d",
+  "@minutesAbbr": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "topicsMain": "İşlenen Konular",
+  "totalAttendanceLabel": "Toplam Katılım",
+  "levelProgress": "Seviye İlerlemesi",
+  "messengerLabel": "Messenger",
+  "chatLabel": "Sohbet",
+  "editLevelForStudent": "Seviyeyi Düzenle - {name}",
+  "@editLevelForStudent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "coursePaymentStatus": "Mevcut Kurs Ödeme Durumu",
+  "blockedFromApp": "Uygulamaya girişi engellendi",
+  "whatsappPhoneLabel": "WhatsApp (Telefon numarası)",
+  "messengerLinkLabel": "Messenger Bağlantısı",
+  "saveLabel": "Kaydet",
+  "sessionSavedSuccess": "Oturum başarıyla kaydedildi ✓",
+  "resetPasswordEmailInstructions": "Şifre sıfırlama bağlantısı şu adrese gönderilecek:\n{email}",
+  "@resetPasswordEmailInstructions": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "noEmailForStudent": "Bu öğrenci için e-posta adresi bulunamadı",
+  "sendLabel": "Gönder",
+  "homeworkAssignedSuccess": "Ödev başarıyla atandı",
+  "assignQuizToStudent": "Öğrenciye Sınav Ata",
+  "selectQuiz": "Sınav Seç",
+  "assign": "Ata",
+  "quizAssignedSuccess": "\"{title}\" sınavı başarıyla atandı",
+  "@quizAssignedSuccess": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "correctHomework": "Ödevi Puanla",
+  "correctionNotesHint": "Öğrenci için düzeltme notları yazın... (isteğe bağlı)",
+  "confirmCorrection": "Değerlendirmeyi Onayla",
+  "homeworkCorrectedSuccess": "Ödev puanlandı olarak işaretlendi",
+  "editCorrection": "Değerlendirmeyi Düzenle",
+  "editNotesHint": "Güncellenmiş notlar...",
+  "deleteCorrection": "Değerlendirmeyi Sil",
+  "deleteCorrectionConfirm": "Değerlendirmeyi silip ödevi \"Gönderildi\" durumuna sıfırlamak istiyor musunuz?",
+  "delete": "Sil",
+  "assignTextOrFileHomework": "Yazılı / Dosya Ödevi Ata",
+  "typeHomeworkTextHint": "Ödev metnini buraya yazın...",
+  "manage": "Yönet",
+  "profileSaveError": "Kaydedilirken bir hata oluştu. Lütfen profil ayarlarınızın doğru olduğundan emin olun.",
+  "nameRequired": "İsim gerekli",
+  "phoneNumber": "Telefon Numarası",
+  "filesCount": "{count} dosya",
+  "@filesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "edit": "Düzenle",
+  "quizDescriptionOptional": "Açıklama (isteğe bağlı)",
+  "questionTextHint": "Soruyu buraya yazın...",
+  "imageUploadAdd": "Resim Ekle",
+  "imageUploadChange": "Resmi Değiştir",
+  "imageUploaded": "Resim başarıyla yüklendi",
+  "imageUploadFailed": "Resim yükleme başarısız",
+  "addOptionLabel": "Seçenek Ekle",
+  "optionIndexHint": "Seçenek {number}",
+  "@optionIndexHint": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "correctAnswerFillBlank": "Doğru Cevap *",
+  "correctAnswerFillBlankHint": "Doğru cevabı yazın...",
+  "timeSecondsOptional": "Süre (saniye, isteğe bağlı)",
+  "timeSecondsHint": "örn. 30",
+  "hintOptional": "İpucu (isteğe bağlı)",
+  "hintPlaceholder": "Öğrenci için bir ipucu yazın...",
+  "addLabel": "Ekle",
+  "saveEditLabel": "Değişiklikleri Kaydet",
+  "noQuestionsYet": "Henüz soru eklenmedi",
+  "enterQuizTitleError": "Lütfen sınav başlığını girin",
+  "enterQuestionTextError": "Lütfen soru metnini girin",
+  "selectOneCorrectAnswerError": "Lütfen bir doğru cevap seçin",
+  "selectAtLeastOneCorrectAnswerError": "Lütfen en az bir doğru cevap seçin",
+  "enterCorrectAnswerFillBlankError": "Lütfen doğru cevabı girin",
+  "questionTypeSingleChoice": "Tekli Seçim",
+  "questionTypeFillBlank": "Boşluk Doldurma",
+  "pageLabel": "Sayfa",
+  "bookmarkLabel": "Yer İşareti",
+  "tafsirLabel": "Tefsir",
+  "listenLabel": "Dinle",
+  "indexLabel": "İndeks",
+  "hizbLabel": "Hizb {number}",
+  "@hizbLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "hizbQuarter": "Çeyrek Hizb {number}",
+  "@hizbQuarter": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "hizbHalf": "Yarım Hizb {number}",
+  "@hizbHalf": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "hizbThreeQuarters": "Üç Çeyrek Hizb {number}",
+  "@hizbThreeQuarters": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "passageLabel": "Ortak Metin (İsteğe Bağlı)",
+  "passageHint": "Soruların ait olduğu metni buraya yazın...",
+  "importFromQuestionBank": "Soru Bankasından İçe Aktar",
+  "importFromBankButton": "Soruları İçe Aktar",
+  "noQuestionsToImport": "İçe aktarılacak geçmiş soru bulunmamaktadır.",
+  "importSelectedButton": "Seçilenleri İçe Aktar ({count})",
+  "@importSelectedButton": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchQuestionsHint": "Sorularda ara...",
+  "assignToStudentsTitle": "Sınavı Öğrencilere Ata",
+  "assignButton": "Öğrencilere Ata",
+  "assignmentSuccess": "Sınav seçilen öğrencilere başarıyla atandı",
+  "sendFileTooltip": "Dosya gönder",
+  "fileSizeLimitError": "Dosya boyutu sınırı aşıyor (10 MB).",
+  "fileUploadFailed": "Dosya yüklenemedi: {error}",
+  "@fileUploadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadFile": "Dosyayı İndir",
+  "downloadMushafOffline": "Mevcut Kur'an'ı Çevrimdışı İndir",
+  "mushafDownloaded": "✓ Güncel Kur'an tamamen indirildi (çevrimdışı hazır)",
+  "downloadingMushaf": "Kur'an indiriliyor... %{percent}",
+  "@downloadingMushaf": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadFailed": "İndirme başarısız. Lütfen tekrar deneyin."
+}

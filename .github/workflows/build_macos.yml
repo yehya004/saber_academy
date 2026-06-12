@@ -1,0 +1,51 @@
+name: Build macOS Application
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Recreate .env file
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
+
+      - name: Enable macOS build
+        run: flutter config --enable-macos-desktop
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build macOS Application
+        run: flutter build macos --release --no-codesign
+
+      - name: Compress Build Artifacts
+        run: |
+          cd build/macos/Build/Products/Release
+          zip -r ../../../../saber_academy_macos.zip saber_academy.app
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macOS-Release
+          path: saber_academy_macos.zip

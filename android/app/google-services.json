@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "509710303809",
+    "project_id": "saber-academy-b0985",
+    "storage_bucket": "saber-academy-b0985.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:509710303809:android:edfaa499dec14bde35fcc0",
+        "android_client_info": {
+          "package_name": "com.saberacademy.saber_academy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCz200S8vTbGuo3jX-ALWI5bzVZoe_UCAU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
