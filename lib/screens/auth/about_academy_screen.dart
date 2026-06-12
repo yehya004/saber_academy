@@ -81,6 +81,8 @@ class _AboutAcademyScreenState extends State<AboutAcademyScreen> {
 
     final nameLabel = isAr ? 'الاسم الكامل' : (isTr ? 'Ad Soyad' : 'Full Name');
     final phoneLabel = isAr ? 'رقم الهاتف أو الواتساب' : (isTr ? 'Telefon Numarası veya WhatsApp' : 'WhatsApp or Phone Number');
+    final countryLabel = isAr ? 'البلد' : (isTr ? 'Ülke' : 'Country');
+    final emailLabel = isAr ? 'البريد الإلكتروني (اختياري)' : (isTr ? 'E-posta (İsteğe bağlı)' : 'Email (Optional)');
     final messengerLabel = isAr ? 'رابط حساب ماسنجر (اختياري)' : (isTr ? 'Messenger Bağlantısı (İsteğe bağlı)' : 'Messenger Profile Link (Optional)');
     final submitTxt = isAr ? 'بدء المحادثة الآن' : (isTr ? 'Sohbeti Şimdi Başlat' : 'Start Chat Now');
     final cancelTxt = isAr ? 'إلغاء' : (isTr ? 'İptal' : 'Cancel');
@@ -96,6 +98,8 @@ class _AboutAcademyScreenState extends State<AboutAcademyScreen> {
           dialogTitle: dialogTitle,
           nameLabel: nameLabel,
           phoneLabel: phoneLabel,
+          countryLabel: countryLabel,
+          emailLabel: emailLabel,
           messengerLabel: messengerLabel,
           submitTxt: submitTxt,
           cancelTxt: cancelTxt,
@@ -1330,6 +1334,8 @@ class _GuestFormSheet extends StatefulWidget {
   final String dialogTitle;
   final String nameLabel;
   final String phoneLabel;
+  final String countryLabel;
+  final String emailLabel;
   final String messengerLabel;
   final String submitTxt;
   final String cancelTxt;
@@ -1340,6 +1346,8 @@ class _GuestFormSheet extends StatefulWidget {
     required this.dialogTitle,
     required this.nameLabel,
     required this.phoneLabel,
+    required this.countryLabel,
+    required this.emailLabel,
     required this.messengerLabel,
     required this.submitTxt,
     required this.cancelTxt,
@@ -1355,6 +1363,8 @@ class _GuestFormSheetState extends State<_GuestFormSheet> {
   final _client = Supabase.instance.client;
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _countryController = TextEditingController();
+  final _emailController = TextEditingController();
   final _messengerController = TextEditingController();
   bool _submitting = false;
 
@@ -1362,6 +1372,8 @@ class _GuestFormSheetState extends State<_GuestFormSheet> {
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
+    _countryController.dispose();
+    _emailController.dispose();
     _messengerController.dispose();
     super.dispose();
   }
@@ -1369,14 +1381,31 @@ class _GuestFormSheetState extends State<_GuestFormSheet> {
   Future<void> _submitGuestChat() async {
     final name = _nameController.text.trim();
     final phone = _phoneController.text.trim();
+    final country = _countryController.text.trim();
+    final email = _emailController.text.trim();
     final messenger = _messengerController.text.trim();
 
-    if (name.isEmpty || phone.isEmpty) {
-      final isAr = widget.lang == 'ar';
-      final isTr = widget.lang == 'tr';
+    final isAr = widget.lang == 'ar';
+    final isTr = widget.lang == 'tr';
+
+    if (name.isEmpty || phone.isEmpty || country.isEmpty) {
       final errorMsg = isAr
-          ? 'يرجى إدخال الاسم ورقم الهاتف.'
-          : (isTr ? 'Lütfen adınızı ve telefon numaranızı girin.' : 'Please enter your name and phone number.');
+          ? 'يرجى إدخال الاسم ورقم الهاتف والبلد.'
+          : (isTr ? 'Lütfen adınızı, telefon numaranızı ve ülkenizi girin.' : 'Please enter your name, phone number, and country.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMsg),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    if (email.isNotEmpty && !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+      final errorMsg = isAr
+          ? 'يرجى إدخال بريد إلكتروني صحيح.'
+          : (isTr ? 'Lütfen geçerli bir e-posta adresi girin.' : 'Please enter a valid email address.');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(errorMsg),
@@ -1392,7 +1421,7 @@ class _GuestFormSheetState extends State<_GuestFormSheet> {
     try {
       // 1. Generate anonymous guest account credentials
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final generatedEmail = 'guest_$timestamp@saberacademy.com';
+      final generatedEmail = email.isNotEmpty ? email : 'guest_$timestamp@saberacademy.com';
       final generatedPassword = 'GuestPass_$timestamp!';
 
       // 2. Register via Supabase signup
@@ -1414,6 +1443,7 @@ class _GuestFormSheetState extends State<_GuestFormSheet> {
         'full_name': 'زائر: $name',
         'email': generatedEmail,
         'phone': phone,
+        'country': country,
         'messenger_link': messenger.isNotEmpty ? messenger : null,
         'level': 1,
         'lesson_in_level': 0.0,
@@ -1516,6 +1546,35 @@ class _GuestFormSheetState extends State<_GuestFormSheet> {
               decoration: InputDecoration(
                 labelText: widget.phoneLabel,
                 prefixIcon: const Icon(Icons.phone_outlined, color: AppColors.primary),
+                filled: true,
+                fillColor: AppColors.background,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _countryController,
+              decoration: InputDecoration(
+                labelText: widget.countryLabel,
+                prefixIcon: const Icon(Icons.public_outlined, color: AppColors.primary),
+                filled: true,
+                fillColor: AppColors.background,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                labelText: widget.emailLabel,
+                prefixIcon: const Icon(Icons.email_outlined, color: AppColors.primary),
                 filled: true,
                 fillColor: AppColors.background,
                 border: OutlineInputBorder(
