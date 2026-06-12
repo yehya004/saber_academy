@@ -4,12 +4,24 @@ import '../models/profile_model.dart';
 class ProfileService {
   final _client = Supabase.instance.client;
 
-  /// Returns all profiles with role = 'student'.
+  /// Returns all profiles with role = 'student' and is_guest = false.
   Future<List<ProfileModel>> fetchStudents() async {
     final data = await _client
         .from('profiles')
         .select()
         .eq('role', 'student')
+        .eq('is_guest', false)
+        .order('full_name');
+    return data.map((e) => ProfileModel.fromMap(e)).toList();
+  }
+
+  /// Returns all profiles with role = 'student' and is_guest = true.
+  Future<List<ProfileModel>> fetchGuests() async {
+    final data = await _client
+        .from('profiles')
+        .select()
+        .eq('role', 'student')
+        .eq('is_guest', true)
         .order('full_name');
     return data.map((e) => ProfileModel.fromMap(e)).toList();
   }

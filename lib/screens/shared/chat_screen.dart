@@ -21,6 +21,11 @@ import '../../services/telegram_storage_service.dart';
 import '../../widgets/chat_bubble.dart';
 import 'image_editor_screen.dart';
 
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+import '../../providers/auth_provider.dart';
+import '../../core/router/app_router.dart';
+
 class ChatScreen extends StatefulWidget {
   final String partnerId;
   final String partnerName;
@@ -50,6 +55,7 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _sendingFile = false;
   late String _myId;
   ProfileModel? _partnerProfile;
+  bool _isGuest = false;
 
   final _audioRecorder = AudioRecorder();
   bool _isRecording = false;
@@ -64,6 +70,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _myId = Supabase.instance.client.auth.currentUser?.id ?? '';
+    _isGuest = context.read<AuthProvider>().profile?.isGuest ?? false;
     _loadCachedMessages();
     _subscribeToMessages();
     _startPolling();
@@ -597,11 +604,63 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  Future<bool?> _showExitConfirmationDialog() {
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final isTr = Localizations.localeOf(context).languageCode == 'tr';
+
+    final title = isAr ? 'إنهاء الجلسة' : (isTr ? 'Oturumu Kapat' : 'Exit Chat');
+    final content = isAr
+        ? 'هل أنت متأكد من رغبتك في الخروج؟ سيتم تسجيل خروجك من حساب الزائر والعودة لصفحة الأكاديمية.'
+        : (isTr
+            ? 'Çıkmak istediğinizden emin misiniz? Ziyaretçi oturumunuz kapatılacak ve akademi sayfasına geri döneceksiniz.'
+            : 'Are you sure you want to exit? You will be signed out of the guest account and returned to the academy page.');
+    final confirmTxt = isAr ? 'خروج' : (isTr ? 'Çıkış Yap' : 'Exit');
+    final cancelTxt = isAr ? 'إلغاء' : (isTr ? 'İptal' : 'Cancel');
+
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        content: Text(content),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(cancelTxt, style: const TextStyle(color: AppColors.textSecondary)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(confirmTxt),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
+    final scaffold = Scaffold(
       appBar: AppBar(
+        leading: _isGuest
+            ? IconButton(
+                icon: const Icon(Icons.exit_to_app_rounded),
+                onPressed: () async {
+                  final shouldExit = await _showExitConfirmationDialog();
+                  if (shouldExit == true && context.mounted) {
+                    final auth = context.read<AuthProvider>();
+                    await auth.signOut();
+                    if (context.mounted) {
+                      context.go(AppRoutes.aboutAcademy);
+                    }
+                  }
+                },
+                tooltip: l10n.localeName == 'ar' ? 'خروج' : (l10n.localeName == 'tr' ? 'Çıkış' : 'Exit'),
+              )
+            : null,
         titleSpacing: 0,
         title: Row(
           children: [
@@ -706,6 +765,22 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ],
       ),
+    );
+
+    return PopScope(
+      canPop: !_isGuest,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final shouldExit = await _showExitConfirmationDialog();
+        if (shouldExit == true && context.mounted) {
+          final auth = context.read<AuthProvider>();
+          await auth.signOut();
+          if (context.mounted) {
+            context.go(AppRoutes.aboutAcademy);
+          }
+        }
+      },
+      child: scaffold,
     );
   }
 }

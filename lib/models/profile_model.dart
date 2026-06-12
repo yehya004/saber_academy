@@ -17,6 +17,7 @@ class ProfileModel {
   final bool    isBlocked;     // whether student account is explicitly blocked by teacher
   final String  studySystem;   // 'hours' | 'classes'
   final double  studyBalance;  // remaining hours/classes
+  final bool    isGuest;       // whether student is a temporary guest/visitor
 
   const ProfileModel({
     required this.id,
@@ -36,6 +37,7 @@ class ProfileModel {
     this.isBlocked     = false,
     this.studySystem   = 'classes',
     this.studyBalance  = 0.0,
+    this.isGuest       = false,
   });
 
   bool get isTeacher => role == 'teacher';
@@ -60,6 +62,7 @@ class ProfileModel {
         isBlocked:     (map['is_blocked']     as bool?) ?? false,
         studySystem:   (map['study_system']   as String?) ?? 'classes',
         studyBalance:  ((map['study_balance'] as num?) ?? 0.0).toDouble(),
+        isGuest:       (map['is_guest']       as bool?) ?? false,
       );
 
   Map<String, dynamic> toMap() => {
@@ -80,5 +83,6 @@ class ProfileModel {
         'is_blocked':      isBlocked,
         'study_system':    studySystem,
         'study_balance':   studyBalance,
+        'is_guest':        isGuest,
       };
 }

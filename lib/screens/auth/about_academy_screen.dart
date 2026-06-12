@@ -1450,6 +1450,7 @@ class _GuestFormSheetState extends State<_GuestFormSheet> {
         'is_paid': false,
         'study_system': 'classes',
         'study_balance': 0.0,
+        'is_guest': true,
       };
 
       await _client.from('profiles').insert(profileData);
@@ -1475,16 +1476,12 @@ class _GuestFormSheetState extends State<_GuestFormSheet> {
 
       if (!mounted) return;
 
-      // 5. Navigate to Home and request auto-opening of the chat
+      // 5. Navigate directly to Chat with Sheikh
       Navigator.pop(context); // Close bottom sheet
-      final routeUri = Uri(
-        path: AppRoutes.studentHome,
-        queryParameters: {
-          'chat_partner_id': sheikh.id,
-          'chat_partner_name': sheikh.fullName,
-        },
-      ).toString();
-      context.go(routeUri);
+      context.go(AppRoutes.chat, extra: {
+        'partnerId': sheikh.id,
+        'partnerName': sheikh.fullName,
+      });
     } catch (e) {
       if (mounted) {
         setState(() => _submitting = false);

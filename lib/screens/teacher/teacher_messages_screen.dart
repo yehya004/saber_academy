@@ -24,7 +24,8 @@ class _TeacherMessagesScreenState extends State<TeacherMessagesScreen> {
   final _profileService = ProfileService();
   final _client         = Supabase.instance.client;
 
-  List<_ConvThread> _threads = [];
+  List<_ConvThread> _studentThreads = [];
+  List<_ConvThread> _guestThreads = [];
   bool              _loading = true;
 
   @override
@@ -38,23 +39,39 @@ class _TeacherMessagesScreenState extends State<TeacherMessagesScreen> {
     final auth      = context.read<AuthProvider>();
     final teacherId = auth.profile?.id ?? '';
 
-    final students = await _profileService.fetchStudents();
+    // Fetch both regular students and guest users in parallel
+    final results = await Future.wait([
+      _profileService.fetchStudents(),
+      _profileService.fetchGuests(),
+    ]);
 
-    // For each student, fetch last message and unread count in parallel
-    final threadFutures = students.map((s) => _buildThread(s, teacherId));
-    final threads       = await Future.wait(threadFutures);
+    final students = results[0];
+    final guests   = results[1];
 
-    // Sort: threads with messages first (newest → oldest), then no-message students
-    threads.sort((a, b) {
-      if (a.lastMessageAt == null && b.lastMessageAt == null) return 0;
-      if (a.lastMessageAt == null) return 1;
-      if (b.lastMessageAt == null) return -1;
-      return b.lastMessageAt!.compareTo(a.lastMessageAt!);
-    });
+    // For each profile, fetch last message and unread count in parallel
+    final studentThreadFutures = students.map((s) => _buildThread(s, teacherId));
+    final guestThreadFutures   = guests.map((s) => _buildThread(s, teacherId));
+
+    final studentThreads = await Future.wait(studentThreadFutures);
+    final guestThreads   = await Future.wait(guestThreadFutures);
+
+    // Helper function to sort threads: newest message first
+    void sortThreads(List<_ConvThread> list) {
+      list.sort((a, b) {
+        if (a.lastMessageAt == null && b.lastMessageAt == null) return 0;
+        if (a.lastMessageAt == null) return 1;
+        if (b.lastMessageAt == null) return -1;
+        return b.lastMessageAt!.compareTo(a.lastMessageAt!);
+      });
+    }
+
+    sortThreads(studentThreads);
+    sortThreads(guestThreads);
 
     if (!mounted) return;
     setState(() {
-      _threads = threads;
+      _studentThreads = studentThreads;
+      _guestThreads   = guestThreads;
       _loading = false;
     });
   }
@@ -85,7 +102,6 @@ class _TeacherMessagesScreenState extends State<TeacherMessagesScreen> {
         : null;
     final unreadCount = unreadResp.length;
 
-
     return _ConvThread(
       student:       student,
       lastMessage:   lastMsg?['message_text'] as String?,
@@ -99,94 +115,162 @@ class _TeacherMessagesScreenState extends State<TeacherMessagesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final totalUnread =
-        _threads.fold<int>(0, (s, t) => s + t.unreadCount);
+    final studentsUnread = _studentThreads.fold<int>(0, (s, t) => s + t.unreadCount);
+    final guestsUnread   = _guestThreads.fold<int>(0, (s, t) => s + t.unreadCount);
+    final totalUnread    = studentsUnread + guestsUnread;
     final l10n = AppLocalizations.of(context);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.surface,
-        title: Row(
-          children: [
-            Text(
-              l10n.communication,
-              style: const TextStyle(
-                  fontWeight: FontWeight.bold, color: AppColors.surface),
-            ),
-            const SizedBox(width: 8),
-            if (!_loading && totalUnread > 0)
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color:        AppColors.error,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  '$totalUnread',
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold),
-                ),
-              ),
-          ],
-        ),
-      ),
-      body: _loading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary))
-          : _threads.isEmpty
-              ? _buildEmpty(l10n)
-              : RefreshIndicator(
-                  onRefresh: _load,
-                  color: AppColors.primary,
-                  child: ListView.separated(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    itemCount: _threads.length,
-                    separatorBuilder: (_, __) => const Divider(
-                      height: 1,
-                      indent: 72,
-                      color: Color(0xFFEEEEEE),
-                    ),
-                    itemBuilder: (ctx, i) {
-                      final t = _threads[i];
-                      return _ThreadTile(
-                        thread: t,
-                        onTap: () async {
-                          await context.push(
-                            AppRoutes.chat,
-                            extra: {
-                              'partnerId':   t.student.id,
-                              'partnerName': t.student.fullName,
-                            },
-                          );
-                          _load(); // refresh unread counts after returning
-                        },
-                      );
-                    },
-                  ),
-                ),
-    );
-  }
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final isTr = Localizations.localeOf(context).languageCode == 'tr';
 
-  Widget _buildEmpty(AppLocalizations l10n) => Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.forum_outlined,
-                size: 64, color: AppColors.textSecondary),
-            const SizedBox(height: 12),
-            Text(
-              l10n.noStudentsRegistered,
-              style: const TextStyle(
-                  fontSize: 16, color: AppColors.textSecondary),
-            ),
-          ],
+    final studentsLabel = isAr ? 'الطلاب' : (isTr ? 'Öğrenciler' : 'Students');
+    final guestsLabel   = isAr ? 'الزوار' : (isTr ? 'Ziyaretçiler' : 'Guests');
+
+    Widget buildBadge(int count) {
+      if (count <= 0) return const SizedBox.shrink();
+      return Container(
+        margin: const EdgeInsets.symmetric(horizontal: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: AppColors.error,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          '$count',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       );
+    }
+
+    final appBar = AppBar(
+      backgroundColor: AppColors.primary,
+      foregroundColor: AppColors.surface,
+      title: Row(
+        children: [
+          Text(
+            l10n.communication,
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, color: AppColors.surface),
+          ),
+          const SizedBox(width: 8),
+          if (!_loading && totalUnread > 0)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color:        AppColors.error,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                '$totalUnread',
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+        ],
+      ),
+      bottom: TabBar(
+        indicatorColor: AppColors.secondary,
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white70,
+        tabs: [
+          Tab(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(studentsLabel),
+                buildBadge(studentsUnread),
+              ],
+            ),
+          ),
+          Tab(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(guestsLabel),
+                buildBadge(guestsUnread),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    Widget buildThreadList(List<_ConvThread> threads, String emptyMsg) {
+      if (threads.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.forum_outlined, size: 64, color: AppColors.textSecondary),
+              const SizedBox(height: 12),
+              Text(
+                emptyMsg,
+                style: const TextStyle(fontSize: 16, color: AppColors.textSecondary),
+              ),
+            ],
+          ),
+        );
+      }
+      return RefreshIndicator(
+        onRefresh: _load,
+        color: AppColors.primary,
+        child: ListView.separated(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          itemCount: threads.length,
+          separatorBuilder: (_, __) => const Divider(
+            height: 1,
+            indent: 72,
+            color: Color(0xFFEEEEEE),
+          ),
+          itemBuilder: (ctx, i) {
+            final t = threads[i];
+            return _ThreadTile(
+              thread: t,
+              onTap: () async {
+                await context.push(
+                  AppRoutes.chat,
+                  extra: {
+                    'partnerId':   t.student.id,
+                    'partnerName': t.student.fullName,
+                  },
+                );
+                _load(); // refresh unread counts after returning
+              },
+            );
+          },
+        ),
+      );
+    }
+
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: appBar,
+        body: _loading
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.primary))
+            : TabBarView(
+                children: [
+                  buildThreadList(
+                    _studentThreads,
+                    l10n.noStudentsRegistered,
+                  ),
+                  buildThreadList(
+                    _guestThreads,
+                    isAr ? 'لا يوجد زوار حالياً' : (isTr ? 'Henüz ziyaretçi yok' : 'No guest messages yet'),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
 }
 
 // ── Data model ────────────────────────────────────────────────────────────────
