@@ -11,6 +11,8 @@ import '../../core/constants/app_colors.dart';
 import '../../core/router/app_router.dart';
 import '../../models/profile_model.dart';
 import '../../l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import '../../providers/auth_provider.dart';
 
 class AboutAcademyScreen extends StatefulWidget {
   const AboutAcademyScreen({super.key});
@@ -1454,6 +1456,11 @@ class _GuestFormSheetState extends State<_GuestFormSheet> {
       };
 
       await _client.from('profiles').insert(profileData);
+
+      // Load the registered profile into AuthProvider so the app state knows the user is logged in
+      if (mounted) {
+        await context.read<AuthProvider>().loadProfile();
+      }
 
       // 4. Find the teacher (the Sheikh)
       ProfileModel? sheikh = widget.teacher;
