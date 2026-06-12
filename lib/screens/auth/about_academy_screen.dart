@@ -61,10 +61,10 @@ class _AboutAcademyScreenState extends State<AboutAcademyScreen> {
   }
 
   Future<void> _contactWhatsApp() async {
-    final phoneNum = _teacher?.phone ?? '';
+    final phoneNum = (_teacher?.phone ?? '').replaceAll(RegExp(r'[^0-9]'), '');
     final urlString = phoneNum.isNotEmpty
         ? 'https://wa.me/$phoneNum'
-        : 'https://wa.me/201200000000'; // Default fallback
+        : 'https://wa.me/201289212204'; // Default fallback
     final uri = Uri.parse(urlString);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -1446,16 +1446,16 @@ class _GuestFormSheetState extends State<_GuestFormSheet> {
 
       if (!mounted) return;
 
-      // 5. Navigate to Home and then push Chat screen directly
+      // 5. Navigate to Home and request auto-opening of the chat
       Navigator.pop(context); // Close bottom sheet
-      context.go(AppRoutes.studentHome); // Sets the bottom navigation context
-      context.push(
-        AppRoutes.chat,
-        extra: {
-          'partnerId': sheikh.id,
-          'partnerName': sheikh.fullName,
+      final routeUri = Uri(
+        path: AppRoutes.studentHome,
+        queryParameters: {
+          'chat_partner_id': sheikh.id,
+          'chat_partner_name': sheikh.fullName,
         },
-      );
+      ).toString();
+      context.go(routeUri);
     } catch (e) {
       if (mounted) {
         setState(() => _submitting = false);

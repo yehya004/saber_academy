@@ -69,6 +69,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   int                      _unreadMessages  = 0;
   int                      _pendingQuizzes  = 0;
   List<LessonPostponementModel> _postponements = [];
+  bool                     _hasAutoOpenedChat = false;
 
   final _quizService = QuizService();
 
@@ -77,6 +78,34 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     super.initState();
     _loadData();
     NotificationService().requestPermissions();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_hasAutoOpenedChat) {
+      try {
+        final state = GoRouterState.of(context);
+        final partnerId = state.uri.queryParameters['chat_partner_id'];
+        final partnerName = state.uri.queryParameters['chat_partner_name'];
+        if (partnerId != null && partnerName != null) {
+          _hasAutoOpenedChat = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              context.push(
+                AppRoutes.chat,
+                extra: {
+                  'partnerId': partnerId,
+                  'partnerName': partnerName,
+                },
+              );
+            }
+          });
+        }
+      } catch (e) {
+        debugPrint("Error checking auto-open chat: $e");
+      }
+    }
   }
 
   Future<void> _loadData() async {
