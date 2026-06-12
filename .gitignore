@@ -50,6 +50,7 @@ app.*.map.json
 *.zip
 *.exe
 *.sqlite
+!assets/quran/database.sqlite
 *.db
 *.txt
 *.sqlite3.db
