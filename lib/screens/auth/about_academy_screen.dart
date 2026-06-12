@@ -1363,7 +1363,7 @@ class _GuestFormSheetState extends State<_GuestFormSheet> {
   final _client = Supabase.instance.client;
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _countryController = TextEditingController();
+  String? _selectedCountry;
   final _emailController = TextEditingController();
   final _messengerController = TextEditingController();
   bool _submitting = false;
@@ -1372,7 +1372,6 @@ class _GuestFormSheetState extends State<_GuestFormSheet> {
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
-    _countryController.dispose();
     _emailController.dispose();
     _messengerController.dispose();
     super.dispose();
@@ -1381,7 +1380,7 @@ class _GuestFormSheetState extends State<_GuestFormSheet> {
   Future<void> _submitGuestChat() async {
     final name = _nameController.text.trim();
     final phone = _phoneController.text.trim();
-    final country = _countryController.text.trim();
+    final country = _selectedCountry ?? '';
     final email = _emailController.text.trim();
     final messenger = _messengerController.text.trim();
 
@@ -1555,8 +1554,9 @@ class _GuestFormSheetState extends State<_GuestFormSheet> {
               ),
             ),
             const SizedBox(height: 12),
-            TextField(
-              controller: _countryController,
+            DropdownButtonFormField<String>(
+              initialValue: _selectedCountry,
+              isExpanded: true,
               decoration: InputDecoration(
                 labelText: widget.countryLabel,
                 prefixIcon: const Icon(Icons.public_outlined, color: AppColors.primary),
@@ -1567,6 +1567,15 @@ class _GuestFormSheetState extends State<_GuestFormSheet> {
                   borderSide: BorderSide.none,
                 ),
               ),
+              items: _kCountries
+                  .map(
+                    (c) => DropdownMenuItem(
+                      value: c,
+                      child: Text(_getLocalizedCountry(context, c)),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (v) => setState(() => _selectedCountry = v),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -1691,4 +1700,114 @@ class _EmbeddedYoutubePlayerState extends State<_EmbeddedYoutubePlayer> {
       aspectRatio: 16 / 9,
     );
   }
+}
+
+const List<String> _kCountries = [
+  'المملكة العربية السعودية',
+  'مصر',
+  'الأردن',
+  'فلسطين',
+  'الإمارات العربية المتحدة',
+  'الكويت',
+  'البحرين',
+  'قطر',
+  'عُمان',
+  'اليمن',
+  'العراق',
+  'سوريا',
+  'لبنان',
+  'ليبيا',
+  'تونس',
+  'الجزائر',
+  'المغرب',
+  'السودان',
+  'الصومال',
+  'موريتانيا',
+  'تركيا',
+  'باكستان',
+  'ماليزيا',
+  'إندونيسيا',
+  'المملكة المتحدة',
+  'ألمانيا',
+  'فرنسا',
+  'الولايات المتحدة الأمريكية',
+  'كندا',
+  'أستراليا',
+  'دولة أخرى',
+];
+
+String _getLocalizedCountry(BuildContext context, String countryName) {
+  final locale = Localizations.localeOf(context).languageCode;
+  if (locale == 'en') {
+    switch (countryName) {
+      case 'المملكة العربية السعودية': return 'Saudi Arabia';
+      case 'مصر': return 'Egypt';
+      case 'الأردن': return 'Jordan';
+      case 'فلسطين': return 'Palestine';
+      case 'الإمارات العربية المتحدة': return 'United Arab Emirates';
+      case 'الكويت': return 'Kuwait';
+      case 'البحرين': return 'Bahrain';
+      case 'قطر': return 'Qatar';
+      case 'عُمان': return 'Oman';
+      case 'اليمن': return 'Yemen';
+      case 'العراق': return 'Iraq';
+      case 'سوريا': return 'Syria';
+      case 'لبنان': return 'Lebanon';
+      case 'ليبيا': return 'Libya';
+      case 'تونس': return 'Tunisia';
+      case 'الجزائر': return 'Algeria';
+      case 'المغرب': return 'Morocco';
+      case 'السودان': return 'Sudan';
+      case 'الصومال': return 'Somalia';
+      case 'موريتانيا': return 'Mauritania';
+      case 'تركيا': return 'Turkey';
+      case 'باكستان': return 'Pakistan';
+      case 'ماليزيا': return 'Malaysia';
+      case 'إندونيسيا': return 'Indonesia';
+      case 'المملكة المتحدة': return 'United Kingdom';
+      case 'ألمانيا': return 'Germany';
+      case 'فرنسا': return 'France';
+      case 'الولايات المتحدة الأمريكية': return 'United States';
+      case 'كندا': return 'Canada';
+      case 'أستراليا': return 'Australia';
+      case 'دولة أخرى': return 'Other Country';
+      default: return countryName;
+    }
+  } else if (locale == 'tr') {
+    switch (countryName) {
+      case 'المملكة العربية السعودية': return 'Suudi Arabistan';
+      case 'مصر': return 'Mısır';
+      case 'الأردن': return 'Ürdün';
+      case 'فلسطين': return 'Filistin';
+      case 'الإمارات العربية المتحدة': return 'Birleşik Arap Emirlikleri';
+      case 'الكويت': return 'Kuveyt';
+      case 'البحرين': return 'Bahreyn';
+      case 'قطر': return 'Katar';
+      case 'عُمان': return 'Umman';
+      case 'اليمن': return 'Yemen';
+      case 'العراق': return 'Irak';
+      case 'سوريا': return 'Suriye';
+      case 'لبنان': return 'Lübnan';
+      case 'ليبيا': return 'Libya';
+      case 'تونس': return 'Tunus';
+      case 'الجزائر': return 'Cezayir';
+      case 'المغرب': return 'Fas';
+      case 'السودان': return 'Sudan';
+      case 'الصومال': return 'Somali';
+      case 'موريتانيا': return 'Moritanya';
+      case 'تركيا': return 'Türkiye';
+      case 'باكستان': return 'Pakistan';
+      case 'ماليزيا': return 'Malezya';
+      case 'إندونيسيا': return 'Endonezya';
+      case 'المملكة المتحدة': return 'Birleşik Krallık';
+      case 'ألمانيا': return 'Almanya';
+      case 'فرنسا': return 'Fransa';
+      case 'الولايات المتحدة الأمريكية': return 'Amerika Birleşik Devletleri';
+      case 'كندا': return 'Kanada';
+      case 'أستراليا': return 'Avustralya';
+      case 'دولة أخرى': return 'Diğer Ülke';
+      default: return countryName;
+    }
+  }
+  return countryName;
 }
