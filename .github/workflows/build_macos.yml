@@ -42,7 +42,7 @@ jobs:
       - name: Compress Build Artifacts
         run: |
           cd build/macos/Build/Products/Release
-          zip -r ../../../../saber_academy_macos.zip saber_academy.app
+          zip -r "${{ github.workspace }}/saber_academy_macos.zip" saber_academy.app
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
