@@ -9,6 +9,7 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/locale_provider.dart';
 import '../../services/auth_service.dart';
+import '../../services/profile_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -61,6 +62,20 @@ class _LoginScreenState extends State<LoginScreen> {
       final lang = auth.profile?.languagePreference;
       if (lang != null && (lang == 'ar' || lang == 'en' || lang == 'tr')) {
         await context.read<LocaleProvider>().setLocale(Locale(lang));
+      }
+
+      if (!mounted) return;
+
+      if (auth.profile?.isGuest == true) {
+        final teacher = await ProfileService().fetchTeacherForStudent(auth.profile!.id);
+        if (!mounted) return;
+        if (teacher != null) {
+          context.go(AppRoutes.chat, extra: {
+            'partnerId': teacher.id,
+            'partnerName': teacher.fullName,
+          });
+          return;
+        }
       }
 
       if (!mounted) return;

@@ -276,6 +276,27 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    if (auth.profile?.isGuest == true) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final teacher = await _profileService.fetchTeacherForStudent(auth.profile!.id);
+        if (teacher != null && context.mounted) {
+          context.go(AppRoutes.chat, extra: {
+            'partnerId': teacher.id,
+            'partnerName': teacher.fullName,
+          });
+        } else {
+          await auth.signOut();
+          if (context.mounted) context.go(AppRoutes.aboutAcademy);
+        }
+      });
+      return const Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+      );
+    }
+
     final l10n = AppLocalizations.of(context);
     final name = auth.profile?.fullName ?? '';
     final isBlocked = auth.profile?.isBlocked ?? false;
