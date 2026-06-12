@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-
+import 'package:flutter/foundation.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -237,7 +237,7 @@ class _ChatScreenState extends State<ChatScreen> {
     
     String? path;
     try {
-      if (Platform.isWindows) {
+      if (!kIsWeb && Platform.isWindows) {
         final result = await FilePicker.pickFiles(
           type: FileType.image,
           allowMultiple: false,
@@ -281,7 +281,7 @@ class _ChatScreenState extends State<ChatScreen> {
         senderId: _myId,
         receiverId: widget.partnerId,
         messageText: '',
-        fileName: file.path.split(Platform.pathSeparator).last,
+        fileName: file.path.split(kIsWeb ? '/' : Platform.pathSeparator).last,
         telegramFileId: telegramFileId,
       );
       await _fetchMessagesSilently();

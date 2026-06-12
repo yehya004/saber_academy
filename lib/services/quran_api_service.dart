@@ -63,6 +63,7 @@ class QuranApiService {
   static final _cache = <String, List<QuranAyah>>{};
 
   static Future<File> _getLocalTafsirFile(String edition, int page) async {
+    if (kIsWeb) throw UnsupportedError("File system not supported on web");
     final appDir = await getApplicationDocumentsDirectory();
     final dir = Directory('${appDir.path}/tafsir/$edition');
     if (!await dir.exists()) {
@@ -72,6 +73,7 @@ class QuranApiService {
   }
 
   static Future<bool> isTafsirDownloaded(String edition) async {
+    if (kIsWeb) return false;
     try {
       final appDir = await getApplicationDocumentsDirectory();
       final dir = Directory('${appDir.path}/tafsir/$edition');
@@ -90,6 +92,7 @@ class QuranApiService {
   }
 
   static Future<void> deleteTafsir(String edition) async {
+    if (kIsWeb) return;
     try {
       final appDir = await getApplicationDocumentsDirectory();
       final dir = Directory('${appDir.path}/tafsir/$edition');
@@ -138,18 +141,20 @@ class QuranApiService {
     if (_cache.containsKey(key)) return _cache[key]!;
 
     // 1. Try local cache
-    try {
-      final localFile = await _getLocalTafsirFile(edition, page);
-      if (await localFile.exists()) {
-        final content = await localFile.readAsString();
-        final list = (jsonDecode(content) as List)
-            .map((a) => QuranAyah.fromJson(a as Map<String, dynamic>))
-            .toList();
-        _cache[key] = list;
-        return list;
+    if (!kIsWeb) {
+      try {
+        final localFile = await _getLocalTafsirFile(edition, page);
+        if (await localFile.exists()) {
+          final content = await localFile.readAsString();
+          final list = (jsonDecode(content) as List)
+              .map((a) => QuranAyah.fromJson(a as Map<String, dynamic>))
+              .toList();
+          _cache[key] = list;
+          return list;
+        }
+      } catch (e) {
+        debugPrint("Offline cache read failed for $edition page $page: $e");
       }
-    } catch (e) {
-      debugPrint("Offline cache read failed for $edition page $page: $e");
     }
 
     try {
@@ -161,11 +166,13 @@ class QuranApiService {
         _cache[key] = list;
 
         // 2. Save to local cache
-        try {
-          final localFile = await _getLocalTafsirFile(edition, page);
-          await localFile.writeAsString(jsonEncode(res.data['data']['ayahs']), flush: true);
-        } catch (e) {
-          debugPrint("Offline cache save failed for $edition page $page: $e");
+        if (!kIsWeb) {
+          try {
+            final localFile = await _getLocalTafsirFile(edition, page);
+            await localFile.writeAsString(jsonEncode(res.data['data']['ayahs']), flush: true);
+          } catch (e) {
+            debugPrint("Offline cache save failed for $edition page $page: $e");
+          }
         }
 
         return list;

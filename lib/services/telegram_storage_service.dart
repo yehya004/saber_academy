@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 
 /// Handles file uploads/downloads via Telegram Bot API.
@@ -25,7 +25,7 @@ class TelegramStorageService {
   /// Uploads [file] to the Telegram channel.
   /// Returns the Telegram **file_id** (permanent identifier stored in Supabase).
   Future<String> uploadFile(File file, {String? caption}) async {
-    final fileName = file.path.split(Platform.pathSeparator).last;
+    final fileName = file.path.split(kIsWeb ? '/' : Platform.pathSeparator).last;
 
     final formData = FormData.fromMap({
       'chat_id':  _channelId,

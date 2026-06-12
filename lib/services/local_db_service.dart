@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import '../models/chat_message_model.dart';
@@ -8,8 +9,10 @@ class LocalDatabaseService {
   LocalDatabaseService._internal();
 
   Database? _db;
+  final List<ChatMessageModel> _webCache = [];
 
   Future<Database> get database async {
+    if (kIsWeb) throw UnsupportedError('SQLite is not supported on Web');
     if (_db != null) return _db!;
     _db = await _initDb();
     return _db!;
@@ -60,6 +63,13 @@ class LocalDatabaseService {
 
   /// Bulk insert or update chat messages in local SQLite database
   Future<void> saveMessages(List<ChatMessageModel> messages) async {
+    if (kIsWeb) {
+      for (final msg in messages) {
+        _webCache.removeWhere((m) => m.id == msg.id);
+        _webCache.add(msg);
+      }
+      return;
+    }
     final db = await database;
     final batch = db.batch();
     for (final msg in messages) {
@@ -89,6 +99,14 @@ class LocalDatabaseService {
     required String userId,
     required String partnerId,
   }) async {
+    if (kIsWeb) {
+      final list = _webCache.where((msg) =>
+          (msg.senderId == userId && msg.receiverId == partnerId) ||
+          (msg.senderId == partnerId && msg.receiverId == userId)
+      ).toList();
+      list.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      return list;
+    }
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'cached_chat_messages',

@@ -12,6 +12,7 @@ class QuranDatabaseHelper {
   Database? _db;
 
   Future<Database> get database async {
+    if (kIsWeb) throw UnsupportedError('SQLite is not supported on Web');
     if (_db != null) return _db!;
     _db = await _initDb();
     return _db!;
@@ -39,6 +40,7 @@ class QuranDatabaseHelper {
 
   /// Fetches lines for a given Medina page (1-604) from the page_lines table.
   Future<List<Map<String, dynamic>>> getLinesForPage(int page) async {
+    if (kIsWeb) return [];
     try {
       final db = await database;
       return await db.rawQuery('''
@@ -55,6 +57,7 @@ class QuranDatabaseHelper {
   /// Fetches verses for a given Medina page (1-604).
   /// Joins with the surahs table to get surah name.
   Future<List<Map<String, dynamic>>> getVersesForPage(int page) async {
+    if (kIsWeb) return [];
     try {
       final db = await database;
       return await db.rawQuery('''
@@ -104,6 +107,7 @@ class QuranDatabaseHelper {
   /// Searches for verses matching the query (without diacritics).
   Future<List<Map<String, dynamic>>> searchVerses(String query) async {
     if (query.trim().isEmpty) return [];
+    if (kIsWeb) return [];
     try {
       if (_cachedSearchVerses == null) {
         final db = await database;

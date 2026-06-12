@@ -53,9 +53,11 @@ Future<void> main() async {
       anonKey: anonKey,
     );
 
-    // Initialize Firebase (non-Windows) and Notification Services
+    // Initialize Firebase (non-Windows, non-Web) and Notification Services
     try {
-      if (!kIsWeb && Platform.isWindows) {
+      if (kIsWeb) {
+        await NotificationService().initialize();
+      } else if (Platform.isWindows) {
         await NotificationService().initialize();
       } else {
         await Firebase.initializeApp();
