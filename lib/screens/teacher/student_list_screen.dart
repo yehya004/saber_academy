@@ -400,6 +400,7 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
   late double _total;
   late bool   _isPaid;
   late bool   _isBlocked;
+  late String _studySystem;
   bool        _saving = false;
 
   @override
@@ -410,6 +411,28 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
     _total  = widget.student.totalInLevel;
     _isPaid = widget.student.isPaid;
     _isBlocked = widget.student.isBlocked;
+    _studySystem = widget.student.studySystem;
+  }
+
+  String _getStudySystemLabel() {
+    final locale = Localizations.localeOf(context).languageCode;
+    if (locale == 'ar') return 'نظام الدراسة';
+    if (locale == 'tr') return 'Çalışma Sistemi';
+    return 'Study System';
+  }
+
+  String _getClassesLabel() {
+    final locale = Localizations.localeOf(context).languageCode;
+    if (locale == 'ar') return 'حصص';
+    if (locale == 'tr') return 'Dersler';
+    return 'Classes';
+  }
+
+  String _getHoursLabel() {
+    final locale = Localizations.localeOf(context).languageCode;
+    if (locale == 'ar') return 'ساعات';
+    if (locale == 'tr') return 'Saatler';
+    return 'Hours';
   }
 
   Future<void> _save() async {
@@ -422,6 +445,7 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
         totalInLevel:  _total,
         isPaid:        _isPaid,
         isBlocked:     _isBlocked,
+        studySystem:   _studySystem,
       );
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
@@ -462,6 +486,35 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 12),
+            // ── Study System Selector ──────────────────────────
+            DropdownButtonFormField<String>(
+              initialValue: _studySystem,
+              decoration: InputDecoration(
+                labelText: _getStudySystemLabel(),
+                prefixIcon: const Icon(Icons.settings_outlined, color: AppColors.primary),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              ),
+              items: [
+                DropdownMenuItem(
+                  value: 'classes',
+                  child: Text(_getClassesLabel()),
+                ),
+                DropdownMenuItem(
+                  value: 'hours',
+                  child: Text(_getHoursLabel()),
+                ),
+              ],
+              onChanged: (val) {
+                if (val != null) {
+                  setState(() {
+                    _studySystem = val;
+                  });
+                }
+              },
+            ),
+            const SizedBox(height: 12),
+            const Divider(),
             // ── Level picker ──────────────────────────
             Row(
               children: [
@@ -499,10 +552,11 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
             ),
             const Divider(),
             // ── Lesson picker or hours text field ─────────────────────────
-            if (widget.student.studySystem == 'hours') ...[
+            if (_studySystem == 'hours') ...[
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6.0),
                 child: TextFormField(
+                  key: const ValueKey('completed_hours'),
                   initialValue: '$_lesson',
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   decoration: InputDecoration(
@@ -524,6 +578,7 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6.0),
                 child: TextFormField(
+                  key: const ValueKey('total_hours'),
                   initialValue: '$_total',
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   decoration: InputDecoration(
@@ -546,6 +601,7 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6.0),
                 child: TextFormField(
+                  key: const ValueKey('completed_classes'),
                   initialValue: '${_lesson.toInt()}',
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
@@ -567,6 +623,7 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6.0),
                 child: TextFormField(
+                  key: const ValueKey('total_classes'),
                   initialValue: '${_total.toInt()}',
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(

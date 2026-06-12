@@ -1299,6 +1299,7 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
   late double _total;
   late bool   _isPaid;
   late bool   _isBlocked;
+  late String _studySystem;
   bool        _saving = false;
 
   @override
@@ -1309,6 +1310,28 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
     _total  = widget.student.totalInLevel;
     _isPaid = widget.student.isPaid;
     _isBlocked = widget.student.isBlocked;
+    _studySystem = widget.student.studySystem;
+  }
+
+  String _getStudySystemLabel() {
+    final locale = Localizations.localeOf(context).languageCode;
+    if (locale == 'ar') return 'نظام الدراسة';
+    if (locale == 'tr') return 'Çalışma Sistemi';
+    return 'Study System';
+  }
+
+  String _getClassesLabel() {
+    final locale = Localizations.localeOf(context).languageCode;
+    if (locale == 'ar') return 'حصص';
+    if (locale == 'tr') return 'Dersler';
+    return 'Classes';
+  }
+
+  String _getHoursLabel() {
+    final locale = Localizations.localeOf(context).languageCode;
+    if (locale == 'ar') return 'ساعات';
+    if (locale == 'tr') return 'Saatler';
+    return 'Hours';
   }
 
   Future<void> _save() async {
@@ -1321,6 +1344,7 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
         totalInLevel:  _total,
         isPaid:        _isPaid,
         isBlocked:     _isBlocked,
+        studySystem:   _studySystem,
       );
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
@@ -1356,65 +1380,143 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
           ),
         ],
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(height: 12),
-          _PickerRow(
-            icon:     Icons.signal_cellular_alt,
-            color:    AppColors.primary,
-            label:    l10n.level,
-            value:    _level,
-            min:      1,
-            max:      99,
-            onMinus:  () => setState(() => _level--),
-            onPlus:   () => setState(() => _level++),
-          ),
-          const Divider(),
-          // ── Lesson picker ─────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6.0),
-            child: TextFormField(
-              initialValue: '${_lesson.toInt()}',
-              keyboardType: TextInputType.number,
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            // ── Study System Selector ──────────────────────────
+            DropdownButtonFormField<String>(
+              initialValue: _studySystem,
               decoration: InputDecoration(
-                labelText: Localizations.localeOf(context).languageCode == 'ar'
-                    ? 'عدد الحصص المكتملة في المستوى'
-                    : 'Completed Classes in Level',
-                prefixIcon: const Icon(Icons.menu_book_outlined, color: AppColors.secondary),
+                labelText: _getStudySystemLabel(),
+                prefixIcon: const Icon(Icons.settings_outlined, color: AppColors.primary),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               ),
+              items: [
+                DropdownMenuItem(
+                  value: 'classes',
+                  child: Text(_getClassesLabel()),
+                ),
+                DropdownMenuItem(
+                  value: 'hours',
+                  child: Text(_getHoursLabel()),
+                ),
+              ],
               onChanged: (val) {
-                final parsed = double.tryParse(val);
-                if (parsed != null) {
-                  _lesson = parsed;
+                if (val != null) {
+                  setState(() {
+                    _studySystem = val;
+                  });
                 }
               },
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6.0),
-            child: TextFormField(
-              initialValue: '${_total.toInt()}',
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: Localizations.localeOf(context).languageCode == 'ar'
-                    ? 'إجمالي حصص المستوى'
-                    : 'Total Classes in Level',
-                prefixIcon: const Icon(Icons.class_outlined, color: AppColors.primary),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            const SizedBox(height: 12),
+            const Divider(),
+            _PickerRow(
+              icon:     Icons.signal_cellular_alt,
+              color:    AppColors.primary,
+              label:    l10n.level,
+              value:    _level,
+              min:      1,
+              max:      99,
+              onMinus:  () => setState(() => _level--),
+              onPlus:   () => setState(() => _level++),
+            ),
+            const Divider(),
+            // ── Lesson picker or hours text field ─────────────────────────
+            if (_studySystem == 'hours') ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6.0),
+                child: TextFormField(
+                  key: const ValueKey('completed_hours'),
+                  initialValue: '$_lesson',
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: Localizations.localeOf(context).languageCode == 'ar'
+                        ? 'عدد الساعات المكتملة في المستوى'
+                        : 'Completed Hours in Level',
+                    prefixIcon: const Icon(Icons.menu_book_outlined, color: AppColors.secondary),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                  onChanged: (val) {
+                    final parsed = double.tryParse(val);
+                    if (parsed != null) {
+                      _lesson = parsed;
+                    }
+                  },
+                ),
               ),
-              onChanged: (val) {
-                final parsed = double.tryParse(val);
-                if (parsed != null) {
-                  _total = parsed;
-                }
-              },
-            ),
-          ),
-          const Divider(),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6.0),
+                child: TextFormField(
+                  key: const ValueKey('total_hours'),
+                  initialValue: '$_total',
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: Localizations.localeOf(context).languageCode == 'ar'
+                        ? 'إجمالي ساعات المستوى'
+                        : 'Total Hours in Level',
+                    prefixIcon: const Icon(Icons.alarm_on_outlined, color: AppColors.primary),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                  onChanged: (val) {
+                    final parsed = double.tryParse(val);
+                    if (parsed != null) {
+                      _total = parsed;
+                    }
+                  },
+                ),
+              ),
+            ] else ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6.0),
+                child: TextFormField(
+                  key: const ValueKey('completed_classes'),
+                  initialValue: '${_lesson.toInt()}',
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: Localizations.localeOf(context).languageCode == 'ar'
+                        ? 'عدد الحصص المكتملة في المستوى'
+                        : 'Completed Classes in Level',
+                    prefixIcon: const Icon(Icons.menu_book_outlined, color: AppColors.secondary),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                  onChanged: (val) {
+                    final parsed = double.tryParse(val);
+                    if (parsed != null) {
+                      _lesson = parsed;
+                    }
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6.0),
+                child: TextFormField(
+                  key: const ValueKey('total_classes'),
+                  initialValue: '${_total.toInt()}',
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: Localizations.localeOf(context).languageCode == 'ar'
+                        ? 'إجمالي حصص المستوى'
+                        : 'Total Classes in Level',
+                    prefixIcon: const Icon(Icons.class_outlined, color: AppColors.primary),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                  onChanged: (val) {
+                    final parsed = double.tryParse(val);
+                    if (parsed != null) {
+                      _total = parsed;
+                    }
+                  },
+                ),
+              ),
+            ],
           // ── Payment switch ─────────────────────────
           SwitchListTile(
             title: Text(
@@ -1457,7 +1559,8 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
           const SizedBox(height: 8),
         ],
       ),
-      actions: [
+    ),
+    actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
           child: Text(l10n.cancel,

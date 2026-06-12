@@ -31,7 +31,7 @@ class _CreateStudentScreenState extends State<CreateStudentScreen> {
   bool    _loading      = false;
   bool    _showPass     = false;
   bool    _showConfirm  = false;
-  final String _studySystem   = 'classes';
+  String _studySystem   = 'classes';
 
   @override
   void dispose() {
@@ -334,6 +334,42 @@ class _CreateStudentScreenState extends State<CreateStudentScreen> {
             const SizedBox(height: AppSpacing.small),
             _FormCard(
               children: [
+                // Study system selector
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                  child: DropdownButtonFormField<String>(
+                    initialValue: _studySystem,
+                    decoration: InputDecoration(
+                      labelText: getStudySystemLabel(context),
+                      labelStyle: const TextStyle(color: AppColors.textSecondary),
+                      prefixIcon: const Icon(
+                        Icons.settings_outlined,
+                        color: AppColors.primary,
+                        size:  20,
+                      ),
+                      border:        InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                    ),
+                    items: [
+                      DropdownMenuItem(
+                        value: 'classes',
+                        child: Text(getClassesLabel(context)),
+                      ),
+                      DropdownMenuItem(
+                        value: 'hours',
+                        child: Text(getHoursLabel(context)),
+                      ),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) {
+                        setState(() {
+                          _studySystem = val;
+                        });
+                      }
+                    },
+                  ),
+                ),
+                const Divider(height: 1, indent: 48, color: AppColors.progressTrack),
                 // Level picker
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -395,12 +431,21 @@ class _CreateStudentScreenState extends State<CreateStudentScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: TextFormField(
+                    key: ValueKey('completed_$_studySystem'),
                     initialValue: '${_lessonInLevel.toInt()}',
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: Localizations.localeOf(context).languageCode == 'ar'
-                          ? 'عدد الحصص المكتملة في المستوى'
-                          : 'Completed Classes in Level',
+                      labelText: _studySystem == 'hours'
+                          ? (Localizations.localeOf(context).languageCode == 'ar'
+                              ? 'عدد الساعات المكتملة في المستوى'
+                              : Localizations.localeOf(context).languageCode == 'tr'
+                                  ? 'Seviyedeki Tamamlanan Saatler'
+                                  : 'Completed Hours in Level')
+                          : (Localizations.localeOf(context).languageCode == 'ar'
+                              ? 'عدد الحصص المكتملة في المستوى'
+                              : Localizations.localeOf(context).languageCode == 'tr'
+                                  ? 'Seviyedeki Tamamlanan Dersler'
+                                  : 'Completed Classes in Level'),
                       prefixIcon: const Icon(Icons.menu_book_outlined, color: AppColors.secondary),
                       border: InputBorder.none,
                       focusedBorder: InputBorder.none,
@@ -417,13 +462,25 @@ class _CreateStudentScreenState extends State<CreateStudentScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: TextFormField(
+                    key: ValueKey('total_$_studySystem'),
                     initialValue: '${_totalInLevel.toInt()}',
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: Localizations.localeOf(context).languageCode == 'ar'
-                          ? 'إجمالي حصص المستوى'
-                          : 'Total Classes in Level',
-                      prefixIcon: const Icon(Icons.class_outlined, color: AppColors.primary),
+                      labelText: _studySystem == 'hours'
+                          ? (Localizations.localeOf(context).languageCode == 'ar'
+                              ? 'إجمالي ساعات المستوى'
+                              : Localizations.localeOf(context).languageCode == 'tr'
+                                  ? 'Seviyedeki Toplam Saat'
+                                  : 'Total Hours in Level')
+                          : (Localizations.localeOf(context).languageCode == 'ar'
+                              ? 'إجمالي حصص المستوى'
+                              : Localizations.localeOf(context).languageCode == 'tr'
+                                  ? 'Seviyedeki Toplam Ders'
+                                  : 'Total Classes in Level'),
+                      prefixIcon: Icon(
+                        _studySystem == 'hours' ? Icons.alarm_on_outlined : Icons.class_outlined,
+                        color: AppColors.primary,
+                      ),
                       border: InputBorder.none,
                       focusedBorder: InputBorder.none,
                     ),

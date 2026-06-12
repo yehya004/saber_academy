@@ -33,6 +33,7 @@ class ProfileService {
     double?         totalInLevel,
     bool?           isPaid,
     bool?           isBlocked,
+    String?         studySystem,
   }) {
     final updates = <String, dynamic>{
       'level':           level,
@@ -41,6 +42,7 @@ class ProfileService {
     if (totalInLevel != null) updates['total_in_level'] = totalInLevel;
     if (isPaid != null) updates['is_paid'] = isPaid;
     if (isBlocked != null) updates['is_blocked'] = isBlocked;
+    if (studySystem != null) updates['study_system'] = studySystem;
     return _client.from('profiles').update(updates).eq('id', studentId);
   }
 
