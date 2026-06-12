@@ -7,8 +7,10 @@ import '../../core/constants/app_spacing.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/quiz_model.dart';
 import '../../models/session_model.dart';
+import '../../models/profile_model.dart';
 import '../../services/attendance_service.dart';
 import '../../services/quiz_service.dart';
+import '../../services/profile_service.dart';
 import '../../widgets/status_badge.dart';
 
 class AttendanceScreen extends StatefulWidget {
@@ -30,6 +32,8 @@ class AttendanceScreen extends StatefulWidget {
 class _AttendanceScreenState extends State<AttendanceScreen> {
   final _service      = AttendanceService();
   final _quizService  = QuizService();
+  final _profileService = ProfileService();
+  
   List<SessionModel>  _sessions   = [];
   List<QuizModel>     _quizzes    = [];
   bool                _loading    = true;
@@ -38,10 +42,17 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   String              _selectedStatus = 'present';
   String              _homeworkType   = 'text'; // 'text' | 'file' | 'quiz'
   QuizModel?          _selectedQuiz;   // chosen from picker when type == 'quiz'
+  
   final _excuseCtrl   = TextEditingController();
   final _topicCtrl    = TextEditingController();
   final _homeworkCtrl = TextEditingController();
   final _resourceCtrl = TextEditingController();
+  
+  // For duration input (Hours system)
+  ProfileModel?       _studentProfile;
+  int                 _selectedDurationMinutes = 60;
+  final _customDurationCtrl = TextEditingController();
+  bool                _isCustomDuration = false;
 
   @override
   void initState() {
@@ -62,17 +73,26 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     _topicCtrl.dispose();
     _homeworkCtrl.dispose();
     _resourceCtrl.dispose();
+    _customDurationCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    final list = await _service.fetchStudentSessions(widget.studentId);
-    if (mounted) {
-      setState(() {
-        _sessions = list;
-        _loading = false;
-      });
+    try {
+      final results = await Future.wait([
+        _service.fetchStudentSessions(widget.studentId),
+        _profileService.fetchStudentById(widget.studentId),
+      ]);
+      if (mounted) {
+        setState(() {
+          _sessions = results[0] as List<SessionModel>;
+          _studentProfile = results[1] as ProfileModel?;
+          _loading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -93,6 +113,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Future<void> _submit() async {
+    final locale = Localizations.localeOf(context).languageCode;
     setState(() => _submitting = true);
     try {
       final hwText   = _homeworkCtrl.text.trim();
@@ -122,6 +143,22 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               : null;
 
       double finalDeduction = 1.0;
+      if (_studentProfile?.studySystem == 'hours') {
+        if (_isCustomDuration) {
+          final parsed = double.tryParse(_customDurationCtrl.text.trim());
+          if (parsed != null && parsed > 0) {
+            finalDeduction = parsed / 60.0;
+          } else {
+            throw Exception(
+              locale == 'ar'
+                  ? 'الرجاء إدخال مدة الجلسة بالدقائق بشكل صحيح'
+                  : 'Please enter a valid session duration in minutes'
+            );
+          }
+        } else {
+          finalDeduction = _selectedDurationMinutes / 60.0;
+        }
+      }
 
       await _service.markAttendance(
         studentId:     widget.studentId,
@@ -139,10 +176,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       _topicCtrl.clear();
       _homeworkCtrl.clear();
       _resourceCtrl.clear();
+      _customDurationCtrl.clear();
       setState(() {
         _selectedDate  = DateTime.now();
         _homeworkType  = 'text';
         _selectedQuiz  = null;
+        _selectedDurationMinutes = 60;
+        _isCustomDuration = false;
       });
       await _load();
       if (mounted) {
@@ -194,7 +234,133 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         padding: const EdgeInsets.all(AppSpacing.medium),
         children: [
           // ── Remaining Balance Banner ─────────────────────────
-
+          if (_studentProfile != null) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [AppColors.primary, AppColors.secondary],
+                  begin:  Alignment.topLeft,
+                  end:    Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.25),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.account_balance_wallet_outlined,
+                      color: Colors.white,
+                      size: 26,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          Localizations.localeOf(context).languageCode == 'ar'
+                              ? 'الرصيد المتبقي للطالب'
+                              : Localizations.localeOf(context).languageCode == 'tr'
+                                  ? 'Öğrencinin Kalan Bakiyesi'
+                                  : 'Student Remaining Balance',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.85),
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Builder(
+                          builder: (ctx) {
+                            final balance = _studentProfile!.studyBalance;
+                            final isHours = _studentProfile!.studySystem == 'hours';
+                            if (isHours) {
+                              final totalMinutes = (balance * 60).round();
+                              final hrs = totalMinutes ~/ 60;
+                              final mins = totalMinutes % 60;
+                              
+                              if (Localizations.localeOf(context).languageCode == 'ar') {
+                                return Text(
+                                  mins > 0 ? '$hrs ساعة و $mins دقيقة' : '$hrs ساعة',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                );
+                              } else if (Localizations.localeOf(context).languageCode == 'tr') {
+                                return Text(
+                                  mins > 0 ? '$hrs saat, $mins dakika' : '$hrs saat',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                );
+                              } else {
+                                return Text(
+                                  mins > 0 ? '$hrs hrs, $mins mins' : '$hrs hrs',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                );
+                              }
+                            } else {
+                              final count = balance.toInt();
+                              if (Localizations.localeOf(context).languageCode == 'ar') {
+                                return Text(
+                                  '$count حصة',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                );
+                              } else if (Localizations.localeOf(context).languageCode == 'tr') {
+                                return Text(
+                                  '$count ders',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                );
+                              } else {
+                                return Text(
+                                  '$count classes',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.medium),
+          ],
 
           // ── New session form ─────────────────────────────────
           _FormSection(
@@ -259,8 +425,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 ),
               ),
 
-
-
               // Excuse field
               if (_selectedStatus == 'absent') ...[
                 const SizedBox(height: AppSpacing.medium),
@@ -271,6 +435,123 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   iconColor:  AppColors.warning,
                   maxLines:   2,
                 ),
+              ],
+
+              // Duration selector (Hours system only)
+              if (_studentProfile?.studySystem == 'hours' &&
+                  (_selectedStatus == 'present' || _selectedStatus == 'late')) ...[
+                const SizedBox(height: AppSpacing.medium),
+                Text(
+                  Localizations.localeOf(context).languageCode == 'ar'
+                      ? 'مدة الجلسة المستهلكة'
+                      : Localizations.localeOf(context).languageCode == 'tr'
+                          ? 'Ders Süresi'
+                          : 'Session Duration',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize:   13,
+                      color:      AppColors.textPrimary),
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<int>(
+                  initialValue: _isCustomDuration ? null : _selectedDurationMinutes,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.alarm_outlined, color: AppColors.primary),
+                    filled: true,
+                    fillColor: AppColors.background,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  hint: Text(
+                    Localizations.localeOf(context).languageCode == 'ar'
+                        ? 'اختر المدة'
+                        : 'Select duration',
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      value: 30,
+                      child: Text(
+                        Localizations.localeOf(context).languageCode == 'ar'
+                            ? '30 دقيقة (نصف ساعة)'
+                            : '30 minutes (0.5 hour)',
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 45,
+                      child: Text(
+                        Localizations.localeOf(context).languageCode == 'ar'
+                            ? '45 دقيقة (0.75 ساعة)'
+                            : '45 minutes (0.75 hour)',
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 60,
+                      child: Text(
+                        Localizations.localeOf(context).languageCode == 'ar'
+                            ? '60 دقيقة (ساعة كاملة)'
+                            : '60 minutes (1 hour)',
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 90,
+                      child: Text(
+                        Localizations.localeOf(context).languageCode == 'ar'
+                            ? '90 دقيقة (ساعة ونصف)'
+                            : '90 minutes (1.5 hours)',
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 120,
+                      child: Text(
+                        Localizations.localeOf(context).languageCode == 'ar'
+                            ? '120 دقيقة (ساعتان)'
+                            : '120 minutes (2 hours)',
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: -1,
+                      child: Text(
+                        Localizations.localeOf(context).languageCode == 'ar'
+                            ? 'مدة مخصصة (كتابة بالدقائق)'
+                            : 'Custom duration (type in minutes)',
+                      ),
+                    ),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) {
+                      setState(() {
+                        if (val == -1) {
+                          _isCustomDuration = true;
+                        } else {
+                          _isCustomDuration = false;
+                          _selectedDurationMinutes = val;
+                        }
+                      });
+                    }
+                  },
+                ),
+                if (_isCustomDuration) ...[
+                  const SizedBox(height: AppSpacing.small),
+                  TextField(
+                    controller: _customDurationCtrl,
+                    keyboardType: TextInputType.number,
+                    textDirection: TextDirection.ltr,
+                    decoration: InputDecoration(
+                      labelText: Localizations.localeOf(context).languageCode == 'ar'
+                          ? 'المدة بالدقائق (مثال: 50)'
+                          : 'Duration in minutes (e.g. 50)',
+                      prefixIcon: const Icon(Icons.edit_note_outlined, color: AppColors.secondary),
+                      filled: true,
+                      fillColor: AppColors.background,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                ],
               ],
 
               const SizedBox(height: AppSpacing.medium),

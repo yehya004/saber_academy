@@ -7,10 +7,10 @@ import 'package:path_provider/path_provider.dart';
 
 /// A single Ayah returned from api.alquran.cloud.
 class QuranAyah {
-  final int    number;         // global sequential (1–6236)
-  final int    numberInSurah;
+  final int number; // global sequential (1–6236)
+  final int numberInSurah;
   final String surahNameAr;
-  final int    surahNumber;
+  final int surahNumber;
   final String text;
 
   const QuranAyah({
@@ -22,11 +22,11 @@ class QuranAyah {
   });
 
   factory QuranAyah.fromJson(Map<String, dynamic> j) => QuranAyah(
-        number:        (j['number'] as num).toInt(),
+        number: (j['number'] as num).toInt(),
         numberInSurah: (j['numberInSurah'] as num).toInt(),
-        surahNameAr:   j['surah']['name'] as String,
-        surahNumber:   (j['surah']['number'] as num).toInt(),
-        text:          j['text'] as String,
+        surahNameAr: j['surah']['name'] as String,
+        surahNumber: (j['surah']['number'] as num).toInt(),
+        text: j['text'] as String,
       );
 
   /// Mishary Al-Afasy CDN audio URL.
@@ -36,10 +36,10 @@ class QuranAyah {
 
 /// All editions for a single Mushaf page.
 class QuranPageBundle {
-  final List<QuranAyah> arabic;   // quran-uthmani
-  final List<QuranAyah> english;  // en.sahih
-  final List<QuranAyah> turkish;  // tr.diyanet
-  final List<QuranAyah> tafsir;   // ar.muyassar
+  final List<QuranAyah> arabic; // quran-uthmani
+  final List<QuranAyah> english; // en.sahih
+  final List<QuranAyah> turkish; // tr.diyanet
+  final List<QuranAyah> tafsir; // ar.muyassar
 
   const QuranPageBundle({
     required this.arabic,
@@ -135,8 +135,7 @@ class QuranApiService {
     onProgress(1.0);
   }
 
-  static Future<List<QuranAyah>> _fetchPage(
-      int page, String edition) async {
+  static Future<List<QuranAyah>> _fetchPage(int page, String edition) async {
     final key = '$page/$edition';
     if (_cache.containsKey(key)) return _cache[key]!;
 
@@ -169,7 +168,8 @@ class QuranApiService {
         if (!kIsWeb) {
           try {
             final localFile = await _getLocalTafsirFile(edition, page);
-            await localFile.writeAsString(jsonEncode(res.data['data']['ayahs']), flush: true);
+            await localFile.writeAsString(jsonEncode(res.data['data']['ayahs']),
+                flush: true);
           } catch (e) {
             debugPrint("Offline cache save failed for $edition page $page: $e");
           }
@@ -181,8 +181,7 @@ class QuranApiService {
     return [];
   }
 
-  static Future<List<QuranAyah>> _safeFetch(
-          int page, String edition) async {
+  static Future<List<QuranAyah>> _safeFetch(int page, String edition) async {
     try {
       return await _fetchPage(page, edition);
     } catch (_) {
@@ -244,10 +243,12 @@ class QuranApiService {
     605: [6222, 6236],
   };
 
-  static Future<QuranPageBundle> fetchPage(int mushafPage, {bool isDiyanet = false}) async {
+  static Future<QuranPageBundle> fetchPage(int mushafPage,
+      {bool isDiyanet = false}) async {
     // 1. Fetch from Diyanet API if API key is present
     final token = dotenv.env['DIB_KURAN_API_TOKEN'];
-    final baseUrl = dotenv.env['DIB_KURAN_API_BASE_URL'] ?? 'https://api.diyanet.gov.tr';
+    final baseUrl =
+        dotenv.env['DIB_KURAN_API_BASE_URL'] ?? 'https://api.diyanet.gov.tr';
     final Map<String, Map<String, String>> dibMap = {};
 
     if (token != null && token.trim().isNotEmpty) {
@@ -261,7 +262,9 @@ class QuranApiService {
             },
           ),
         );
-        if (res.statusCode == 200 && res.data != null && res.data['data'] != null) {
+        if (res.statusCode == 200 &&
+            res.data != null &&
+            res.data['data'] != null) {
           final list = res.data['data'] as List;
           for (final item in list) {
             final int surahId = (item['surah_id'] as num).toInt();
@@ -323,25 +326,33 @@ class QuranApiService {
       final seenTafsir = <int>{};
 
       for (final verse in flatArabic) {
-        if (verse.number >= startIdx && verse.number <= endIdx && !seenArabic.contains(verse.number)) {
+        if (verse.number >= startIdx &&
+            verse.number <= endIdx &&
+            !seenArabic.contains(verse.number)) {
           arabicList.add(verse);
           seenArabic.add(verse.number);
         }
       }
       for (final verse in flatEnglish) {
-        if (verse.number >= startIdx && verse.number <= endIdx && !seenEnglish.contains(verse.number)) {
+        if (verse.number >= startIdx &&
+            verse.number <= endIdx &&
+            !seenEnglish.contains(verse.number)) {
           englishList.add(verse);
           seenEnglish.add(verse.number);
         }
       }
       for (final verse in flatTurkish) {
-        if (verse.number >= startIdx && verse.number <= endIdx && !seenTurkish.contains(verse.number)) {
+        if (verse.number >= startIdx &&
+            verse.number <= endIdx &&
+            !seenTurkish.contains(verse.number)) {
           turkishList.add(verse);
           seenTurkish.add(verse.number);
         }
       }
       for (final verse in flatTafsir) {
-        if (verse.number >= startIdx && verse.number <= endIdx && !seenTafsir.contains(verse.number)) {
+        if (verse.number >= startIdx &&
+            verse.number <= endIdx &&
+            !seenTafsir.contains(verse.number)) {
           tafsirList.add(verse);
           seenTafsir.add(verse.number);
         }
@@ -395,10 +406,10 @@ class QuranApiService {
     }
 
     return QuranPageBundle(
-      arabic:  arabicList,
+      arabic: arabicList,
       english: englishList,
       turkish: turkishList,
-      tafsir:  tafsirList,
+      tafsir: tafsirList,
     );
   }
 }
