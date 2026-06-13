@@ -16,7 +16,8 @@ Widget buildPlatformSpecificImage({
     final element = html.ImageElement()
       ..src = imageUrl
       ..style.width = '100%'
-      ..style.height = '100%';
+      ..style.height = '100%'
+      ..style.pointerEvents = 'none';
 
     switch (fit) {
       case BoxFit.contain:
