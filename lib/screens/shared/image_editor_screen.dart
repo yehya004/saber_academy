@@ -60,11 +60,13 @@ class DrawingPath {
 
 class ImageEditorScreen extends StatefulWidget {
   final Uint8List imageBytes;
+  final String imagePath;
   final String imageName;
 
   const ImageEditorScreen({
     super.key,
     required this.imageBytes,
+    required this.imagePath,
     required this.imageName,
   });
 
@@ -449,10 +451,15 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
                                   fit: StackFit.expand,
                                   children: [
                                     // Base Image
-                                    Image.memory(
-                                      widget.imageBytes,
-                                      fit: BoxFit.fill,
-                                    ),
+                                    kIsWeb
+                                        ? Image.network(
+                                            widget.imagePath,
+                                            fit: BoxFit.fill,
+                                          )
+                                        : Image.memory(
+                                            widget.imageBytes,
+                                            fit: BoxFit.fill,
+                                          ),
 
                                     // Drawing overlay
                                     GestureDetector(

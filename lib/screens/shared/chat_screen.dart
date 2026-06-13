@@ -240,6 +240,7 @@ class _ChatScreenState extends State<ChatScreen> {
     
     Uint8List? imageBytes;
     String? imageName;
+    String? imagePath;
     
     try {
       if (!kIsWeb && Platform.isWindows) {
@@ -252,6 +253,7 @@ class _ChatScreenState extends State<ChatScreen> {
           if (fileInfo.path != null) {
             imageBytes = await File(fileInfo.path!).readAsBytes();
             imageName = fileInfo.name;
+            imagePath = fileInfo.path;
           }
         }
       } else {
@@ -262,19 +264,21 @@ class _ChatScreenState extends State<ChatScreen> {
         if (picked != null) {
           imageBytes = await picked.readAsBytes();
           imageName = picked.name;
+          imagePath = picked.path;
         }
       }
     } catch (e) {
       debugPrint("Error picking image: $e");
     }
     
-    if (imageBytes == null) return;
+    if (imageBytes == null || imagePath == null) return;
 
     if (!mounted) return;
     final dynamic result = await Navigator.of(context).push<dynamic>(
       MaterialPageRoute(
         builder: (_) => ImageEditorScreen(
           imageBytes: imageBytes!,
+          imagePath: imagePath!,
           imageName: imageName ?? 'image.png',
         ),
       ),
