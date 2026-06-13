@@ -7,6 +7,7 @@ import '../core/constants/app_spacing.dart';
 import '../l10n/app_localizations.dart';
 import '../models/chat_message_model.dart';
 import '../services/telegram_storage_service.dart';
+import 'web_image/web_image.dart';
 
 class ChatBubble extends StatelessWidget {
   final ChatMessageModel message;
@@ -213,19 +214,11 @@ class _ImageContent extends StatelessWidget {
               bottomLeft:  Radius.circular(isMine ? AppSpacing.chatBubbleRadius : 4),
               bottomRight: Radius.circular(isMine ? 4 : AppSpacing.chatBubbleRadius),
             ),
-            child: Image.network(
-              message.imageUrl!,
+            child: buildWebFriendlyImage(
+              imageUrl: message.imageUrl!,
+              width: 220,
+              height: 180,
               fit: BoxFit.cover,
-              loadingBuilder: (_, child, progress) => progress == null
-                  ? child
-                  : const SizedBox(
-                      width: 200, height: 150,
-                      child: Center(child: CircularProgressIndicator()),
-                    ),
-              errorBuilder: (_, __, ___) => const SizedBox(
-                width: 200, height: 100,
-                child: Center(child: Icon(Icons.broken_image, color: Colors.grey)),
-              ),
             ),
           ),
           Positioned(
