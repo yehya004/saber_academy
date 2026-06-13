@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -237,7 +238,9 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _sendImage() async {
     final l10n = AppLocalizations.of(context);
     
-    String? path;
+    Uint8List? imageBytes;
+    String? imageName;
+    
     try {
       if (!kIsWeb && Platform.isWindows) {
         final result = await FilePicker.pickFiles(
@@ -245,7 +248,11 @@ class _ChatScreenState extends State<ChatScreen> {
           allowMultiple: false,
         );
         if (result != null && result.files.isNotEmpty) {
-          path = result.files.single.path;
+          final fileInfo = result.files.single;
+          if (fileInfo.path != null) {
+            imageBytes = await File(fileInfo.path!).readAsBytes();
+            imageName = fileInfo.name;
+          }
         }
       } else {
         final picked = await _imagePicker.pickImage(
@@ -253,37 +260,43 @@ class _ChatScreenState extends State<ChatScreen> {
           imageQuality: 70,
         );
         if (picked != null) {
-          path = picked.path;
+          imageBytes = await picked.readAsBytes();
+          imageName = picked.name;
         }
       }
     } catch (e) {
       debugPrint("Error picking image: $e");
     }
     
-    if (path == null) return;
+    if (imageBytes == null) return;
 
     if (!mounted) return;
-    final File? editedFile = await Navigator.of(context).push<File?>(
+    final dynamic result = await Navigator.of(context).push<dynamic>(
       MaterialPageRoute(
-        builder: (_) => ImageEditorScreen(imageFile: File(path!)),
+        builder: (_) => ImageEditorScreen(
+          imageBytes: imageBytes!,
+          imageName: imageName ?? 'image.png',
+        ),
       ),
     );
-    if (editedFile == null) return;
+    if (result == null) return;
 
     setState(() => _sendingImage = true);
     try {
-      final file = editedFile;
-      // Upload to Telegram only (bypass Supabase Storage)
+      // result can be File (on Native) or Uint8List (on Web)
       final telegramFileId = await _telegramService.uploadFile(
-        file,
+        result,
         caption: 'صورة في المحادثة من $_myId إلى ${widget.partnerId} — ${DateTime.now().toIso8601String()}',
+        fileName: imageName,
       );
+
+      final String name = imageName ?? (result is File ? result.path.split(Platform.pathSeparator).last : 'image.png');
 
       await _chatService.sendMessage(
         senderId: _myId,
         receiverId: widget.partnerId,
         messageText: '',
-        fileName: file.path.split(kIsWeb ? '/' : Platform.pathSeparator).last,
+        fileName: name,
         telegramFileId: telegramFileId,
       );
       await _fetchMessagesSilently();
@@ -311,8 +324,6 @@ class _ChatScreenState extends State<ChatScreen> {
     if (result == null || result.files.isEmpty) return;
 
     final fileInfo = result.files.single;
-    final path = fileInfo.path;
-    if (path == null) return;
 
     // Enforce 10 MB size limit
     if (fileInfo.size > 10 * 1024 * 1024) {
@@ -328,13 +339,22 @@ class _ChatScreenState extends State<ChatScreen> {
       return;
     }
 
+    dynamic uploadSource;
+    if (kIsWeb) {
+      if (fileInfo.bytes == null) return;
+      uploadSource = fileInfo.bytes;
+    } else {
+      if (fileInfo.path == null) return;
+      uploadSource = File(fileInfo.path!);
+    }
+
     setState(() => _sendingFile = true);
     try {
-      final file = File(path);
       // Upload to Telegram only (bypass Supabase Storage)
       final telegramFileId = await _telegramService.uploadFile(
-        file,
+        uploadSource,
         caption: 'ملف في المحادثة (${fileInfo.name}) من $_myId إلى ${widget.partnerId} — ${DateTime.now().toIso8601String()}',
+        fileName: fileInfo.name,
       );
 
       await _chatService.sendMessage(
@@ -438,27 +458,40 @@ class _ChatScreenState extends State<ChatScreen> {
       });
 
       if (path == null) return;
-      final file = File(path);
-      if (!file.existsSync()) return;
 
-      final size = file.lengthSync();
-      if (size > 10 * 1024 * 1024) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.fileSizeLimitError),
-              backgroundColor: AppColors.error,
-            ),
-          );
+      dynamic uploadSource;
+      if (kIsWeb) {
+        final response = await Dio().get<List<int>>(
+          path,
+          options: Options(responseType: ResponseType.bytes),
+        );
+        if (response.data == null) return;
+        uploadSource = Uint8List.fromList(response.data!);
+      } else {
+        final file = File(path);
+        if (!file.existsSync()) return;
+
+        final size = file.lengthSync();
+        if (size > 10 * 1024 * 1024) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(l10n.fileSizeLimitError),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+          return;
         }
-        return;
+        uploadSource = file;
       }
 
       setState(() => _sendingFile = true);
       // Upload to Telegram only (bypass Supabase Storage)
       final telegramFileId = await _telegramService.uploadFile(
-        file,
+        uploadSource,
         caption: 'ريكورد صوتي في المحادثة من $_myId إلى ${widget.partnerId} — ${DateTime.now().toIso8601String()}',
+        fileName: 'Voice Note.m4a',
       );
 
       await _chatService.sendMessage(

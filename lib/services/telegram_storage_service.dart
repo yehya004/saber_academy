@@ -22,14 +22,28 @@ class TelegramStorageService {
 
   // ── Upload ────────────────────────────────────────────────────────────────
 
-  /// Uploads [file] to the Telegram channel.
-  /// Returns the Telegram **file_id** (permanent identifier stored in Supabase).
-  Future<String> uploadFile(File file, {String? caption}) async {
-    final fileName = file.path.split(kIsWeb ? '/' : Platform.pathSeparator).last;
+  Future<String> uploadFile(
+    dynamic file, {
+    String? caption,
+    String? fileName,
+  }) async {
+    final String name = fileName ?? (file is File ? file.path.split(kIsWeb ? '/' : Platform.pathSeparator).last : 'file.bin');
+    
+    MultipartFile multipartFile;
+    if (file is Uint8List) {
+      multipartFile = MultipartFile.fromBytes(file, filename: name);
+    } else if (file is File) {
+      if (kIsWeb) {
+        throw UnsupportedError("Reading files from path is not supported on web. Use bytes.");
+      }
+      multipartFile = await MultipartFile.fromFile(file.path, filename: name);
+    } else {
+      throw ArgumentError("Invalid file type: expected File or Uint8List");
+    }
 
     final formData = FormData.fromMap({
       'chat_id':  _channelId,
-      'document': await MultipartFile.fromFile(file.path, filename: fileName),
+      'document': multipartFile,
       'caption':  caption ?? 'واجب طالب — ${DateTime.now().toIso8601String()}',
     });
 

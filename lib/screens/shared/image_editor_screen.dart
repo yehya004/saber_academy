@@ -1,7 +1,7 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
@@ -59,9 +59,14 @@ class DrawingPath {
 }
 
 class ImageEditorScreen extends StatefulWidget {
-  final File imageFile;
+  final Uint8List imageBytes;
+  final String imageName;
 
-  const ImageEditorScreen({super.key, required this.imageFile});
+  const ImageEditorScreen({
+    super.key,
+    required this.imageBytes,
+    required this.imageName,
+  });
 
   @override
   State<ImageEditorScreen> createState() => _ImageEditorScreenState();
@@ -94,7 +99,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
 
   Future<void> _loadImageDimensions() async {
     try {
-      final bytes = await widget.imageFile.readAsBytes();
+      final bytes = widget.imageBytes;
       final codec = await ui.instantiateImageCodec(bytes);
       final frame = await codec.getNextFrame();
       if (mounted) {
@@ -357,13 +362,20 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       if (byteData == null) return;
 
       final Uint8List pngBytes = byteData.buffer.asUint8List();
-      final tempDir = await getTemporaryDirectory();
-      final path = '${tempDir.path}/edited_image_${DateTime.now().millisecondsSinceEpoch}.png';
-      final file = File(path);
-      await file.writeAsBytes(pngBytes);
 
-      if (mounted) {
-        Navigator.of(context).pop(file);
+      if (kIsWeb) {
+        if (mounted) {
+          Navigator.of(context).pop(pngBytes);
+        }
+      } else {
+        final tempDir = await getTemporaryDirectory();
+        final path = '${tempDir.path}/edited_image_${DateTime.now().millisecondsSinceEpoch}.png';
+        final file = File(path);
+        await file.writeAsBytes(pngBytes);
+
+        if (mounted) {
+          Navigator.of(context).pop(file);
+        }
       }
     } catch (e) {
       debugPrint("Error saving edited image: $e");
@@ -437,8 +449,8 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
                                   fit: StackFit.expand,
                                   children: [
                                     // Base Image
-                                    Image.file(
-                                      widget.imageFile,
+                                    Image.memory(
+                                      widget.imageBytes,
                                       fit: BoxFit.fill,
                                     ),
 
