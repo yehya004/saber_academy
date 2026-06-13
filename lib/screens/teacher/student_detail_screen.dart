@@ -59,16 +59,18 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
         _attendanceService.getStudentLevelData(_student.id),
         _scheduleService.getScheduleForStudent(_student.id),
         LessonPostponementService().getPostponementsForStudent(_student.id),
+        _profileService.fetchStudentById(_student.id),
       ]);
       final levelData = results[0] as Map<String, num>;
       final schedule  = results[1] as LessonScheduleModel?;
       final postponements = results[2] as List<LessonPostponementModel>;
+      final refreshedProfile = results[3] as ProfileModel?;
 
       if (!mounted) return;
       final l10n = AppLocalizations.of(context);
       final teacherCountry = context.read<AuthProvider>().profile?.country;
       final teacherTz = _tzService.getTimezone(teacherCountry) ?? 'Africa/Cairo';
-      final studentTz = _tzService.getTimezone(_student.country);
+      final studentTz = refreshedProfile != null ? _tzService.getTimezone(refreshedProfile.country) : _tzService.getTimezone(_student.country);
 
       List<DayScheduleEntry> tEntries = [];
       List<DayScheduleEntry> sEntries = [];
@@ -103,6 +105,9 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
 
       if (mounted) {
         setState(() {
+          if (refreshedProfile != null) {
+            _student = refreshedProfile;
+          }
           _totalAttended   = levelData['total_attended']?.toInt() ?? 0;
           _schedule        = schedule;
           _teacherEntries  = tEntries;
@@ -590,15 +595,70 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
                                 _StatBox(
                                   icon:  Icons.menu_book_outlined,
                                   color: AppColors.secondary,
-                                  label: l10n.initialLessonInLevel,
+                                  label: _student.studySystem == 'hours'
+                                      ? (Localizations.localeOf(context).languageCode == 'ar'
+                                          ? 'الساعات المكتملة'
+                                          : Localizations.localeOf(context).languageCode == 'tr'
+                                              ? 'Tamamlanan Saatler'
+                                              : 'Completed Hours')
+                                      : (Localizations.localeOf(context).languageCode == 'ar'
+                                          ? 'الحصص المكتملة'
+                                          : Localizations.localeOf(context).languageCode == 'tr'
+                                              ? 'Tamamlanan Dersler'
+                                              : 'Completed Classes'),
                                   value: '${_student.lessonInLevel}',
                                 ),
-                                const SizedBox(width: AppSpacing.small),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.small),
+                            Row(
+                              children: [
                                 _StatBox(
                                   icon:  Icons.check_circle_outline,
                                   color: AppColors.success,
                                   label: l10n.totalAttendanceLabel,
                                   value: '$_totalAttended',
+                                ),
+                                const SizedBox(width: AppSpacing.small),
+                                Builder(
+                                  builder: (ctx) {
+                                    final isHours = _student.studySystem == 'hours';
+                                    final double balance = (_student.studyBalance == 0.0 && _student.totalInLevel > _student.lessonInLevel)
+                                        ? _student.totalInLevel - _student.lessonInLevel
+                                        : _student.studyBalance;
+                                    String valStr = '';
+                                    String lblStr = '';
+                                    if (isHours) {
+                                      final totalMinutes = (balance * 60).round();
+                                      final hrs = totalMinutes ~/ 60;
+                                      final mins = totalMinutes % 60;
+                                      if (Localizations.localeOf(context).languageCode == 'ar') {
+                                        valStr = mins > 0 ? '$hrs س و $mins د' : '$hrs س';
+                                        lblStr = 'الرصيد المتبقي';
+                                      } else if (Localizations.localeOf(context).languageCode == 'tr') {
+                                        valStr = mins > 0 ? '$hrs sa $mins dk' : '$hrs sa';
+                                        lblStr = 'Kalan Bakiye';
+                                      } else {
+                                        valStr = mins > 0 ? '$hrs h $mins m' : '$hrs h';
+                                        lblStr = 'Remaining Balance';
+                                      }
+                                    } else {
+                                      valStr = '${balance.toInt()}';
+                                      if (Localizations.localeOf(context).languageCode == 'ar') {
+                                        lblStr = 'الرصيد المتبقي';
+                                      } else if (Localizations.localeOf(context).languageCode == 'tr') {
+                                        lblStr = 'Kalan Bakiye';
+                                      } else {
+                                        lblStr = 'Remaining Balance';
+                                      }
+                                    }
+                                    return _StatBox(
+                                      icon:  Icons.account_balance_wallet_outlined,
+                                      color: Colors.purple,
+                                      label: lblStr,
+                                      value: valStr,
+                                    );
+                                  },
                                 ),
                               ],
                             ),
@@ -728,15 +788,41 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
                                         color:    AppColors.textSecondary,
                                       ),
                                     ),
-                                    Text(
-                                      Localizations.localeOf(context).languageCode == 'ar'
-                                          ? '${_student.lessonInLevel.toInt()} / ${_student.totalInLevel.toInt()} درس'
-                                          : '${_student.lessonInLevel.toInt()} / ${_student.totalInLevel.toInt()} Lessons',
-                                      style: const TextStyle(
-                                        fontSize:   12,
-                                        fontWeight: FontWeight.bold,
-                                        color:      AppColors.primary,
-                                      ),
+                                    Builder(
+                                      builder: (ctx) {
+                                        final isHours = _student.studySystem == 'hours';
+                                        final lessonVal = isHours ? _student.lessonInLevel : _student.lessonInLevel.toInt();
+                                        final totalVal = isHours ? _student.totalInLevel : _student.totalInLevel.toInt();
+                                        final isAr = Localizations.localeOf(context).languageCode == 'ar';
+                                        final isTr = Localizations.localeOf(context).languageCode == 'tr';
+                                        
+                                        String label = '';
+                                        if (isHours) {
+                                          if (isAr) {
+                                            label = '$lessonVal / $totalVal ساعة';
+                                          } else if (isTr) {
+                                            label = '$lessonVal / $totalVal saat';
+                                          } else {
+                                            label = '$lessonVal / $totalVal hours';
+                                          }
+                                        } else {
+                                          if (isAr) {
+                                            label = '$lessonVal / $totalVal درس';
+                                          } else if (isTr) {
+                                            label = '$lessonVal / $totalVal ders';
+                                          } else {
+                                            label = '$lessonVal / $totalVal lessons';
+                                          }
+                                        }
+                                        return Text(
+                                          label,
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.primary,
+                                          ),
+                                        );
+                                      },
                                     ),
                                   ],
                                 ),
@@ -1297,6 +1383,7 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
   late int    _level;
   late double _lesson;
   late double _total;
+  late double _studyBalance;
   late bool   _isPaid;
   late bool   _isBlocked;
   late String _studySystem;
@@ -1308,6 +1395,10 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
     _level  = widget.student.level;
     _lesson = widget.student.lessonInLevel;
     _total  = widget.student.totalInLevel;
+    _studyBalance = widget.student.studyBalance;
+    if (_studyBalance == 0.0 && _total > _lesson) {
+      _studyBalance = _total - _lesson;
+    }
     _isPaid = widget.student.isPaid;
     _isBlocked = widget.student.isBlocked;
     _studySystem = widget.student.studySystem;
@@ -1345,6 +1436,7 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
         isPaid:        _isPaid,
         isBlocked:     _isBlocked,
         studySystem:   _studySystem,
+        studyBalance:  _studyBalance,
       );
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
@@ -1408,6 +1500,7 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
                 if (val != null) {
                   setState(() {
                     _studySystem = val;
+                    _studyBalance = (_total - _lesson).clamp(0.0, 99999.0);
                   });
                 }
               },
@@ -1444,7 +1537,10 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
                   onChanged: (val) {
                     final parsed = double.tryParse(val);
                     if (parsed != null) {
-                      _lesson = parsed;
+                      setState(() {
+                        _lesson = parsed;
+                        _studyBalance = (_total - _lesson).clamp(0.0, 99999.0);
+                      });
                     }
                   },
                 ),
@@ -1466,7 +1562,10 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
                   onChanged: (val) {
                     final parsed = double.tryParse(val);
                     if (parsed != null) {
-                      _total = parsed;
+                      setState(() {
+                        _total = parsed;
+                        _studyBalance = (_total - _lesson).clamp(0.0, 99999.0);
+                      });
                     }
                   },
                 ),
@@ -1489,7 +1588,10 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
                   onChanged: (val) {
                     final parsed = double.tryParse(val);
                     if (parsed != null) {
-                      _lesson = parsed;
+                      setState(() {
+                        _lesson = parsed;
+                        _studyBalance = (_total - _lesson).clamp(0.0, 99999.0);
+                      });
                     }
                   },
                 ),
@@ -1511,12 +1613,48 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
                   onChanged: (val) {
                     final parsed = double.tryParse(val);
                     if (parsed != null) {
-                      _total = parsed;
+                      setState(() {
+                        _total = parsed;
+                        _studyBalance = (_total - _lesson).clamp(0.0, 99999.0);
+                      });
                     }
                   },
                 ),
               ),
             ],
+            const Divider(),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6.0),
+              child: TextFormField(
+                key: ValueKey('study_balance_${_studySystem}_$_studyBalance'),
+                initialValue: _studyBalance % 1 == 0 ? '${_studyBalance.toInt()}' : '$_studyBalance',
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  labelText: _studySystem == 'hours'
+                      ? (Localizations.localeOf(context).languageCode == 'ar'
+                          ? 'الرصيد المتبقي من الساعات'
+                          : Localizations.localeOf(context).languageCode == 'tr'
+                              ? 'Kalan Saat Bakiyesi'
+                              : 'Remaining Hours Balance')
+                      : (Localizations.localeOf(context).languageCode == 'ar'
+                          ? 'الرصيد المتبقي من الحصص'
+                          : Localizations.localeOf(context).languageCode == 'tr'
+                              ? 'Kalan Ders Bakiyesi'
+                              : 'Remaining Classes Balance'),
+                  prefixIcon: const Icon(Icons.account_balance_wallet_outlined, color: Colors.purple),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                ),
+                onChanged: (val) {
+                  final parsed = double.tryParse(val);
+                  if (parsed != null) {
+                    setState(() {
+                      _studyBalance = parsed;
+                    });
+                  }
+                },
+              ),
+            ),
           // ── Payment switch ─────────────────────────
           SwitchListTile(
             title: Text(

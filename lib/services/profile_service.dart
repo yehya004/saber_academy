@@ -46,6 +46,7 @@ class ProfileService {
     bool?           isPaid,
     bool?           isBlocked,
     String?         studySystem,
+    double?         studyBalance,
   }) {
     final updates = <String, dynamic>{
       'level':           level,
@@ -55,6 +56,7 @@ class ProfileService {
     if (isPaid != null) updates['is_paid'] = isPaid;
     if (isBlocked != null) updates['is_blocked'] = isBlocked;
     if (studySystem != null) updates['study_system'] = studySystem;
+    if (studyBalance != null) updates['study_balance'] = studyBalance;
     return _client.from('profiles').update(updates).eq('id', studentId);
   }
 

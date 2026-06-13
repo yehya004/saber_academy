@@ -80,11 +80,16 @@ class AttendanceService {
     if (shouldDeduct) {
       final profile = await _client
           .from('profiles')
-          .select('study_balance')
+          .select('study_balance, total_in_level, lesson_in_level')
           .eq('id', studentId)
           .maybeSingle();
       if (profile != null) {
-        final double currentBalance = ((profile['study_balance'] as num?) ?? 0.0).toDouble();
+        final double total = ((profile['total_in_level'] as num?) ?? 20.0).toDouble();
+        final double lesson = ((profile['lesson_in_level'] as num?) ?? 0.0).toDouble();
+        double currentBalance = ((profile['study_balance'] as num?) ?? 0.0).toDouble();
+        if (currentBalance == 0.0 && total > lesson) {
+          currentBalance = total - lesson;
+        }
         final double newBalance = (currentBalance - deductedAmount).clamp(0.0, 99999.0);
         await _client.from('profiles').update({
           'study_balance': newBalance,

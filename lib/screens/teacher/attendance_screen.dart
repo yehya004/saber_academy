@@ -285,7 +285,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         const SizedBox(height: 4),
                         Builder(
                           builder: (ctx) {
-                            final balance = _studentProfile!.studyBalance;
+                            final double balance = (_studentProfile!.studyBalance == 0.0 && _studentProfile!.totalInLevel > _studentProfile!.lessonInLevel)
+                                ? _studentProfile!.totalInLevel - _studentProfile!.lessonInLevel
+                                : _studentProfile!.studyBalance;
                             final isHours = _studentProfile!.studySystem == 'hours';
                             if (isHours) {
                               final totalMinutes = (balance * 60).round();
@@ -756,7 +758,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               _sessions.length,
               (i) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: _SessionCard(session: _sessions[i], fmt: fmt),
+                child: _SessionCard(
+                  session: _sessions[i],
+                  fmt: fmt,
+                  studySystem: _studentProfile?.studySystem ?? 'classes',
+                ),
               ),
             ),
         ],
@@ -768,9 +774,14 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 // ── Session Card (expandable) ─────────────────────────────────────────────────
 
 class _SessionCard extends StatefulWidget {
-  const _SessionCard({required this.session, required this.fmt});
+  const _SessionCard({
+    required this.session,
+    required this.fmt,
+    required this.studySystem,
+  });
   final SessionModel session;
   final intl.DateFormat   fmt;
+  final String studySystem;
   @override
   State<_SessionCard> createState() => _SessionCardState();
 }
@@ -825,6 +836,15 @@ class _SessionCardState extends State<_SessionCard> {
                     widget.fmt.format(s.sessionDate),
                     style: const TextStyle(
                         color: AppColors.textPrimary, fontSize: 14),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '(${formatSessionDuration(s.deductedAmount, widget.studySystem, l10n.localeName)})',
+                    style: const TextStyle(
+                      color: AppColors.secondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   if (s.topic != null && s.topic!.isNotEmpty) ...[
                     const SizedBox(width: 8),
@@ -1181,5 +1201,42 @@ class _HomeworkTypeChip extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+String formatSessionDuration(double amount, String studySystem, String locale) {
+  final isHours = studySystem == 'hours';
+  final isAr = locale == 'ar';
+  final isTr = locale == 'tr';
+  if (isHours) {
+    if (isAr) {
+      if (amount == 1.0) return 'ساعة واحدة';
+      if (amount == 1.5) return 'ساعة ونصف';
+      if (amount == 2.0) return 'ساعتان';
+      final totalMinutes = (amount * 60).round();
+      final hrs = totalMinutes ~/ 60;
+      final mins = totalMinutes % 60;
+      return mins > 0 ? '$hrs س و $mins د' : '$hrs س';
+    } else if (isTr) {
+      final totalMinutes = (amount * 60).round();
+      final hrs = totalMinutes ~/ 60;
+      final mins = totalMinutes % 60;
+      return mins > 0 ? '$hrs sa $mins dk' : '$hrs sa';
+    } else {
+      final totalMinutes = (amount * 60).round();
+      final hrs = totalMinutes ~/ 60;
+      final mins = totalMinutes % 60;
+      return mins > 0 ? '$hrs h $mins m' : '$hrs h';
+    }
+  } else {
+    if (isAr) {
+      if (amount == 1.0) return 'حصة واحدة';
+      if (amount == 2.0) return 'حصتان';
+      return '${amount.toInt()} حصص';
+    } else if (isTr) {
+      return '${amount.toInt()} Ders';
+    } else {
+      return '${amount.toInt()} classes';
+    }
   }
 }

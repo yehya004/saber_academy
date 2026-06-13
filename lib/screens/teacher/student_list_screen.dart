@@ -398,6 +398,7 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
   late int    _level;
   late double _lesson;
   late double _total;
+  late double _studyBalance;
   late bool   _isPaid;
   late bool   _isBlocked;
   late String _studySystem;
@@ -409,6 +410,10 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
     _level  = widget.student.level;
     _lesson = widget.student.lessonInLevel;
     _total  = widget.student.totalInLevel;
+    _studyBalance = widget.student.studyBalance;
+    if (_studyBalance == 0.0 && _total > _lesson) {
+      _studyBalance = _total - _lesson;
+    }
     _isPaid = widget.student.isPaid;
     _isBlocked = widget.student.isBlocked;
     _studySystem = widget.student.studySystem;
@@ -446,6 +451,7 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
         isPaid:        _isPaid,
         isBlocked:     _isBlocked,
         studySystem:   _studySystem,
+        studyBalance:  _studyBalance,
       );
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
@@ -509,6 +515,7 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
                 if (val != null) {
                   setState(() {
                     _studySystem = val;
+                    _studyBalance = (_total - _lesson).clamp(0.0, 99999.0);
                   });
                 }
               },
@@ -537,9 +544,7 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
                     '$_level',
                     textAlign: TextAlign.center,
                     style: const TextStyle(
-                      fontSize:   18,
-                      fontWeight: FontWeight.bold,
-                      color:      AppColors.primary,
+                      fontSize: 18,
                     ),
                   ),
                 ),
@@ -570,7 +575,10 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
                   onChanged: (val) {
                     final parsed = double.tryParse(val);
                     if (parsed != null) {
-                      _lesson = parsed;
+                      setState(() {
+                        _lesson = parsed;
+                        _studyBalance = (_total - _lesson).clamp(0.0, 99999.0);
+                      });
                     }
                   },
                 ),
@@ -592,7 +600,10 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
                   onChanged: (val) {
                     final parsed = double.tryParse(val);
                     if (parsed != null) {
-                      _total = parsed;
+                      setState(() {
+                        _total = parsed;
+                        _studyBalance = (_total - _lesson).clamp(0.0, 99999.0);
+                      });
                     }
                   },
                 ),
@@ -615,7 +626,10 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
                   onChanged: (val) {
                     final parsed = double.tryParse(val);
                     if (parsed != null) {
-                      _lesson = parsed;
+                      setState(() {
+                        _lesson = parsed;
+                        _studyBalance = (_total - _lesson).clamp(0.0, 99999.0);
+                      });
                     }
                   },
                 ),
@@ -637,12 +651,48 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
                   onChanged: (val) {
                     final parsed = double.tryParse(val);
                     if (parsed != null) {
-                      _total = parsed;
+                      setState(() {
+                        _total = parsed;
+                        _studyBalance = (_total - _lesson).clamp(0.0, 99999.0);
+                      });
                     }
                   },
                 ),
               ),
             ],
+            const Divider(),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6.0),
+              child: TextFormField(
+                key: ValueKey('study_balance_${_studySystem}_$_studyBalance'),
+                initialValue: _studyBalance % 1 == 0 ? '${_studyBalance.toInt()}' : '$_studyBalance',
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  labelText: _studySystem == 'hours'
+                      ? (Localizations.localeOf(context).languageCode == 'ar'
+                          ? 'الرصيد المتبقي من الساعات'
+                          : Localizations.localeOf(context).languageCode == 'tr'
+                              ? 'Kalan Saat Bakiyesi'
+                              : 'Remaining Hours Balance')
+                      : (Localizations.localeOf(context).languageCode == 'ar'
+                          ? 'الرصيد المتبقي من الحصص'
+                          : Localizations.localeOf(context).languageCode == 'tr'
+                              ? 'Kalan Ders Bakiyesi'
+                              : 'Remaining Classes Balance'),
+                  prefixIcon: const Icon(Icons.account_balance_wallet_outlined, color: Colors.purple),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                ),
+                onChanged: (val) {
+                  final parsed = double.tryParse(val);
+                  if (parsed != null) {
+                    setState(() {
+                      _studyBalance = parsed;
+                    });
+                  }
+                },
+              ),
+            ),
             const Divider(),
             // ── Payment switch ─────────────────────────
             SwitchListTile(

@@ -59,6 +59,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   final _chatService = ChatService();
 
   Map<String, num>?        _levelData;
+  ProfileModel?            _studentProfile;
   ProfileModel?            _teacher;
   LessonScheduleModel?     _schedule;
   // Per-day entries converted to student's local timezone
@@ -130,6 +131,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
             .toList();
         final unreadMessages = cached['unreadMessages'] as int? ?? 0;
         final pendingQuizzes = cached['pendingQuizzes'] as int? ?? 0;
+        final studentProfile = cached['studentProfile'] != null ? ProfileModel.fromMap(cached['studentProfile']) : null;
 
         DateTime? nextLessonDateTime;
         bool fromOnline = false;
@@ -151,6 +153,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
         if (mounted) {
           setState(() {
             _levelData = levelData;
+            _studentProfile = studentProfile;
             _teacher = teacher;
             _schedule = schedule;
             _localEntries = localEntries;
@@ -183,6 +186,8 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
             .catchError((_) => <QuizAssignmentModel>[]),
         LessonPostponementService().getPostponementsForStudent(userId)
             .catchError((_) => <LessonPostponementModel>[]),
+        _profileService.fetchStudentById(userId)
+            .catchError((_) => null),
       ]);
 
       final levelData = results[0] as Map<String, num>;
@@ -196,6 +201,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
           .length;
       final recentSessions = allSessions;
       final postponements = results[6] as List<LessonPostponementModel>;
+      final studentProfile = results[7] as ProfileModel?;
 
       DateTime?              nextLessonDateTime;
       bool                   fromOnline  = false;
@@ -220,6 +226,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       if (mounted) {
         setState(() {
           _levelData          = levelData;
+          _studentProfile     = studentProfile;
           _teacher            = teacher;
           _schedule           = schedule;
           _localEntries       = localEntries;
@@ -245,6 +252,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
         'recentSessions': recentSessions.map((s) => s.toMap()).toList(),
         'unreadMessages': unreadMessages,
         'pendingQuizzes': pendingQuizzes,
+        'studentProfile': studentProfile?.toMap(),
       };
       await prefs.setString(cacheKey, jsonEncode(dataToCache));
 
@@ -276,27 +284,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
-    if (auth.profile?.isGuest == true) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        final teacher = await _profileService.fetchTeacherForStudent(auth.profile!.id);
-        if (teacher != null && context.mounted) {
-          context.go(AppRoutes.chat, extra: {
-            'partnerId': teacher.id,
-            'partnerName': teacher.fullName,
-          });
-        } else {
-          await auth.signOut();
-          if (context.mounted) context.go(AppRoutes.aboutAcademy);
-        }
-      });
-      return const Scaffold(
-        backgroundColor: AppColors.background,
-        body: Center(
-          child: CircularProgressIndicator(color: AppColors.primary),
-        ),
-      );
-    }
-
     final l10n = AppLocalizations.of(context);
     final name = auth.profile?.fullName ?? '';
     final isBlocked = auth.profile?.isBlocked ?? false;
@@ -691,39 +678,93 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                         ],
                       ),
                       child: _levelData != null
-                          ? Row(
-                              children: [
-                                LevelProgressIndicator(
-                                  level:           _levelData!['level']!.toInt(),
-                                  progressInLevel: _levelData!['progress_in_level']!,
-                                  totalAttended:   _levelData!['total_attended']!.toInt(),
-                                ),
-                                const SizedBox(width: AppSpacing.large),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      _StatRow(
-                                        icon:  Icons.check_circle_outline,
-                                        color: AppColors.success,
-                                        label: l10n.totalAttended(
-                                          _levelData!['total_attended']!.toInt(),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      _StatRow(
-                                        icon:  Icons.trending_up,
-                                        color: AppColors.secondary,
-                                        label: l10n.sessionsOf(
-                                          _levelData!['progress_in_level']!.toInt(),
-                                          20,
-                                        ),
-                                      ),
+                          ? Builder(
+                              builder: (ctx) {
+                                final profile = _studentProfile ?? auth.profile;
+                                final level = _levelData!['level']!.toInt();
+                                final progress = _levelData!['progress_in_level']!.toDouble();
+                                final total = profile?.totalInLevel ?? 20.0;
+                                final totalAttended = _levelData!['total_attended']!.toInt();
+                                final studySystem = profile?.studySystem ?? 'classes';
+                                final double rawBalance = profile?.studyBalance ?? 0.0;
 
-                                    ],
-                                  ),
-                                ),
-                              ],
+                                final double balance = (rawBalance == 0.0 && total > progress)
+                                    ? (total - progress)
+                                    : rawBalance;
+
+                                final isHours = studySystem == 'hours';
+
+                                String progressText = '';
+                                String progressLabel = '';
+                                if (isHours) {
+                                  progressText = '${progress % 1 == 0 ? progress.toInt() : progress.toStringAsFixed(1)} / ${total % 1 == 0 ? total.toInt() : total.toStringAsFixed(1)}';
+                                  progressLabel = l10n.localeName == 'ar' ? 'ساعة مكتملة' : (l10n.localeName == 'tr' ? 'Tamamlanan Saat' : 'Hours Completed');
+                                } else {
+                                  progressText = '${progress.toInt()} / ${total.toInt()}';
+                                  progressLabel = l10n.localeName == 'ar' ? 'حصة مكتملة' : (l10n.localeName == 'tr' ? 'Tamamlanan Ders' : 'Classes Completed');
+                                }
+
+                                String balanceStr = '';
+                                if (isHours) {
+                                  final totalMinutes = (balance * 60).round();
+                                  final hrs = totalMinutes ~/ 60;
+                                  final mins = totalMinutes % 60;
+                                  if (l10n.localeName == 'ar') {
+                                    balanceStr = mins > 0 ? '$hrs س و $mins د' : '$hrs س';
+                                  } else if (l10n.localeName == 'tr') {
+                                    balanceStr = mins > 0 ? '$hrs sa $mins dk' : '$hrs sa';
+                                  } else {
+                                    balanceStr = mins > 0 ? '$hrs h $mins m' : '$hrs h';
+                                  }
+                                } else {
+                                  if (l10n.localeName == 'ar') {
+                                    balanceStr = '${balance.toInt()} حصة';
+                                  } else if (l10n.localeName == 'tr') {
+                                    balanceStr = '${balance.toInt()} Ders';
+                                  } else {
+                                    balanceStr = '${balance.toInt()} classes';
+                                  }
+                                }
+
+                                return Row(
+                                  children: [
+                                    LevelProgressIndicator(
+                                      level:           level,
+                                      progressInLevel: progress,
+                                      totalInLevel:    total,
+                                    ),
+                                    const SizedBox(width: AppSpacing.large),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          _StatRow(
+                                            icon:  Icons.check_circle_outline,
+                                            color: AppColors.success,
+                                            label: l10n.totalAttended(totalAttended),
+                                          ),
+                                          const SizedBox(height: 12),
+                                          _StatRow(
+                                            icon:  Icons.menu_book_outlined,
+                                            color: AppColors.secondary,
+                                            label: '$progressText $progressLabel',
+                                          ),
+                                          const SizedBox(height: 12),
+                                          _StatRow(
+                                            icon:  Icons.account_balance_wallet_outlined,
+                                            color: Colors.purple,
+                                            label: l10n.localeName == 'ar' 
+                                                ? 'الرصيد المتبقي: $balanceStr' 
+                                                : (l10n.localeName == 'tr' 
+                                                    ? 'Kalan Bakiye: $balanceStr' 
+                                                    : 'Remaining Balance: $balanceStr'),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }
                             )
                           : const Center(
                               child: Padding(
@@ -792,7 +833,10 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                     if (_recentSessions.isNotEmpty) ...[
                       _SectionTitle(title: l10n.recentSessions),
                       const SizedBox(height: AppSpacing.small),
-                      ..._recentSessions.map((s) => _StudentSessionCard(session: s)),
+                      ..._recentSessions.map((s) => _StudentSessionCard(
+                            session: s,
+                            studySystem: _studentProfile?.studySystem ?? auth.profile?.studySystem ?? 'classes',
+                          )),
                       const SizedBox(height: AppSpacing.large),
                     ],
                   ],
@@ -1154,8 +1198,9 @@ class _StatRow extends StatelessWidget {
 // ── Session card for student ──────────────────────────────────────────────────
 
 class _StudentSessionCard extends StatefulWidget {
-  const _StudentSessionCard({required this.session});
+  const _StudentSessionCard({required this.session, required this.studySystem});
   final SessionModel session;
+  final String studySystem;
   @override
   State<_StudentSessionCard> createState() => _StudentSessionCardState();
 }
@@ -1247,12 +1292,33 @@ class _StudentSessionCardState extends State<_StudentSessionCard> {
                           ],
                         ),
                         const SizedBox(height: 2),
-                        Text(
-                          dateStr,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color:    AppColors.textSecondary,
-                          ),
+                        Row(
+                          children: [
+                            Text(
+                              dateStr,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color:    AppColors.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Text(
+                              '•',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color:    AppColors.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              formatSessionDuration(s.deductedAmount, widget.studySystem, l10n.localeName),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color:    AppColors.secondary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -1794,5 +1860,42 @@ class _UpcomingLessonCard extends StatelessWidget {
               ],
             ),
     );
+  }
+}
+
+String formatSessionDuration(double amount, String studySystem, String locale) {
+  final isHours = studySystem == 'hours';
+  final isAr = locale == 'ar';
+  final isTr = locale == 'tr';
+  if (isHours) {
+    if (isAr) {
+      if (amount == 1.0) return 'ساعة واحدة';
+      if (amount == 1.5) return 'ساعة ونصف';
+      if (amount == 2.0) return 'ساعتان';
+      final totalMinutes = (amount * 60).round();
+      final hrs = totalMinutes ~/ 60;
+      final mins = totalMinutes % 60;
+      return mins > 0 ? '$hrs س و $mins د' : '$hrs س';
+    } else if (isTr) {
+      final totalMinutes = (amount * 60).round();
+      final hrs = totalMinutes ~/ 60;
+      final mins = totalMinutes % 60;
+      return mins > 0 ? '$hrs sa $mins dk' : '$hrs sa';
+    } else {
+      final totalMinutes = (amount * 60).round();
+      final hrs = totalMinutes ~/ 60;
+      final mins = totalMinutes % 60;
+      return mins > 0 ? '$hrs h $mins m' : '$hrs h';
+    }
+  } else {
+    if (isAr) {
+      if (amount == 1.0) return 'حصة واحدة';
+      if (amount == 2.0) return 'حصتان';
+      return '${amount.toInt()} حصص';
+    } else if (isTr) {
+      return '${amount.toInt()} Ders';
+    } else {
+      return '${amount.toInt()} classes';
+    }
   }
 }

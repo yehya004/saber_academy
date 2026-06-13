@@ -32,6 +32,7 @@ class _CreateStudentScreenState extends State<CreateStudentScreen> {
   bool    _showPass     = false;
   bool    _showConfirm  = false;
   String _studySystem   = 'classes';
+  double  _studyBalance  = 20.0;
 
   @override
   void dispose() {
@@ -67,7 +68,7 @@ class _CreateStudentScreenState extends State<CreateStudentScreen> {
         totalInLevel:  _totalInLevel,
         isPaid:        _isPaid,
         studySystem:   _studySystem,
-        studyBalance:  0.0,
+        studyBalance:  _studyBalance,
       );
       if (!mounted) return;
       setState(() => _loading = false);
@@ -364,6 +365,7 @@ class _CreateStudentScreenState extends State<CreateStudentScreen> {
                       if (val != null) {
                         setState(() {
                           _studySystem = val;
+                          _studyBalance = (_totalInLevel - _lessonInLevel).clamp(0.0, 99999.0);
                         });
                       }
                     },
@@ -453,7 +455,10 @@ class _CreateStudentScreenState extends State<CreateStudentScreen> {
                     onChanged: (val) {
                       final parsed = double.tryParse(val);
                       if (parsed != null) {
-                        _lessonInLevel = parsed;
+                        setState(() {
+                          _lessonInLevel = parsed;
+                          _studyBalance = (_totalInLevel - _lessonInLevel).clamp(0.0, 99999.0);
+                        });
                       }
                     },
                   ),
@@ -489,6 +494,40 @@ class _CreateStudentScreenState extends State<CreateStudentScreen> {
                       if (parsed != null) {
                         setState(() {
                           _totalInLevel = parsed;
+                          _studyBalance = (_totalInLevel - _lessonInLevel).clamp(0.0, 99999.0);
+                        });
+                      }
+                    },
+                  ),
+                ),
+                const Divider(height: 1, indent: 48, color: AppColors.progressTrack),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: TextFormField(
+                    key: ValueKey('balance_${_studySystem}_$_studyBalance'),
+                    initialValue: _studyBalance % 1 == 0 ? '${_studyBalance.toInt()}' : '$_studyBalance',
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(
+                      labelText: _studySystem == 'hours'
+                          ? (Localizations.localeOf(context).languageCode == 'ar'
+                              ? 'الرصيد الابتدائي للساعات'
+                              : Localizations.localeOf(context).languageCode == 'tr'
+                                  ? 'Başlangıç Saat Bakiyesi'
+                                  : 'Initial Hours Balance')
+                          : (Localizations.localeOf(context).languageCode == 'ar'
+                              ? 'الرصيد الابتدائي للحصص'
+                              : Localizations.localeOf(context).languageCode == 'tr'
+                                  ? 'Başlangıç Ders Bakiyesi'
+                                  : 'Initial Classes Balance'),
+                      prefixIcon: const Icon(Icons.account_balance_wallet_outlined, color: AppColors.secondary),
+                      border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                    ),
+                    onChanged: (val) {
+                      final parsed = double.tryParse(val);
+                      if (parsed != null) {
+                        setState(() {
+                          _studyBalance = parsed;
                         });
                       }
                     },

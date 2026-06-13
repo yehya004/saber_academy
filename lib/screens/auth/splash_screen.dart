@@ -12,8 +12,6 @@ import '../../providers/locale_provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/notification_service.dart';
 
-import '../../services/profile_service.dart';
-
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -94,21 +92,6 @@ class _SplashScreenState extends State<SplashScreen>
     }
 
     if (!mounted) return;
-
-    if (auth.profile?.isGuest == true) {
-      final teacher = await ProfileService().fetchTeacherForStudent(auth.profile!.id);
-      if (teacher != null && mounted) {
-        context.go(AppRoutes.chat, extra: {
-          'partnerId': teacher.id,
-          'partnerName': teacher.fullName,
-        });
-        return;
-      } else {
-        await auth.signOut();
-        if (mounted) context.go(AppRoutes.aboutAcademy);
-        return;
-      }
-    }
 
     context.go(auth.isTeacher ? AppRoutes.teacherHome : AppRoutes.studentHome);
 

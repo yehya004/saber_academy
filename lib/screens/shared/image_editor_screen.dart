@@ -459,7 +459,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
                                           _currentPath = DrawingPath(
                                             points: [localPos],
                                             color: _currentMode == EditorMode.highlighter
-                                                ? _selectedColor.withValues(alpha: 0.4)
+                                                ? _selectedColor.withValues(alpha: 0.25)
                                                 : _selectedColor,
                                             strokeWidth: _currentMode == EditorMode.highlighter ? 24.0 : _strokeWidth,
                                             isHighlighter: _currentMode == EditorMode.highlighter,
@@ -513,24 +513,27 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
                                             });
                                           },
                                           child: Stack(
-                                            clipBehavior: Clip.none,
                                             children: [
-                                              Container(
-                                                padding: const EdgeInsets.all(8),
-                                                decoration: BoxDecoration(
-                                                  border: isSelected
-                                                      ? Border.all(color: Colors.blueAccent, width: 1.5)
-                                                      : null,
+                                              Padding(
+                                                padding: const EdgeInsets.all(16.0),
+                                                child: Container(
+                                                  padding: const EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                    border: isSelected
+                                                        ? Border.all(color: Colors.blueAccent, width: 1.5)
+                                                        : null,
+                                                  ),
+                                                  child: stamp.type == 'check'
+                                                      ? Icon(Icons.check_circle_rounded, color: Colors.green, size: 48 * stamp.scale)
+                                                      : Icon(Icons.cancel_rounded, color: Colors.red, size: 48 * stamp.scale),
                                                 ),
-                                                child: stamp.type == 'check'
-                                                    ? const Icon(Icons.check_circle_rounded, color: Colors.green, size: 48)
-                                                    : const Icon(Icons.cancel_rounded, color: Colors.red, size: 48),
                                               ),
                                               if (isSelected)
                                                 Positioned(
-                                                  top: -12,
-                                                  right: -12,
+                                                  top: 0,
+                                                  right: 0,
                                                   child: GestureDetector(
+                                                    behavior: HitTestBehavior.opaque,
                                                     onTap: () {
                                                       setState(() {
                                                         _stampOverlays.removeWhere((o) => o.id == stamp.id);
@@ -539,12 +542,16 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
                                                       });
                                                     },
                                                     child: Container(
-                                                      decoration: const BoxDecoration(
-                                                        color: Colors.red,
-                                                        shape: BoxShape.circle,
+                                                      color: Colors.transparent,
+                                                      padding: const EdgeInsets.all(12),
+                                                      child: Container(
+                                                        decoration: const BoxDecoration(
+                                                          color: Colors.red,
+                                                          shape: BoxShape.circle,
+                                                        ),
+                                                        padding: const EdgeInsets.all(6),
+                                                        child: const Icon(Icons.close, size: 16, color: Colors.white),
                                                       ),
-                                                      padding: const EdgeInsets.all(4),
-                                                      child: const Icon(Icons.close, size: 14, color: Colors.white),
                                                     ),
                                                   ),
                                                 ),
@@ -573,37 +580,41 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
                                             setState(() {
                                               _selectedItemId = overlay.id;
                                               _selectedItemType = 'text';
+                                              _selectedColor = overlay.color;
                                             });
                                           },
                                           onDoubleTap: () {
                                             _editTextOverlay(overlay);
                                           },
                                           child: Stack(
-                                            clipBehavior: Clip.none,
                                             children: [
-                                              Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.black54,
-                                                  borderRadius: BorderRadius.circular(6),
-                                                  border: isSelected
-                                                      ? Border.all(color: Colors.blueAccent, width: 1.5)
-                                                      : null,
-                                                ),
-                                                child: Text(
-                                                  overlay.text,
-                                                  style: TextStyle(
-                                                    color: overlay.color,
-                                                    fontSize: overlay.fontSize,
-                                                    fontWeight: FontWeight.bold,
+                                              Padding(
+                                                padding: const EdgeInsets.all(16.0),
+                                                child: Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.black54,
+                                                    borderRadius: BorderRadius.circular(6),
+                                                    border: isSelected
+                                                        ? Border.all(color: Colors.blueAccent, width: 1.5)
+                                                        : null,
+                                                  ),
+                                                  child: Text(
+                                                    overlay.text,
+                                                    style: TextStyle(
+                                                      color: overlay.color,
+                                                      fontSize: overlay.fontSize,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
                                                   ),
                                                 ),
                                               ),
                                               if (isSelected)
                                                 Positioned(
-                                                  top: -12,
-                                                  right: -12,
+                                                  top: 0,
+                                                  right: 0,
                                                   child: GestureDetector(
+                                                    behavior: HitTestBehavior.opaque,
                                                     onTap: () {
                                                       setState(() {
                                                         _textOverlays.removeWhere((o) => o.id == overlay.id);
@@ -612,12 +623,16 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
                                                       });
                                                     },
                                                     child: Container(
-                                                      decoration: const BoxDecoration(
-                                                        color: Colors.red,
-                                                        shape: BoxShape.circle,
+                                                      color: Colors.transparent,
+                                                      padding: const EdgeInsets.all(12),
+                                                      child: Container(
+                                                        decoration: const BoxDecoration(
+                                                          color: Colors.red,
+                                                          shape: BoxShape.circle,
+                                                        ),
+                                                        padding: const EdgeInsets.all(6),
+                                                        child: const Icon(Icons.close, size: 16, color: Colors.white),
                                                       ),
-                                                      padding: const EdgeInsets.all(4),
-                                                      child: const Icon(Icons.close, size: 14, color: Colors.white),
                                                     ),
                                                   ),
                                                 ),
@@ -637,8 +652,81 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
                   ),
                 ),
 
-                // Colors & Width sliders
-                if (_currentMode != EditorMode.none) ...[
+                // Colors & Width & Size sliders
+                if (_selectedItemId != null) ...[
+                  if (_selectedItemType == 'text') ...[
+                    Container(
+                      color: Colors.grey[950],
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildColorDot(Colors.red),
+                          _buildColorDot(Colors.green),
+                          _buildColorDot(Colors.blue),
+                          _buildColorDot(Colors.yellow),
+                          _buildColorDot(Colors.white),
+                          _buildColorDot(Colors.black),
+                        ],
+                      ),
+                    ),
+                  ],
+                  Container(
+                    color: Colors.grey[950],
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _selectedItemType == 'text' ? Icons.text_fields_rounded : Icons.photo_size_select_large_rounded,
+                          color: Colors.white70,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          _selectedItemType == 'text'
+                              ? (isAr ? 'حجم الخط' : (isTr ? 'Yazı Boyutu' : 'Font Size'))
+                              : (isAr ? 'حجم العلامة' : (isTr ? 'Damga Boyutu' : 'Stamp Size')),
+                          style: const TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                        Expanded(
+                          child: Builder(builder: (context) {
+                            if (_selectedItemType == 'text') {
+                              final textOverlay = _textOverlays.firstWhere((o) => o.id == _selectedItemId,
+                                  orElse: () => TextOverlay(id: '', text: '', offset: Offset.zero, color: Colors.white));
+                              if (textOverlay.id.isEmpty) return const SizedBox();
+                              return Slider(
+                                value: textOverlay.fontSize.clamp(12.0, 72.0),
+                                min: 12.0,
+                                max: 72.0,
+                                activeColor: AppColors.primary,
+                                onChanged: (val) {
+                                  setState(() {
+                                    textOverlay.fontSize = val;
+                                  });
+                                },
+                              );
+                            } else {
+                              final stampOverlay = _stampOverlays.firstWhere((o) => o.id == _selectedItemId,
+                                  orElse: () => StampOverlay(id: '', type: '', offset: Offset.zero));
+                              if (stampOverlay.id.isEmpty) return const SizedBox();
+                              return Slider(
+                                value: stampOverlay.scale.clamp(0.5, 3.0),
+                                min: 0.5,
+                                max: 3.0,
+                                activeColor: AppColors.primary,
+                                onChanged: (val) {
+                                  setState(() {
+                                    stampOverlay.scale = val;
+                                  });
+                                },
+                              );
+                            }
+                          }),
+                        ),
+                      ],
+                    ),
+                  ),
+                ] else if (_currentMode != EditorMode.none) ...[
                   Container(
                     color: Colors.grey[950],
                     padding: const EdgeInsets.symmetric(vertical: 8),
