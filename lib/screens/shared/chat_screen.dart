@@ -705,8 +705,11 @@ class _ChatScreenState extends State<ChatScreen> {
                                 final dialogNavigator = Navigator.of(ctx);
                                 setDialogState(() => fetchingBytes = true);
                                 try {
+                                  final String fetchUrl = kIsWeb
+                                      ? 'https://corsproxy.io/?${Uri.encodeComponent(imageUrl)}'
+                                      : imageUrl;
                                   final response = await Dio().get<List<int>>(
-                                    imageUrl,
+                                    fetchUrl,
                                     options: Options(responseType: ResponseType.bytes),
                                   );
                                   if (response.data != null) {
