@@ -705,15 +705,44 @@ class _ChatScreenState extends State<ChatScreen> {
                                 final dialogNavigator = Navigator.of(ctx);
                                 setDialogState(() => fetchingBytes = true);
                                 try {
-                                  final String fetchUrl = kIsWeb
-                                      ? 'https://corsproxy.io/?${Uri.encodeComponent(imageUrl)}'
-                                      : imageUrl;
-                                  final response = await Dio().get<List<int>>(
-                                    fetchUrl,
-                                    options: Options(responseType: ResponseType.bytes),
-                                  );
-                                  if (response.data != null) {
-                                    final bytes = Uint8List.fromList(response.data!);
+                                  List<int>? responseBytes;
+                                  if (kIsWeb) {
+                                    final List<String> proxyUrls = [
+                                      'https://cors.zme.ink/$imageUrl',
+                                      'https://corsproxy.org/?url=${Uri.encodeComponent(imageUrl)}',
+                                      'https://api.allorigins.win/raw?url=${Uri.encodeComponent(imageUrl)}',
+                                    ];
+                                    for (final proxyUrl in proxyUrls) {
+                                      try {
+                                        final response = await Dio().get<List<int>>(
+                                          proxyUrl,
+                                          options: Options(
+                                            responseType: ResponseType.bytes,
+                                            connectTimeout: const Duration(seconds: 6),
+                                            receiveTimeout: const Duration(seconds: 6),
+                                          ),
+                                        );
+                                        final contentType = response.headers.value('content-type') ?? '';
+                                        if (response.data != null && 
+                                            !contentType.contains('text/html') && 
+                                            !contentType.contains('application/json')) {
+                                          responseBytes = response.data;
+                                          break;
+                                        }
+                                      } catch (e) {
+                                        debugPrint("Failed to fetch via proxy $proxyUrl: $e");
+                                      }
+                                    }
+                                  } else {
+                                    final response = await Dio().get<List<int>>(
+                                      imageUrl,
+                                      options: Options(responseType: ResponseType.bytes),
+                                    );
+                                    responseBytes = response.data;
+                                  }
+                                  
+                                  if (responseBytes != null) {
+                                    final bytes = Uint8List.fromList(responseBytes);
                                     dialogNavigator.pop();
                                     
                                     if (mounted) {
