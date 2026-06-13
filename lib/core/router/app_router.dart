@@ -68,11 +68,13 @@ abstract final class AppRoutes {
 }
 
 abstract final class AppRouter {
+  static bool wasLoggedIn = false;
+
   static final GoRouter router = GoRouter(
     initialLocation: AppRoutes.splash,
     redirect: (context, state) {
       final session   = Supabase.instance.client.auth.currentSession;
-      final loggedIn  = session != null;
+      final loggedIn  = session != null || wasLoggedIn;
       final path      = state.uri.path;
 
       // Allow unauthenticated access to splash, login, and about academy.

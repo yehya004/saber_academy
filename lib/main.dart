@@ -11,6 +11,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:qcf_quran_plus/qcf_quran_plus.dart';
 
 import 'app.dart';
+import 'core/router/app_router.dart';
 import 'providers/auth_provider.dart';
 import 'providers/locale_provider.dart';
 import 'services/notification_service.dart';
@@ -71,23 +72,29 @@ Future<void> main() async {
     initError = e;
   }
 
-  // Load saved language preference on startup to prevent reset/flashing
+  // Load saved language preference and login status on startup to prevent reset/flashing and web refresh logouts
   String? savedLang;
+  bool wasLoggedIn = false;
   try {
     final prefs = await SharedPreferences.getInstance();
     savedLang = prefs.getString('app_language_pref');
+    wasLoggedIn = prefs.getBool('was_logged_in') ?? false;
   } catch (_) {}
+
+  AppRouter.wasLoggedIn = wasLoggedIn;
 
   if (initError != null) {
     runApp(InitializationErrorApp(error: initError));
     return;
   }
 
+  final authProvider = AuthProvider();
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => LocaleProvider(initialLanguageCode: savedLang)),
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => authProvider),
       ],
       child: const SaberAcademyApp(),
     ),

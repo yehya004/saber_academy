@@ -12,6 +12,28 @@ import '../services/notification_service.dart';
 class AuthProvider extends ChangeNotifier {
   final _authService = AuthService();
 
+  AuthProvider() {
+    _initAuthListener();
+  }
+
+  void _initAuthListener() {
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
+      final session = data.session;
+      if (session != null) {
+        if (_profile == null || _profile!.id != session.user.id) {
+          await loadProfile();
+        }
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('was_logged_in', true);
+      } else {
+        _profile = null;
+        _safeNotify();
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('was_logged_in');
+      }
+    });
+  }
+
   ProfileModel? _profile;
   bool _isLoading = false;
   bool _disposed = false;
