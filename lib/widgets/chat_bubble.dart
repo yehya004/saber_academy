@@ -234,12 +234,19 @@ class _ImageContent extends StatelessWidget {
 
     return Stack(
       children: [
-        onImageTapped != null
-            ? InkWell(
-                onTap: () => onImageTapped!(message),
-                child: imageWidget,
-              )
-            : imageWidget,
+        imageWidget,
+        if (onImageTapped != null)
+          Positioned(
+            left: 0,
+            top: 0,
+            width: 220,
+            height: 180,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => onImageTapped!(message),
+              child: const SizedBox.expand(),
+            ),
+          ),
         Positioned(
           bottom: 4, right: 6,
           child: Row(

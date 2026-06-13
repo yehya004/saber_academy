@@ -19,6 +19,29 @@ Widget buildPlatformSpecificImage({
       ..style.height = '100%'
       ..style.pointerEvents = 'none';
 
+    void disableParentPointerEvents() {
+      try {
+        html.Element? parent = element.parent;
+        int depth = 0;
+        while (parent != null && depth < 5) {
+          if (parent.tagName.toLowerCase() == 'flt-platform-view') {
+            parent.style.pointerEvents = 'none';
+            break;
+          }
+          parent = parent.parent;
+          depth++;
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    element.onLoad.listen((_) => disableParentPointerEvents());
+    
+    for (final ms in [50, 150, 300, 600, 1200]) {
+      Future.delayed(Duration(milliseconds: ms), disableParentPointerEvents);
+    }
+
     switch (fit) {
       case BoxFit.contain:
         element.style.objectFit = 'contain';
