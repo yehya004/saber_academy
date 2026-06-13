@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../widgets/web_image/web_image.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -240,7 +242,6 @@ class _ChatScreenState extends State<ChatScreen> {
     
     Uint8List? imageBytes;
     String? imageName;
-    String? imagePath;
     
     try {
       if (!kIsWeb && Platform.isWindows) {
@@ -253,7 +254,6 @@ class _ChatScreenState extends State<ChatScreen> {
           if (fileInfo.path != null) {
             imageBytes = await File(fileInfo.path!).readAsBytes();
             imageName = fileInfo.name;
-            imagePath = fileInfo.path;
           }
         }
       } else {
@@ -264,21 +264,19 @@ class _ChatScreenState extends State<ChatScreen> {
         if (picked != null) {
           imageBytes = await picked.readAsBytes();
           imageName = picked.name;
-          imagePath = picked.path;
         }
       }
     } catch (e) {
       debugPrint("Error picking image: $e");
     }
     
-    if (imageBytes == null || imagePath == null) return;
+    if (imageBytes == null) return;
 
     if (!mounted) return;
     final dynamic result = await Navigator.of(context).push<dynamic>(
       MaterialPageRoute(
         builder: (_) => ImageEditorScreen(
           imageBytes: imageBytes!,
-          imagePath: imagePath!,
           imageName: imageName ?? 'image.png',
         ),
       ),
@@ -636,6 +634,180 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  void _viewOrEditImage(ChatMessageModel message) {
+    final imageUrl = message.imageUrl;
+    if (imageUrl == null || imageUrl.isEmpty) return;
+
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final isTr = Localizations.localeOf(context).languageCode == 'tr';
+    
+    final mainNavigator = Navigator.of(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.9),
+      builder: (ctx) {
+        bool fetchingBytes = false;
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: const EdgeInsets.all(8),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  InteractiveViewer(
+                    minScale: 0.5,
+                    maxScale: 4.0,
+                    child: Center(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: buildWebFriendlyImage(
+                          imageUrl: imageUrl,
+                          width: MediaQuery.of(context).size.width * 0.9,
+                          height: MediaQuery.of(context).size.height * 0.7,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                  ),
+                  
+                  Positioned(
+                    top: 16,
+                    left: 16,
+                    child: CircleAvatar(
+                      backgroundColor: Colors.black54,
+                      child: IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white),
+                        onPressed: () => Navigator.of(ctx).pop(),
+                      ),
+                    ),
+                  ),
+
+                  Positioned(
+                    bottom: 16,
+                    left: 0,
+                    right: 0,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (fetchingBytes)
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: 12),
+                            child: CircularProgressIndicator(color: AppColors.secondary),
+                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: fetchingBytes ? null : () async {
+                                final dialogNavigator = Navigator.of(ctx);
+                                setDialogState(() => fetchingBytes = true);
+                                try {
+                                  final response = await Dio().get<List<int>>(
+                                    imageUrl,
+                                    options: Options(responseType: ResponseType.bytes),
+                                  );
+                                  if (response.data != null) {
+                                    final bytes = Uint8List.fromList(response.data!);
+                                    dialogNavigator.pop();
+                                    
+                                    if (mounted) {
+                                      final dynamic editedResult = await mainNavigator.push<dynamic>(
+                                        MaterialPageRoute(
+                                          builder: (_) => ImageEditorScreen(
+                                            imageBytes: bytes,
+                                            imageName: message.fileName ?? 'edited_image.png',
+                                          ),
+                                        ),
+                                      );
+                                      if (editedResult != null) {
+                                        if (mounted) {
+                                          setState(() => _sendingImage = true);
+                                        }
+                                        try {
+                                          final telegramFileId = await _telegramService.uploadFile(
+                                            editedResult,
+                                            caption: 'صورة معدلة في المحادثة من $_myId إلى ${widget.partnerId} — ${DateTime.now().toIso8601String()}',
+                                            fileName: 'edited_${message.fileName ?? "image.png"}',
+                                          );
+
+                                          await _chatService.sendMessage(
+                                            senderId: _myId,
+                                            receiverId: widget.partnerId,
+                                            messageText: '',
+                                            fileName: 'edited_${message.fileName ?? "image.png"}',
+                                            telegramFileId: telegramFileId,
+                                          );
+                                          await _fetchMessagesSilently();
+                                        } finally {
+                                          if (mounted) {
+                                            setState(() => _sendingImage = false);
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                } catch (e) {
+                                  debugPrint("Error fetching bytes for edit: $e");
+                                  scaffoldMessenger.showSnackBar(
+                                    SnackBar(
+                                      content: Text(isAr ? 'فشل تحميل الصورة للتعديل' : 'Failed to download image for editing'),
+                                      backgroundColor: AppColors.error,
+                                    ),
+                                  );
+                                } finally {
+                                  setDialogState(() => fetchingBytes = false);
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                              icon: const Icon(Icons.edit, size: 18),
+                              label: Text(
+                                isAr ? 'تعديل وإعادة إرسال' : (isTr ? 'Düzenle ve Yeniden Gönder' : 'Edit & Resend'),
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            ElevatedButton.icon(
+                              onPressed: () async {
+                                final uri = Uri.parse(imageUrl);
+                                await launchUrl(uri, mode: LaunchMode.externalApplication);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white24,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  side: const BorderSide(color: Colors.white38, width: 0.8),
+                                ),
+                              ),
+                              icon: const Icon(Icons.download, size: 18),
+                              label: Text(
+                                isAr ? 'فتح للتحميل' : (isTr ? 'İndirmek için Aç' : 'Open to Download'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -718,6 +890,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 child: ChatBubble(
                                   message: message,
                                   isMine: message.senderId == _myId,
+                                  onImageTapped: _viewOrEditImage,
                                 ),
                               );
                             },

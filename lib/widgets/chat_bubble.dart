@@ -12,8 +12,14 @@ import 'web_image/web_image.dart';
 class ChatBubble extends StatelessWidget {
   final ChatMessageModel message;
   final bool isMine;
+  final void Function(ChatMessageModel message)? onImageTapped;
 
-  const ChatBubble({super.key, required this.message, required this.isMine});
+  const ChatBubble({
+    super.key,
+    required this.message,
+    required this.isMine,
+    this.onImageTapped,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -129,14 +135,14 @@ class ChatBubble extends StatelessWidget {
                     telegramFileId: message.telegramFileId,
                   );
                   return tempMsg.isImage
-                      ? _ImageContent(message: tempMsg, isMine: isMine)
+                      ? _ImageContent(message: tempMsg, isMine: isMine, onImageTapped: onImageTapped)
                       : tempMsg.isAudio
                           ? _AudioContent(message: tempMsg, isMine: isMine)
                           : _FileContent(message: tempMsg, isMine: isMine);
                 },
               )
             : message.isImage
-                ? _ImageContent(message: message, isMine: isMine)
+                ? _ImageContent(message: message, isMine: isMine, onImageTapped: onImageTapped)
                 : message.isAudio
                     ? _AudioContent(message: message, isMine: isMine)
                     : message.isFile
@@ -200,56 +206,70 @@ class _TextContent extends StatelessWidget {
 }
 
 class _ImageContent extends StatelessWidget {
-  const _ImageContent({required this.message, required this.isMine});
+  const _ImageContent({
+    required this.message,
+    required this.isMine,
+    this.onImageTapped,
+  });
   final ChatMessageModel message;
   final bool isMine;
+  final void Function(ChatMessageModel message)? onImageTapped;
 
   @override
-  Widget build(BuildContext context) => Stack(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.only(
-              topLeft:     const Radius.circular(AppSpacing.chatBubbleRadius),
-              topRight:    const Radius.circular(AppSpacing.chatBubbleRadius),
-              bottomLeft:  Radius.circular(isMine ? AppSpacing.chatBubbleRadius : 4),
-              bottomRight: Radius.circular(isMine ? 4 : AppSpacing.chatBubbleRadius),
-            ),
-            child: buildWebFriendlyImage(
-              imageUrl: message.imageUrl!,
-              width: 220,
-              height: 180,
-              fit: BoxFit.cover,
-            ),
-          ),
-          Positioned(
-            bottom: 4, right: 6,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  _timeLabel(message.createdAt),
-                  style: const TextStyle(
-                    color:    Colors.white,
-                    fontSize: 10,
-                    shadows: [Shadow(blurRadius: 2, color: Colors.black54)],
-                  ),
+  Widget build(BuildContext context) {
+    final imageWidget = ClipRRect(
+      borderRadius: BorderRadius.only(
+        topLeft:     const Radius.circular(AppSpacing.chatBubbleRadius),
+        topRight:    const Radius.circular(AppSpacing.chatBubbleRadius),
+        bottomLeft:  Radius.circular(isMine ? AppSpacing.chatBubbleRadius : 4),
+        bottomRight: Radius.circular(isMine ? 4 : AppSpacing.chatBubbleRadius),
+      ),
+      child: buildWebFriendlyImage(
+        imageUrl: message.imageUrl!,
+        width: 220,
+        height: 180,
+        fit: BoxFit.cover,
+      ),
+    );
+
+    return Stack(
+      children: [
+        onImageTapped != null
+            ? InkWell(
+                onTap: () => onImageTapped!(message),
+                child: imageWidget,
+              )
+            : imageWidget,
+        Positioned(
+          bottom: 4, right: 6,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _timeLabel(message.createdAt),
+                style: const TextStyle(
+                  color:    Colors.white,
+                  fontSize: 10,
+                  shadows: [Shadow(blurRadius: 2, color: Colors.black54)],
                 ),
-                if (isMine) ...[
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.done_all,
-                    size: 14,
-                    color: message.isRead
-                        ? const Color(0xFF34B7F1) // WhatsApp blue read color
-                        : Colors.white60,
-                    shadows: const [Shadow(blurRadius: 2, color: Colors.black54)],
-                  ),
-                ],
+              ),
+              if (isMine) ...[
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.done_all,
+                  size: 14,
+                  color: message.isRead
+                      ? const Color(0xFF34B7F1) // WhatsApp blue read color
+                      : Colors.white60,
+                  shadows: const [Shadow(blurRadius: 2, color: Colors.black54)],
+                ),
               ],
-            ),
+            ],
           ),
-        ],
-      );
+        ),
+      ],
+    );
+  }
 }
 
 class _FileContent extends StatelessWidget {
