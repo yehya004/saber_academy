@@ -32,12 +32,38 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
   int _todaySessionsCount  = 0;
   int _unreadMessagesCount = 0;
   int _pendingHomeworks    = 0;
+  String? _loadedTeacherId;
 
   @override
   void initState() {
     super.initState();
-    _load();
     NotificationService().requestPermissions();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final auth = Provider.of<AuthProvider>(context);
+    final teacherId = auth.profile?.id;
+    if (teacherId != null && teacherId != _loadedTeacherId) {
+      _loadedTeacherId = teacherId;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _load();
+        }
+      });
+    } else if (teacherId == null && _loadedTeacherId != null) {
+      _loadedTeacherId = null;
+      _clearState();
+    }
+  }
+
+  void _clearState() {
+    _students = [];
+    _todaySessionsCount = 0;
+    _unreadMessagesCount = 0;
+    _pendingHomeworks = 0;
+    _loading = false;
   }
 
   Future<void> _load() async {

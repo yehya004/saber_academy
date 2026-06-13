@@ -73,17 +73,28 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   bool                     _hasAutoOpenedChat = false;
 
   final _quizService = QuizService();
+  String? _loadedUserId;
 
   @override
   void initState() {
     super.initState();
-    _loadData();
     NotificationService().requestPermissions();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    final auth = Provider.of<AuthProvider>(context);
+    final userId = auth.profile?.id;
+    if (userId != null && userId != _loadedUserId) {
+      _loadedUserId = userId;
+      _loadData();
+    } else if (userId == null && _loadedUserId != null) {
+      _loadedUserId = null;
+      _clearState();
+    }
+
     if (!_hasAutoOpenedChat) {
       try {
         final state = GoRouterState.of(context);
@@ -107,6 +118,20 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
         debugPrint("Error checking auto-open chat: $e");
       }
     }
+  }
+
+  void _clearState() {
+    _levelData = null;
+    _studentProfile = null;
+    _teacher = null;
+    _schedule = null;
+    _localEntries = [];
+    _nextLessonDateTime = null;
+    _scheduleFromOnline = false;
+    _recentSessions = [];
+    _unreadMessages = 0;
+    _pendingQuizzes = 0;
+    _postponements = [];
   }
 
   Future<void> _loadData() async {
