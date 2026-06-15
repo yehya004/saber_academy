@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'quran_api_service.dart';
@@ -123,6 +123,7 @@ class QuranAudioService extends ChangeNotifier {
 
   // Local Audio paths helpers
   Future<String> _getLocalAudioPath(String qari, int ayahNumber) async {
+    if (kIsWeb) return '';
     final appDir = await getApplicationDocumentsDirectory();
     final dir = Directory('${appDir.path}/quran_audio/$qari');
     if (!await dir.exists()) {
@@ -132,12 +133,14 @@ class QuranAudioService extends ChangeNotifier {
   }
 
   Future<bool> isAyahDownloaded(String qari, int ayahNumber) async {
+    if (kIsWeb) return false;
     final path = await _getLocalAudioPath(qari, ayahNumber);
     final file = File(path);
     return await file.exists() && file.lengthSync() > 0;
   }
 
   Future<bool> isPageAudioDownloaded(int page, QuranPageBundle? pageBundle) async {
+    if (kIsWeb) return false;
     if (pageBundle == null || pageBundle.arabic.isEmpty) return false;
     for (final ayah in pageBundle.arabic) {
       final exists = await isAyahDownloaded(_selectedQari, ayah.number);
@@ -148,6 +151,7 @@ class QuranAudioService extends ChangeNotifier {
 
   // Audio Downloading Methods
   Future<void> downloadPageAudio(int page, QuranPageBundle pageBundle) async {
+    if (kIsWeb) return;
     if (_isAudioDownloading) return;
     _isAudioDownloading = true;
     _audioDownloadProgress = 0.0;
@@ -198,16 +202,21 @@ class QuranAudioService extends ChangeNotifier {
     }
     
     final ayah = _bundle!.arabic[_playingAyahIndex];
-    final localPath = await _getLocalAudioPath(_selectedQari, ayah.number);
-    final localFile = File(localPath);
     
     try {
       await _player.stop();
-      if (await localFile.exists() && localFile.lengthSync() > 0) {
-        await _player.play(DeviceFileSource(localPath));
-      } else {
+      if (kIsWeb) {
         final url = _getAudioUrl(_selectedQari, ayah.number, ayah.surahNumber, ayah.numberInSurah);
         await _player.play(UrlSource(url));
+      } else {
+        final localPath = await _getLocalAudioPath(_selectedQari, ayah.number);
+        final localFile = File(localPath);
+        if (await localFile.exists() && localFile.lengthSync() > 0) {
+          await _player.play(DeviceFileSource(localPath));
+        } else {
+          final url = _getAudioUrl(_selectedQari, ayah.number, ayah.surahNumber, ayah.numberInSurah);
+          await _player.play(UrlSource(url));
+        }
       }
       await _player.setPlaybackRate(_playbackSpeed);
       _isPlaying = true;
@@ -364,6 +373,7 @@ class QuranAudioService extends ChangeNotifier {
 
   /// Returns the total size of downloaded audio files for a qari in MB
   Future<double> getQariDirSizeInMB(String qari) async {
+    if (kIsWeb) return 0.0;
     try {
       final appDir = await getApplicationDocumentsDirectory();
       final dir = Directory('${appDir.path}/quran_audio/$qari');
@@ -381,6 +391,7 @@ class QuranAudioService extends ChangeNotifier {
   }
 
   Future<int> getDownloadedAyahsCount(String qari) async {
+    if (kIsWeb) return 0;
     try {
       final appDir = await getApplicationDocumentsDirectory();
       final dir = Directory('${appDir.path}/quran_audio/$qari');
@@ -408,6 +419,10 @@ class QuranAudioService extends ChangeNotifier {
     required VoidCallback onCompleted,
     required void Function(String error) onError,
   }) async {
+    if (kIsWeb) {
+      onError('التحميل غير مدعوم على المتصفح.');
+      return;
+    }
     if (_isBulkDownloading) {
       onError('هناك عملية تحميل أخرى قيد التشغيل بالفعل.');
       return;
@@ -487,6 +502,7 @@ class QuranAudioService extends ChangeNotifier {
   }
 
   Future<void> deleteAudioForQari(String qari) async {
+    if (kIsWeb) return;
     try {
       final appDir = await getApplicationDocumentsDirectory();
       final dir = Directory('${appDir.path}/quran_audio/$qari');
