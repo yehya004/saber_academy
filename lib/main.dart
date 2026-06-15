@@ -19,14 +19,13 @@ import 'services/notification_service.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load QCF Quran fonts in background
-  if (!kIsWeb) {
-    QcfFontLoader.setupFontsAtStartup(
-      onProgress: (_) {},
-    ).catchError((e) {
-      debugPrint("QcfFontLoader error: $e");
-    });
-  }
+  // Load QCF Quran fonts in background (uses memoryOnly mode on Web to bypass storage path_provider limitations)
+  QcfFontLoader.setupFontsAtStartup(
+    onProgress: (_) {},
+    mode: kIsWeb ? FontStorageMode.memoryOnly : FontStorageMode.permanentDisk,
+  ).catchError((e) {
+    debugPrint("QcfFontLoader error: $e");
+  });
 
   // Initialize FFI for Windows SQLite support
   if (!kIsWeb && Platform.isWindows) {

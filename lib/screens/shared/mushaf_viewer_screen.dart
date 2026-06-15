@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:ui';
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -76,7 +75,7 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
           _page = audioPage;
         });
         if (_mushafType == 'text') {
-          if (!kIsWeb) QcfFontLoader.preloadPages(audioPage, radius: 5);
+          QcfFontLoader.preloadPages(audioPage, radius: 5);
           if (_textPageController != null && _textPageController!.hasClients) {
             _textPageController!.animateToPage(
               audioPage - 1,
@@ -182,6 +181,7 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
                 ),
                 onTap: () async {
                   Navigator.pop(context);
+                  _audioService.unlockWeb();
                   final b = await QuranApiService.fetchPage(pageNum, isDiyanet: false);
                   final idx = b.arabic.indexWhere((a) => a.surahNumber == surahNum && a.numberInSurah == ayahNum);
                   if (idx != -1) {
@@ -380,7 +380,7 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
     _textPageController = PageController(initialPage: clampedPage - 1);
     
     if (type == 'text') {
-      if (!kIsWeb) QcfFontLoader.preloadPages(clampedPage, radius: 5);
+      QcfFontLoader.preloadPages(clampedPage, radius: 5);
     }
     
     if (mounted) {
@@ -431,7 +431,7 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
     // Initialize PageControllers with the correct initial page.
     _pageController = PageController(initialPage: _totalPages - _page);
     _textPageController = PageController(initialPage: _page - 1);
-    if (!kIsWeb) QcfFontLoader.preloadPages(_page, radius: 5);
+    QcfFontLoader.preloadPages(_page, radius: 5);
     if (mounted) setState(() => _isReady = true);
   }
 
@@ -542,7 +542,7 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
     _saveLastPage(capped);
     
     if (_mushafType == 'text') {
-      if (!kIsWeb) QcfFontLoader.preloadPages(capped, radius: 5);
+      QcfFontLoader.preloadPages(capped, radius: 5);
       if (_textPageController != null && _textPageController!.hasClients) {
         _textPageController!.jumpToPage(capped - 1);
       }
@@ -711,54 +711,31 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
           if (_isReady)
             Positioned.fill(
               child: _mushafType == 'text'
-                  ? (kIsWeb
-                      ? WebQuranPageView(
-                          pageController: _textPageController!,
-                          onPageChanged: (page) {
-                            if (mounted) {
-                              setState(() {
-                                _page = page;
-                              });
-                            }
-                            _saveLastPage(page);
-                          },
-                          highlights: _getTextHighlights(),
-                          topBar: SizedBox(height: 48 + topPadding),
-                          bottomBar: SizedBox(height: 72 + bottomPadding),
-                          onVerseTapped: (surah, ayah) {
-                            _showVerseOptionsSheet(
-                              surahNum: surah,
-                              ayahNum: ayah,
-                              pageNum: _page,
-                            );
-                          },
-                          pageBackgroundColor: AppColors.mushafSepiaBg,
-                        )
-                      : QuranPageView(
-                          pageController: _textPageController!,
-                          onPageChanged: (page) {
-                            if (mounted) {
-                              setState(() {
-                                _page = page;
-                              });
-                            }
-                            _saveLastPage(page);
-                            QcfFontLoader.preloadPages(page, radius: 5);
-                          },
-                          highlights: _getTextHighlights(),
-                          topBar: SizedBox(height: 48 + topPadding),
-                          bottomBar: SizedBox(height: 72 + bottomPadding),
-                          onLongPress: (surah, ayah, details) {
-                            _showVerseOptionsSheet(
-                              surahNum: surah,
-                              ayahNum: ayah,
-                              pageNum: _page,
-                            );
-                          },
-                          isTajweed: true,
-                          isDarkMode: false,
-                          pageBackgroundColor: AppColors.mushafSepiaBg,
-                        ))
+                  ? QuranPageView(
+                      pageController: _textPageController!,
+                      onPageChanged: (page) {
+                        if (mounted) {
+                          setState(() {
+                            _page = page;
+                          });
+                        }
+                        _saveLastPage(page);
+                        QcfFontLoader.preloadPages(page, radius: 5);
+                      },
+                      highlights: _getTextHighlights(),
+                      topBar: SizedBox(height: 48 + topPadding),
+                      bottomBar: SizedBox(height: 72 + bottomPadding),
+                      onLongPress: (surah, ayah, details) {
+                        _showVerseOptionsSheet(
+                          surahNum: surah,
+                          ayahNum: ayah,
+                          pageNum: _page,
+                        );
+                      },
+                      isTajweed: true,
+                      isDarkMode: false,
+                      pageBackgroundColor: AppColors.mushafSepiaBg,
+                    )
                   : Directionality(
                       textDirection: TextDirection.rtl,
                       child: PageView.builder(
@@ -1024,7 +1001,10 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
                   _navBtn(
                     icon: Icons.headphones_outlined,
                     label: l10n.listenLabel,
-                    onTap: () => _showTafsirPanel(mushafPage, autoPlay: true),
+                    onTap: () {
+                      _audioService.unlockWeb();
+                      _showTafsirPanel(mushafPage, autoPlay: true);
+                    },
                   ),
                   _navBtn(
                     icon: Icons.list_alt_outlined,

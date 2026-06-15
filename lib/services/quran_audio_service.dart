@@ -21,6 +21,19 @@ class QuranAudioService extends ChangeNotifier {
     });
   }
 
+  Future<void> unlockWeb() async {
+    if (kIsWeb) {
+      try {
+        await _player.play(
+          UrlSource('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAAA'),
+          volume: 0.0,
+        );
+      } catch (e) {
+        debugPrint("Web audio unlock error: $e");
+      }
+    }
+  }
+
   final _player = AudioPlayer();
   final _dio = Dio();
   SharedPreferences? _prefs;
