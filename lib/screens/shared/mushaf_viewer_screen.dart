@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -39,6 +40,7 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
   int? _selectedSurahId;
   int? _selectedAyahId;
   Timer? _searchHighlightTimer;
+  bool _showWebTip = true;
 
   /// Base URL for Madina Mushaf page images (zero-padded 3-digit page number).
   static const String _imageBaseUrl =
@@ -994,6 +996,111 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
             right: 0,
             child: _buildBottomBar(mushafPage, isBookmarked),
           ),
+          // ── Web Side Navigation Chevrons ────────────────────────
+          if (kIsWeb || MediaQuery.of(context).size.width > 600) ...[
+            Positioned(
+              left: 20,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: AnimatedOpacity(
+                  opacity: _page < _totalPages ? 0.8 : 0.2,
+                  duration: const Duration(milliseconds: 200),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 8,
+                        )
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.chevron_left, color: Colors.black87, size: 28),
+                      onPressed: _page < _totalPages ? () => _jumpToPage(_page + 1) : null,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              right: 20,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: AnimatedOpacity(
+                  opacity: _page > 1 ? 0.8 : 0.2,
+                  duration: const Duration(milliseconds: 200),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 8,
+                        )
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.chevron_right, color: Colors.black87, size: 28),
+                      onPressed: _page > 1 ? () => _jumpToPage(_page - 1) : null,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+          // ── Web long-press click helper tip banner ───────────────
+          if (_mushafType == 'text' && (kIsWeb || MediaQuery.of(context).size.width > 600) && _showWebTip)
+            Positioned(
+              top: topPadding + 64,
+              left: 20,
+              right: 20,
+              child: Center(
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 500),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade50.withValues(alpha: 0.95),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.amber.shade200),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      )
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.lightbulb_outline, color: Colors.amber.shade800, size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          l10n.localeName == 'ar'
+                              ? 'تلميح: اضغط مطولاً (مع الاستمرار بالنقر) على الآية بالماوس لتحديدها وإظهار خيارات التفسير أو التلاوة.'
+                              : 'Tip: Click and hold (long press) on any verse to highlight it or view options.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.amber.shade900,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      GestureDetector(
+                        onTap: () => setState(() => _showWebTip = false),
+                        child: Icon(Icons.close, color: Colors.amber.shade700, size: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
