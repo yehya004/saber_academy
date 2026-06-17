@@ -38,7 +38,7 @@ jobs:
 
       - name: Build Web Application
         run: |
-          flutter build web --release --base-href "/saber_academy/"
+          flutter build web --release --base-href "/saber_academy/" --no-tree-shake-icons # Disable icon tree shaking to avoid IconTreeShakerException
           touch build/web/.nojekyll
 
       - name: Deploy to GitHub Pages
