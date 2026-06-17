@@ -11,6 +11,7 @@ import '../../services/quran_audio_service.dart';
 import '../../services/quran_api_service.dart';
 import '../../services/mushaf_coordinate_service.dart';
 import '../../services/quran_database_helper.dart';
+import '../../services/app_qcf_font_loader.dart';
 import 'package:qcf_quran_plus/qcf_quran_plus.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -75,7 +76,7 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
           _page = audioPage;
         });
         if (_mushafType == 'text') {
-          QcfFontLoader.preloadPages(audioPage, radius: 5);
+          AppQcfFontLoader.preloadPages(audioPage, radius: 5);
           if (_textPageController != null && _textPageController!.hasClients) {
             _textPageController!.animateToPage(
               audioPage - 1,
@@ -380,7 +381,7 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
     _textPageController = PageController(initialPage: clampedPage - 1);
     
     if (type == 'text') {
-      QcfFontLoader.preloadPages(clampedPage, radius: 5);
+      AppQcfFontLoader.preloadPages(clampedPage, radius: 5);
     }
     
     if (mounted) {
@@ -431,7 +432,7 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
     // Initialize PageControllers with the correct initial page.
     _pageController = PageController(initialPage: _totalPages - _page);
     _textPageController = PageController(initialPage: _page - 1);
-    QcfFontLoader.preloadPages(_page, radius: 5);
+    AppQcfFontLoader.preloadPages(_page, radius: 5);
     if (mounted) setState(() => _isReady = true);
   }
 
@@ -542,7 +543,7 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
     _saveLastPage(capped);
     
     if (_mushafType == 'text') {
-      QcfFontLoader.preloadPages(capped, radius: 5);
+      AppQcfFontLoader.preloadPages(capped, radius: 5);
       if (_textPageController != null && _textPageController!.hasClients) {
         _textPageController!.jumpToPage(capped - 1);
       }
@@ -711,30 +712,59 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
           if (_isReady)
             Positioned.fill(
               child: _mushafType == 'text'
-                  ? QuranPageView(
-                      pageController: _textPageController!,
-                      onPageChanged: (page) {
-                        if (mounted) {
-                          setState(() {
-                            _page = page;
-                          });
+                  ? LayoutBuilder(
+                      builder: (context, constraints) {
+                        final width = constraints.maxWidth;
+                        final height = constraints.maxHeight;
+                        
+                        // Limit width to maintain standard portrait aspect ratio of Mushaf pages
+                        double targetW = width;
+                        double targetH = height;
+                        const double origRatio = 0.625; // Standard 10:16 Mushaf ratio
+                        
+                        if (width / height > origRatio) {
+                          targetW = height * origRatio;
                         }
-                        _saveLastPage(page);
-                        QcfFontLoader.preloadPages(page, radius: 5);
-                      },
-                      highlights: _getTextHighlights(),
-                      topBar: SizedBox(height: 48 + topPadding),
-                      bottomBar: SizedBox(height: 72 + bottomPadding),
-                      onLongPress: (surah, ayah, details) {
-                        _showVerseOptionsSheet(
-                          surahNum: surah,
-                          ayahNum: ayah,
-                          pageNum: _page,
+                        
+                        final customMediaQuery = MediaQuery.of(context).copyWith(
+                          size: Size(targetW, targetH),
+                        );
+                        
+                        return Center(
+                          child: SizedBox(
+                            width: targetW,
+                            height: targetH,
+                            child: MediaQuery(
+                              data: customMediaQuery,
+                              child: QuranPageView(
+                                pageController: _textPageController!,
+                                onPageChanged: (page) {
+                                  if (mounted) {
+                                    setState(() {
+                                      _page = page;
+                                    });
+                                  }
+                                  _saveLastPage(page);
+                                  AppQcfFontLoader.preloadPages(page, radius: 5);
+                                },
+                                highlights: _getTextHighlights(),
+                                topBar: SizedBox(height: 48 + topPadding),
+                                bottomBar: SizedBox(height: 72 + bottomPadding),
+                                onLongPress: (surah, ayah, details) {
+                                  _showVerseOptionsSheet(
+                                    surahNum: surah,
+                                    ayahNum: ayah,
+                                    pageNum: _page,
+                                  );
+                                },
+                                isTajweed: true,
+                                isDarkMode: false,
+                                pageBackgroundColor: AppColors.mushafSepiaBg,
+                              ),
+                            ),
+                          ),
                         );
                       },
-                      isTajweed: true,
-                      isDarkMode: false,
-                      pageBackgroundColor: AppColors.mushafSepiaBg,
                     )
                   : Directionality(
                       textDirection: TextDirection.rtl,

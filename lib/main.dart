@@ -8,7 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:qcf_quran_plus/qcf_quran_plus.dart';
+import 'services/app_qcf_font_loader.dart';
 
 import 'app.dart';
 import 'core/router/app_router.dart';
@@ -19,12 +19,11 @@ import 'services/notification_service.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load QCF Quran fonts in background (uses memoryOnly mode on Web to bypass storage path_provider limitations)
-  QcfFontLoader.setupFontsAtStartup(
+  // Load QCF Quran fonts in background
+  AppQcfFontLoader.setupFontsAtStartup(
     onProgress: (_) {},
-    mode: kIsWeb ? FontStorageMode.memoryOnly : FontStorageMode.permanentDisk,
   ).catchError((e) {
-    debugPrint("QcfFontLoader error: $e");
+    debugPrint("AppQcfFontLoader error: $e");
   });
 
   // Initialize FFI for Windows SQLite support
