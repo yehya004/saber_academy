@@ -52,10 +52,14 @@ Future<void> main() async {
       anonKey: anonKey,
     );
 
-    // Initialize Firebase (non-Windows, non-Web) and Notification Services
+    // Initialize Firebase and Notification Services
+    // NotificationService is skipped on Web: firebase_messaging and
+    // flutter_local_notifications don't support Web and crash with
+    // "Cannot read properties of undefined (reading 'init')".
     try {
       if (kIsWeb) {
-        await NotificationService().initialize();
+        // Push notifications are not supported on Web – skip entirely.
+        debugPrint("Web: skipping NotificationService.");
       } else if (Platform.isWindows) {
         await NotificationService().initialize();
       } else {
