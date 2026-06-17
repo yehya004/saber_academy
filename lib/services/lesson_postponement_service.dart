@@ -19,7 +19,7 @@ class LessonPostponementService {
     });
   }
 
-  /// Fetches all postponements for a given student.
+  /// Fetches all postponements for a given student, filtering out and deleting passed reschedules.
   Future<List<LessonPostponementModel>> getPostponementsForStudent(String studentId) async {
     final data = await _client
         .from('lesson_postponements')
@@ -27,7 +27,19 @@ class LessonPostponementService {
         .eq('student_id', studentId)
         .order('original_date_time', ascending: false);
 
-    return data.map((e) => LessonPostponementModel.fromMap(e)).toList();
+    final list = data.map((e) => LessonPostponementModel.fromMap(e)).toList();
+    final now = DateTime.now().toUtc();
+
+    // Separate active and passed postponements
+    final activeList = list.where((p) => p.newDateTime.isAfter(now)).toList();
+    final passedList = list.where((p) => p.newDateTime.isBefore(now)).toList();
+
+    // Asynchronously delete passed reschedules from database
+    for (final p in passedList) {
+      deletePostponement(p.id).catchError((_) {});
+    }
+
+    return activeList;
   }
 
   /// Deletes a postponement by ID (e.g. after it has passed or if canceled).

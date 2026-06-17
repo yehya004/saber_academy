@@ -52,7 +52,7 @@ class WebQcfFontLoader {
       final data = await rootBundle.load(
         'packages/qcf_quran_plus/assets/fonts/qcf_tajweed/$fontName.zip',
       );
-      final zipBytes = data.buffer.asUint8List();
+      final zipBytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
 
       // Extract TTF from zip (directly on Web main thread to bypass Isolate.run)
       final archive = ZipDecoder().decodeBytes(zipBytes);
@@ -72,6 +72,7 @@ class WebQcfFontLoader {
       final loader = FontLoader(fontName);
       loader.addFont(Future.value(ByteData.view(fontBytes.buffer)));
       await loader.load();
+      debugPrint("WebQcfFontLoader successfully registered font: $fontName");
     } catch (e) {
       // Silence or print non-blocking error
       debugPrint("WebQcfFontLoader error loading page $pageNumber: $e");

@@ -76,7 +76,9 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
           _page = audioPage;
         });
         if (_mushafType == 'text') {
-          AppQcfFontLoader.preloadPages(audioPage, radius: 5);
+          AppQcfFontLoader.preloadPages(audioPage, radius: 5).then((_) {
+            if (mounted) setState(() {});
+          });
           if (_textPageController != null && _textPageController!.hasClients) {
             _textPageController!.animateToPage(
               audioPage - 1,
@@ -381,7 +383,9 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
     _textPageController = PageController(initialPage: clampedPage - 1);
     
     if (type == 'text') {
-      AppQcfFontLoader.preloadPages(clampedPage, radius: 5);
+      AppQcfFontLoader.preloadPages(clampedPage, radius: 5).then((_) {
+        if (mounted) setState(() {});
+      });
     }
     
     if (mounted) {
@@ -432,7 +436,9 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
     // Initialize PageControllers with the correct initial page.
     _pageController = PageController(initialPage: _totalPages - _page);
     _textPageController = PageController(initialPage: _page - 1);
-    AppQcfFontLoader.preloadPages(_page, radius: 5);
+    AppQcfFontLoader.preloadPages(_page, radius: 5).then((_) {
+      if (mounted) setState(() {});
+    });
     if (mounted) setState(() => _isReady = true);
   }
 
@@ -543,7 +549,9 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
     _saveLastPage(capped);
     
     if (_mushafType == 'text') {
-      AppQcfFontLoader.preloadPages(capped, radius: 5);
+      AppQcfFontLoader.preloadPages(capped, radius: 5).then((_) {
+        if (mounted) setState(() {});
+      });
       if (_textPageController != null && _textPageController!.hasClients) {
         _textPageController!.jumpToPage(capped - 1);
       }
@@ -745,7 +753,9 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
                                     });
                                   }
                                   _saveLastPage(page);
-                                  AppQcfFontLoader.preloadPages(page, radius: 5);
+                                  AppQcfFontLoader.preloadPages(page, radius: 5).then((_) {
+                                    if (mounted) setState(() {});
+                                  });
                                 },
                                 highlights: _getTextHighlights(),
                                 topBar: SizedBox(height: 48 + topPadding),
