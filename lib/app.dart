@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
@@ -7,6 +7,19 @@ import 'package:provider/provider.dart';
 import 'core/constants/app_colors.dart';
 import 'core/router/app_router.dart';
 import 'providers/locale_provider.dart';
+
+/// Custom scroll behavior that allows mouse drag on Flutter Web.
+class _WebScrollBehavior extends MaterialScrollBehavior {
+  const _WebScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => const {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.unknown,
+      };
+}
 
 class SaberAcademyApp extends StatelessWidget {
   const SaberAcademyApp({super.key});
@@ -62,14 +75,9 @@ class SaberAcademyApp extends StatelessWidget {
         ),
       ),
 
-      scrollBehavior: const MaterialScrollBehavior().copyWith(
-        dragDevices: {
-          PointerDeviceKind.mouse,
-          PointerDeviceKind.touch,
-          PointerDeviceKind.stylus,
-          PointerDeviceKind.unknown,
-        },
-      ),
+      // ── Scroll behavior: allow mouse drag on Web ──────────
+      scrollBehavior: const _WebScrollBehavior(),
+
       routerConfig: AppRouter.router,
     );
   }
