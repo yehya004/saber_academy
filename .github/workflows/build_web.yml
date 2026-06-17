@@ -35,7 +35,7 @@ jobs:
 
       - name: Build web release with base href for GitHub Pages
         run: |
-          flutter build web --release --web-renderer html --base-href "/saber_academy/"
+          flutter build web --release --base-href "/saber_academy/"
 
       - name: Deploy to GitHub Pages (gh-pages branch)
         uses: peaceiris/actions-gh-pages@v4
