@@ -86,7 +86,7 @@ flutter:
   generate: true
 
   assets:
-    - .env
+    - env_config.txt
     - assets/images/
     - assets/mushaf/diyanet/diyanet_coordinates.json
     - assets/quran/database.sqlite

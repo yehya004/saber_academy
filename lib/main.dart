@@ -38,16 +38,17 @@ Future<void> main() async {
   Object? initError;
   try {
     // Load environment variables from .env (never commit real secrets).
-    await dotenv.load(fileName: '.env');
+    await dotenv.load(fileName: 'env_config.txt');
 
     final url = dotenv.env['SUPABASE_URL'];
     final anonKey = dotenv.env['SUPABASE_ANON_KEY'];
     if (url == null || url.isEmpty || anonKey == null || anonKey.isEmpty) {
-      throw Exception("SUPABASE_URL or SUPABASE_ANON_KEY is missing in the .env file.");
+      throw Exception(
+          "SUPABASE_URL or SUPABASE_ANON_KEY is missing in the .env file.");
     }
 
     await Supabase.initialize(
-      url:     url,
+      url: url,
       // ignore: deprecated_member_use
       anonKey: anonKey,
     );
@@ -95,7 +96,8 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => LocaleProvider(initialLanguageCode: savedLang)),
+        ChangeNotifierProvider(
+            create: (_) => LocaleProvider(initialLanguageCode: savedLang)),
         ChangeNotifierProvider(create: (_) => authProvider),
       ],
       child: const SaberAcademyApp(),
@@ -182,4 +184,3 @@ class InitializationErrorApp extends StatelessWidget {
     );
   }
 }
-

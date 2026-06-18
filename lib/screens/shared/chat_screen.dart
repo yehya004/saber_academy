@@ -384,11 +384,26 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _startRecording() async {
     try {
-      if (await _audioRecorder.hasPermission()) {
-        final tempDir = await getTemporaryDirectory();
-        final path = '${tempDir.path}/audio_note_${DateTime.now().millisecondsSinceEpoch}.m4a';
+      debugPrint('[VoiceNote] Checking microphone permission...');
+      final hasPermission = await _audioRecorder.hasPermission();
+      debugPrint('[VoiceNote] hasPermission: $hasPermission');
+      if (hasPermission) {
+        String path;
+        if (kIsWeb) {
+          // On web, record package handles blob URLs automatically
+          path = '';
+        } else {
+          final tempDir = await getTemporaryDirectory();
+          path = '${tempDir.path}/audio_note_${DateTime.now().millisecondsSinceEpoch}.m4a';
+        }
+        debugPrint('[VoiceNote] Starting recording at: $path');
         
-        await _audioRecorder.start(const RecordConfig(encoder: AudioEncoder.aacLc), path: path);
+        if (kIsWeb) {
+          await _audioRecorder.start(const RecordConfig(encoder: AudioEncoder.opus), path: '');
+        } else {
+          await _audioRecorder.start(const RecordConfig(encoder: AudioEncoder.aacLc), path: path);
+        }
+        debugPrint('[VoiceNote] Recording started successfully!');
         
         setState(() {
           _isRecording = true;
@@ -425,9 +440,37 @@ class _ChatScreenState extends State<ChatScreen> {
             }
           } catch (_) {}
         });
+      } else {
+        debugPrint('[VoiceNote] Microphone permission denied');
+        if (mounted) {
+          final l10n = AppLocalizations.of(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.localeName == 'ar'
+                  ? 'يجب السماح بإذن الميكروفون لتسجيل الصوت'
+                  : (l10n.localeName == 'tr'
+                      ? 'Ses kaydetmek için mikrofon izni gereklidir'
+                      : 'Microphone permission is required to record voice')),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
       }
-    } catch (e) {
-      debugPrint("Error starting voice recording: $e");
+    } catch (e, st) {
+      debugPrint("[VoiceNote] Error starting voice recording: $e\n$st");
+      if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.localeName == 'ar'
+                ? 'فشل بدء التسجيل: ${e.toString()}'
+                : 'Recording failed: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
@@ -453,33 +496,98 @@ class _ChatScreenState extends State<ChatScreen> {
       _recordTimer?.cancel();
       _amplitudeTimer?.cancel();
       _amplitudes.clear();
+      debugPrint('[VoiceNote] Stopping recording...');
       final path = await _audioRecorder.stop();
+      debugPrint('[VoiceNote] Recorder returned path: $path');
       setState(() {
         _isRecording = false;
         _isRecordingLocked = false;
       });
 
-      if (path == null) return;
+      if (path == null || path.isEmpty) {
+        debugPrint('[VoiceNote] ERROR: path is null or empty');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.localeName == 'ar'
+                  ? 'فشل تسجيل الصوت. حاول مرة أخرى.'
+                  : (l10n.localeName == 'tr'
+                      ? 'Ses kaydı başarısız. Tekrar deneyin.'
+                      : 'Voice recording failed. Please try again.')),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+        return;
+      }
 
       dynamic uploadSource;
       if (kIsWeb) {
+        debugPrint('[VoiceNote] Web: fetching blob bytes from $path');
         final response = await Dio().get<List<int>>(
           path,
           options: Options(responseType: ResponseType.bytes),
         );
-        if (response.data == null) return;
+        if (response.data == null || response.data!.isEmpty) {
+          debugPrint('[VoiceNote] ERROR: web blob data is null/empty');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(l10n.localeName == 'ar'
+                    ? 'فشل قراءة التسجيل الصوتي.'
+                    : 'Failed to read audio recording.'),
+                backgroundColor: AppColors.error,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+          return;
+        }
         uploadSource = Uint8List.fromList(response.data!);
+        debugPrint('[VoiceNote] Web blob size: ${(uploadSource as Uint8List).length} bytes');
       } else {
         final file = File(path);
-        if (!file.existsSync()) return;
+        if (!file.existsSync()) {
+          debugPrint('[VoiceNote] ERROR: file does not exist at $path');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(l10n.localeName == 'ar'
+                    ? 'ملف التسجيل غير موجود.'
+                    : 'Recording file not found.'),
+                backgroundColor: AppColors.error,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+          return;
+        }
 
         final size = file.lengthSync();
+        debugPrint('[VoiceNote] File size: $size bytes');
+        if (size == 0) {
+          debugPrint('[VoiceNote] ERROR: file is empty');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(l10n.localeName == 'ar'
+                    ? 'التسجيل فارغ. حاول مرة أخرى.'
+                    : 'Recording is empty. Please try again.'),
+                backgroundColor: AppColors.error,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+          return;
+        }
         if (size > 10 * 1024 * 1024) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(l10n.fileSizeLimitError),
                 backgroundColor: AppColors.error,
+                behavior: SnackBarBehavior.floating,
               ),
             );
           }
@@ -489,12 +597,14 @@ class _ChatScreenState extends State<ChatScreen> {
       }
 
       setState(() => _sendingFile = true);
+      debugPrint('[VoiceNote] Uploading to Telegram...');
       // Upload to Telegram only (bypass Supabase Storage)
       final telegramFileId = await _telegramService.uploadFile(
         uploadSource,
         caption: 'ريكورد صوتي في المحادثة من $_myId إلى ${widget.partnerId} — ${DateTime.now().toIso8601String()}',
         fileName: 'Voice Note.m4a',
       );
+      debugPrint('[VoiceNote] Telegram upload success: $telegramFileId');
 
       await _chatService.sendMessage(
         senderId: _myId,
@@ -503,13 +613,34 @@ class _ChatScreenState extends State<ChatScreen> {
         fileName: 'Voice Note.m4a',
         telegramFileId: telegramFileId,
       );
+      debugPrint('[VoiceNote] Message sent to chat!');
       await _fetchMessagesSilently();
-    } catch (e) {
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.fileUploadFailed(e.toString())),
+            content: Text(l10n.localeName == 'ar'
+                ? '✅ تم إرسال الرسالة الصوتية'
+                : (l10n.localeName == 'tr'
+                    ? '✅ Sesli mesaj gönderildi'
+                    : '✅ Voice message sent')),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e, st) {
+      debugPrint('[VoiceNote] ERROR: $e\n$st');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.localeName == 'ar'
+                ? 'فشل إرسال التسجيل: ${e.toString()}'
+                : 'Voice send failed: ${e.toString()}'),
             backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
           ),
         );
       }
