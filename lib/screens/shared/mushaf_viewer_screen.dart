@@ -6,7 +6,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../services/mushaf_download_service.dart';
 import '../../services/quran_audio_service.dart';
 import '../../services/quran_api_service.dart';
@@ -48,6 +47,38 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
 
   /// Total mushaf pages (Medina = 604, Diyanet = 605).
   int get _totalPages => _mushafType == 'diyanet' ? 605 : 604;
+
+  Size _getConstrainedPageSize(double availableWidth, double availableHeight, String mushafType) {
+    double origWidth = 2600.0;
+    double origHeight = 4206.0;
+
+    if (mushafType == 'diyanet') {
+      origWidth = 705.0;
+      origHeight = 1147.0;
+    } else if (mushafType == 'tajweed') {
+      origWidth = 456.0;
+      origHeight = 707.0;
+    }
+
+    final double origRatio = origWidth / origHeight;
+    final double maxW = availableWidth - 32; // 16 margin on each side
+    final double maxH = availableHeight - 152; // 64 top margin + 88 bottom margin
+
+    if (maxW <= 0 || maxH <= 0) return const Size(100, 100);
+
+    double displayW;
+    double displayH;
+
+    if (maxW / maxH > origRatio) {
+      displayH = maxH;
+      displayW = maxH * origRatio;
+    } else {
+      displayW = maxW;
+      displayH = maxW / origRatio;
+    }
+
+    return Size(displayW, displayH);
+  }
 
   // ── Lifecycle ─────────────────────────────────────────────────
   final _audioService = QuranAudioService();
@@ -247,7 +278,14 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
           ),
         );
       },
-    );
+    ).whenComplete(() {
+      if (mounted) {
+        setState(() {
+          _selectedSurahId = null;
+          _selectedAyahId = null;
+        });
+      }
+    });
   }
 
   // ── Image URL helper ──────────────────────────────────────────
@@ -554,13 +592,37 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
       AppQcfFontLoader.preloadPages(capped, radius: 5).then((_) {
         if (mounted) setState(() {});
       });
-      if (_textPageController != null && _textPageController!.hasClients) {
-        _textPageController!.jumpToPage(capped - 1);
+      final controller = _textPageController;
+      if (controller != null && controller.hasClients) {
+        final double currentPos = controller.page ?? controller.initialPage.toDouble();
+        final double targetPos = (capped - 1).toDouble();
+        final double diff = (targetPos - currentPos).abs();
+        if (diff == 1.0) {
+          controller.animateToPage(
+            capped - 1,
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOutCubic,
+          );
+        } else {
+          controller.jumpToPage(capped - 1);
+        }
       }
     } else {
       final pageIndex = _totalPages - capped;
-      if (_pageController.hasClients) {
-        _pageController.jumpToPage(pageIndex);
+      final controller = _pageController;
+      if (controller.hasClients) {
+        final double currentPos = controller.page ?? controller.initialPage.toDouble();
+        final double targetPos = pageIndex.toDouble();
+        final double diff = (targetPos - currentPos).abs();
+        if (diff == 1.0) {
+          controller.animateToPage(
+            pageIndex,
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOutCubic,
+          );
+        } else {
+          controller.jumpToPage(pageIndex);
+        }
       }
     }
   }
@@ -781,6 +843,7 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
                   : Directionality(
                       textDirection: TextDirection.rtl,
                       child: PageView.builder(
+                        physics: const BouncingScrollPhysics(), // Allow swiping/dragging on both desktop and mobile
                         key: ValueKey(_mushafType),
                         controller: _pageController,
                         reverse: true, // RTL: swipe right = next page
@@ -794,73 +857,106 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
                         itemBuilder: (context, index) {
                           final pageNum = _totalPages - index;
 
-                          return InteractiveViewer(
-                            minScale: 1.0,
-                            maxScale: 4.0,
-                            child: Center(
-                              child: Container(
-                                margin: const EdgeInsets.fromLTRB(16, 64, 16, 88),
-                                decoration: BoxDecoration(
-                                  color: AppColors.mushafSepiaBg,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: AppColors.secondary.withValues(alpha: 0.12),
-                                    width: 1.5,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.05),
-                                      blurRadius: 15,
-                                      offset: const Offset(0, 8),
-                                    ),
-                                  ],
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: Stack(
-                                      children: [
-                                        _MushafPageImage(
-                                          mushafType: _mushafType,
-                                          pageNum: pageNum,
-                                          fallbackUrl: _imageUrl(pageNum),
-                                          l10n: l10n,
-                                        ),
-                                        if (_audioService.isPlaying &&
-                                            _audioService.playingPage == pageNum &&
-                                            _audioService.bundle != null &&
-                                            _audioService.playingAyahIndex >= 0 &&
-                                            _audioService.playingAyahIndex < _audioService.bundle!.arabic.length)
-                                          _MushafPageHighlightOverlay(
-                                            pageNum: pageNum,
-                                            suraId: _audioService.bundle!.arabic[_audioService.playingAyahIndex].surahNumber,
-                                            ayahId: _audioService.bundle!.arabic[_audioService.playingAyahIndex].numberInSurah,
-                                            mushafType: _mushafType,
-                                          ),
-                                        if (_selectedSurahId != null && _selectedAyahId != null)
-                                          _MushafPageHighlightOverlay(
-                                            pageNum: pageNum,
-                                            suraId: _selectedSurahId!,
-                                            ayahId: _selectedAyahId!,
-                                            mushafType: _mushafType,
-                                          ),
-                                        _MushafPageGestureOverlay(
-                                          pageNum: pageNum,
-                                          mushafType: _mushafType,
-                                          onVerseTapped: (surahNum, ayahNum) {
-                                            _showVerseOptionsSheet(
-                                              surahNum: surahNum,
-                                              ayahNum: ayahNum,
-                                              pageNum: pageNum,
-                                            );
-                                          },
+                          return AnimatedBuilder(
+                            animation: _pageController,
+                            builder: (context, child) {
+                              double pageOffset = 0.0;
+                              if (_pageController.hasClients && _pageController.position.haveDimensions) {
+                                pageOffset = _pageController.page! - index;
+                              } else {
+                                pageOffset = (_totalPages - _page) - index.toDouble();
+                              }
+
+                              return _BookPageFlipTransition(
+                                pageOffset: pageOffset,
+                                child: child!,
+                              );
+                            },
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                final cardSize = _getConstrainedPageSize(
+                                  constraints.maxWidth,
+                                  constraints.maxHeight,
+                                  _mushafType,
+                                );
+
+                                return Center(
+                                  child: Container(
+                                    width: cardSize.width,
+                                    height: cardSize.height,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.mushafSepiaBg,
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: AppColors.secondary.withValues(alpha: 0.12),
+                                        width: 1.5,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(alpha: 0.05),
+                                          blurRadius: 15,
+                                          offset: const Offset(0, 8),
                                         ),
                                       ],
                                     ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(10.0),
+                                        child: _ZoomableMushafPage(
+                                          child: Stack(
+                                            fit: StackFit.expand,
+                                            children: [
+                                              _MushafPageImage(
+                                                mushafType: _mushafType,
+                                                pageNum: pageNum,
+                                                fallbackUrl: _imageUrl(pageNum),
+                                                l10n: l10n,
+                                              ),
+                                              if (_audioService.isPlaying &&
+                                                  _audioService.playingPage == pageNum &&
+                                                  _audioService.bundle != null &&
+                                                  _audioService.playingAyahIndex >= 0 &&
+                                                  _audioService.playingAyahIndex <
+                                                      _audioService.bundle!.arabic.length)
+                                                _MushafPageHighlightOverlay(
+                                                  pageNum: pageNum,
+                                                  suraId: _audioService
+                                                      .bundle!
+                                                      .arabic[_audioService.playingAyahIndex]
+                                                      .surahNumber,
+                                                  ayahId: _audioService
+                                                      .bundle!
+                                                      .arabic[_audioService.playingAyahIndex]
+                                                      .numberInSurah,
+                                                  mushafType: _mushafType,
+                                                ),
+                                              if (_selectedSurahId != null && _selectedAyahId != null)
+                                                _MushafPageHighlightOverlay(
+                                                  pageNum: pageNum,
+                                                  suraId: _selectedSurahId!,
+                                                  ayahId: _selectedAyahId!,
+                                                  mushafType: _mushafType,
+                                                ),
+                                              _MushafPageGestureOverlay(
+                                                pageNum: pageNum,
+                                                mushafType: _mushafType,
+                                                onVerseTapped: (surahNum, ayahNum) {
+                                                  _showVerseOptionsSheet(
+                                                    surahNum: surahNum,
+                                                    ayahNum: ayahNum,
+                                                    pageNum: pageNum,
+                                                  );
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
+                                );
+                              },
                             ),
                           );
                         },
@@ -934,14 +1030,16 @@ class _MushafViewerScreenState extends State<MushafViewerScreen> {
                                     color: AppColors.secondary,
                                   ),
                                   const SizedBox(width: 6),
-                                  Text(
-                                    surahText.isNotEmpty ? surahText : (_mushafType == 'tajweed' ? l10n.mushafTypeTajweed : (_mushafType == 'diyanet' ? l10n.mushafTypeDiyanet : (_mushafType == 'text' ? (l10n.localeName == 'ar' ? 'المصحف الكتابي' : 'Written Mushaf') : l10n.mushafTypeStandard))),
-                                    style: const TextStyle(
-                                      fontSize: 13.5,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                  Flexible(
+                                    child: Text(
+                                      surahText.isNotEmpty ? surahText : (_mushafType == 'tajweed' ? l10n.mushafTypeTajweed : (_mushafType == 'diyanet' ? l10n.mushafTypeDiyanet : (_mushafType == 'text' ? (l10n.localeName == 'ar' ? 'المصحف الكتابي' : 'Written Mushaf') : l10n.mushafTypeStandard))),
+                                      style: const TextStyle(
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
                               ),
@@ -2435,29 +2533,52 @@ class _MushafPageImage extends StatefulWidget {
 }
 
 class _MushafPageImageState extends State<_MushafPageImage> {
-  String? _localPath;
+  Uint8List? _imageBytes;
   bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _checkLocal();
+    _loadImage();
   }
 
   @override
   void didUpdateWidget(_MushafPageImage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.mushafType != widget.mushafType || oldWidget.pageNum != widget.pageNum) {
-      _checkLocal();
+      _loadImage();
     }
   }
 
-  Future<void> _checkLocal() async {
-    setState(() => _loading = true);
-    final path = await MushafDownloadService().getLocalFilePath(widget.mushafType, widget.pageNum);
+  Future<void> _loadImage() async {
+    if (!mounted) return;
+    setState(() {
+      _loading = true;
+      _imageBytes = null;
+    });
+
+    try {
+      final path = await MushafDownloadService().getLocalFilePath(widget.mushafType, widget.pageNum);
+      if (path != null) {
+        final file = File(path);
+        if (await file.exists()) {
+          final bytes = await file.readAsBytes();
+          if (mounted) {
+            setState(() {
+              _imageBytes = bytes;
+              _loading = false;
+            });
+            return;
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint("Error reading local mushaf image file: $e");
+    }
+
     if (mounted) {
       setState(() {
-        _localPath = path;
+        _imageBytes = null;
         _loading = false;
       });
     }
@@ -2471,9 +2592,9 @@ class _MushafPageImageState extends State<_MushafPageImage> {
       );
     }
 
-    if (_localPath != null) {
-      return Image.file(
-        File(_localPath!),
+    if (_imageBytes != null) {
+      return Image.memory(
+        _imageBytes!,
         fit: BoxFit.contain,
         width: double.infinity,
         height: double.infinity,
@@ -2485,18 +2606,21 @@ class _MushafPageImageState extends State<_MushafPageImage> {
   }
 
   Widget _buildNetworkFallback() {
-    return CachedNetworkImage(
-      imageUrl: widget.fallbackUrl,
+    return Image.network(
+      widget.fallbackUrl,
       fit: BoxFit.contain,
       width: double.infinity,
       height: double.infinity,
-      placeholder: (context, url) => const Center(
-        child: CircularProgressIndicator(
-          color: AppColors.secondary,
-          strokeWidth: 2,
-        ),
-      ),
-      errorWidget: (context, url, error) => Center(
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return const Center(
+          child: CircularProgressIndicator(
+            color: AppColors.secondary,
+            strokeWidth: 2,
+          ),
+        );
+      },
+      errorBuilder: (context, error, stackTrace) => Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -2662,10 +2786,17 @@ class _MushafPageHighlightOverlayState extends State<_MushafPageHighlightOverlay
                 mappedY = 1.525 * rawY + tajweedOffsetY;
                 mappedH = 1.525 * rawH;
               } else { // madina
-                mappedX = 7.907 * rawX + 160.0;
-                mappedW = 7.907 * rawW;
-                mappedY = 9.500 * rawY + 40.5;
-                mappedH = 9.500 * rawH;
+                if (widget.pageNum == 1 || widget.pageNum == 2) {
+                  mappedX = 5.500 * rawX + 500.0;
+                  mappedW = 5.500 * rawW;
+                  mappedY = 8.000 * rawY + 840.0;
+                  mappedH = 8.000 * rawH;
+                } else {
+                  mappedX = 7.907 * rawX + 160.0;
+                  mappedW = 7.907 * rawW;
+                  mappedY = 9.500 * rawY + 40.5;
+                  mappedH = 9.500 * rawH;
+                }
               }
 
               final x = mappedX * scaleX + offsetX;
@@ -2834,10 +2965,17 @@ class _MushafPageGestureOverlayState extends State<_MushafPageGestureOverlay> {
                     x2 = x1 + 1.534 * rawW;
                     y2 = y1 + 1.525 * rawH;
                   } else { // madina
-                    x1 = 7.907 * rawX + 160.0;
-                    y1 = 9.500 * rawY + 40.5;
-                    x2 = x1 + 7.907 * rawW;
-                    y2 = y1 + 9.500 * rawH;
+                    if (widget.pageNum == 1 || widget.pageNum == 2) {
+                      x1 = 5.500 * rawX + 500.0;
+                      y1 = 8.000 * rawY + 840.0;
+                      x2 = x1 + 5.500 * rawW;
+                      y2 = y1 + 8.000 * rawH;
+                    } else {
+                      x1 = 7.907 * rawX + 160.0;
+                      y1 = 9.500 * rawY + 40.5;
+                      x2 = x1 + 7.907 * rawW;
+                      y2 = y1 + 9.500 * rawH;
+                    }
                   }
 
                   if (mappedX >= x1 && mappedX <= x2 && mappedY >= y1 && mappedY <= y2) {
@@ -3223,3 +3361,100 @@ class _WebQuranPageItemState extends State<_WebQuranPageItem> {
   }
 }
 
+// ── Zoomable Mushaf Page ──────────────────────────────────────────
+class _ZoomableMushafPage extends StatefulWidget {
+  final Widget child;
+  const _ZoomableMushafPage({required this.child});
+
+  @override
+  State<_ZoomableMushafPage> createState() => _ZoomableMushafPageState();
+}
+
+class _ZoomableMushafPageState extends State<_ZoomableMushafPage> {
+  final TransformationController _controller = TransformationController();
+  bool _panEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_onTransformationChanged);
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onTransformationChanged);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onTransformationChanged() {
+    final scale = _controller.value.getMaxScaleOnAxis();
+    final newPanEnabled = scale > 1.0;
+    if (newPanEnabled != _panEnabled) {
+      setState(() {
+        _panEnabled = newPanEnabled;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InteractiveViewer(
+      transformationController: _controller,
+      minScale: 1.0,
+      maxScale: 4.0,
+      panEnabled: _panEnabled,
+      scaleEnabled: true,
+      child: widget.child,
+    );
+  }
+}
+
+// ── Book Page Flip Transition ─────────────────────────────────────
+class _BookPageFlipTransition extends StatelessWidget {
+  final Widget child;
+  final double pageOffset;
+
+  const _BookPageFlipTransition({
+    required this.child,
+    required this.pageOffset,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // If the page is not visible, don't transform it
+    if (pageOffset < -1.0 || pageOffset > 1.0) {
+      return child;
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double width = constraints.maxWidth;
+        // Counteract standard horizontal translation of PageView in RTL (reverse: true)
+        final double translationX = -pageOffset * width;
+        final double rotation = pageOffset * -0.8; // Rotate page slightly around the axis
+
+        final Matrix4 transform = Matrix4.identity()
+          ..setEntry(3, 2, 0.001) // perspective
+          ..translateByDouble(translationX, 0.0, 0.0, 1.0)
+          ..rotateY(rotation);
+
+        // Scale down slightly as page turns
+        final double scale = 1.0 - (pageOffset.abs() * 0.06);
+        transform.scaleByDouble(scale, scale, 1.0, 1.0);
+
+        // Fade out slightly at the peak of the turn
+        final double opacity = (1.0 - pageOffset.abs() * 0.35).clamp(0.0, 1.0);
+
+        return Opacity(
+          opacity: opacity,
+          child: Transform(
+            transform: transform,
+            alignment: pageOffset < 0 ? Alignment.centerLeft : Alignment.centerRight,
+            child: child,
+          ),
+        );
+      },
+    );
+  }
+}

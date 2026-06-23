@@ -99,6 +99,19 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
 
+          // Language selector on top of green background
+          Positioned(
+            top: 12,
+            left: 12,
+            right: 12,
+            child: SafeArea(
+              child: Align(
+                alignment: Alignment.topRight,
+                child: _buildLanguageFlags(),
+              ),
+            ),
+          ),
+
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -324,6 +337,77 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLanguageFlags() {
+    final currentLocale = Provider.of<LocaleProvider>(context).locale;
+    
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildFlagButton('ar', 'assets/images/flag_sa.png', 'العربية', currentLocale.languageCode == 'ar'),
+        const SizedBox(width: 8),
+        _buildFlagButton('en', 'assets/images/flag_gb.png', 'English', currentLocale.languageCode == 'en'),
+        const SizedBox(width: 8),
+        _buildFlagButton('tr', 'assets/images/flag_tr.png', 'Türkçe', currentLocale.languageCode == 'tr'),
+      ],
+    );
+  }
+
+  Widget _buildFlagButton(String langCode, String flagAsset, String label, bool isSelected) {
+    return GestureDetector(
+      onTap: () async {
+        await context.read<LocaleProvider>().setLocale(Locale(langCode));
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: isSelected 
+              ? Colors.white.withValues(alpha: 0.20) 
+              : Colors.black.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.secondary : Colors.white.withValues(alpha: 0.30),
+            width: 1.5,
+          ),
+          boxShadow: isSelected ? [
+            BoxShadow(
+              color: AppColors.secondary.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            )
+          ] : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(3),
+              child: Image.asset(
+                flagAsset,
+                width: 22,
+                height: 15,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const Icon(
+                  Icons.flag,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

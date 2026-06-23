@@ -11,6 +11,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
+import '../../utils/blob_helper.dart';
+import 'package:provider/provider.dart';
+import '../../providers/auth_provider.dart';
+import 'package:desktop_drop/desktop_drop.dart';
+import 'package:flutter_dropzone/flutter_dropzone.dart';
+import '../../utils/drag_drop_helper.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
@@ -23,6 +29,7 @@ import '../../services/profile_service.dart';
 import '../../services/telegram_storage_service.dart';
 import '../../widgets/chat_bubble.dart';
 import 'image_editor_screen.dart';
+import 'chat_media_screen.dart';
 
 
 
@@ -49,12 +56,21 @@ class _ChatScreenState extends State<ChatScreen> {
 
   StreamSubscription<List<ChatMessageModel>>? _msgSub;
   List<ChatMessageModel> _messages = [];
+  final List<ChatMessageModel> _uploadingMessages = [];
   bool _loading = true;
   bool _hasError = false;
   bool _sendingImage = false;
   bool _sendingFile = false;
+  bool _isDragging = false;
+  bool _isDraggingWeb = false;
+  bool _isSearching = false;
+  bool _initialScrollDone = false;
+  String? _highlightedMessageId;
+  final _searchController = TextEditingController();
+  DropzoneViewController? _dropzoneController;
   late String _myId;
   ProfileModel? _partnerProfile;
+  ChatMessageModel? _replyingTo;
 
   final _audioRecorder = AudioRecorder();
   bool _isRecording = false;
@@ -77,6 +93,20 @@ class _ChatScreenState extends State<ChatScreen> {
     _messageController.addListener(() {
       if (mounted) setState(() {});
     });
+    _searchController.addListener(() {
+      if (mounted) setState(() {});
+    });
+    if (kIsWeb) {
+      DragDropHelper.initialize(
+        onDragStateChanged: (isDragging) {
+          if (mounted) {
+            setState(() {
+              _isDraggingWeb = isDragging;
+            });
+          }
+        },
+      );
+    }
   }
 
   Future<void> _loadPartnerProfile() async {
@@ -113,12 +143,18 @@ class _ChatScreenState extends State<ChatScreen> {
       (msgs) {
         final newMessages = msgs.length > _messages.length;
         if (mounted) {
+          final shouldScroll = !_initialScrollDone && msgs.isNotEmpty;
           setState(() {
             _messages = msgs;
             _loading = false;
             _hasError = false;
+            if (shouldScroll) {
+              _initialScrollDone = true;
+            }
           });
-          if (newMessages) _scrollToBottom();
+          if (shouldScroll || newMessages) {
+            _scrollToBottom();
+          }
         }
         _chatService.markMessagesAsRead(
           receiverId: _myId,
@@ -149,6 +185,7 @@ class _ChatScreenState extends State<ChatScreen> {
         setState(() {
           _messages = cached;
           _loading = false;
+          _initialScrollDone = true;
         });
         _scrollToBottom();
       }
@@ -162,10 +199,14 @@ class _ChatScreenState extends State<ChatScreen> {
     _msgSub?.cancel();
     _pollingTimer?.cancel();
     _messageController.dispose();
+    _searchController.dispose();
     _scrollController.dispose();
     _audioRecorder.dispose();
     _recordTimer?.cancel();
     _amplitudeTimer?.cancel();
+    if (kIsWeb) {
+      DragDropHelper.dispose();
+    }
     super.dispose();
   }
 
@@ -173,12 +214,86 @@ class _ChatScreenState extends State<ChatScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
+          0.0,
+          duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
         );
       }
     });
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted && _scrollController.hasClients) {
+        _scrollController.animateTo(
+          0.0,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  double _estimateMessageHeight(ChatMessageModel msg) {
+    if (msg.isDeleted) return 50.0;
+    
+    double height = 45.0; // margins, time label, general padding
+    
+    if (msg.replyToId != null) {
+      height += 60.0; // reply container
+    }
+    
+    if (msg.isImage) {
+      height += 200.0;
+    } else if (msg.isAudio) {
+      height += 80.0;
+    } else if (msg.isFile) {
+      height += 75.0;
+    } else {
+      // Text estimation: count lines
+      final length = msg.messageText.length;
+      final lines = (length / 45.0).ceil();
+      height += lines * 22.0 + 12.0;
+    }
+    
+    return height.clamp(50.0, 450.0);
+  }
+
+  void _scrollToMessage(String messageId) {
+    final allMessages = [..._messages, ..._uploadingMessages];
+    final allIdx = allMessages.indexWhere((m) => m.id == messageId);
+    if (allIdx == -1) return;
+    
+    final targetIndex = allMessages.length - 1 - allIdx;
+    
+    double targetOffset = 0.0;
+    for (int j = 0; j < targetIndex; j++) {
+      targetOffset += _estimateMessageHeight(allMessages[allMessages.length - 1 - j]);
+    }
+    
+    // Adjust target offset to center the message
+    final adjustedOffset = (targetOffset - 150.0).clamp(0.0, _scrollController.position.maxScrollExtent);
+    
+    _scrollController.animateTo(
+      adjustedOffset,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+    
+    setState(() {
+      _highlightedMessageId = messageId;
+    });
+    
+    Timer(const Duration(milliseconds: 2000), () {
+      if (mounted) {
+        setState(() {
+          _highlightedMessageId = null;
+        });
+      }
+    });
+  }
+
+  String _timeLabel(DateTime dt) {
+    final local = dt.toLocal();
+    return '${local.hour.toString().padLeft(2, '0')}:'
+        '${local.minute.toString().padLeft(2, '0')}';
   }
 
   void _startPolling() {
@@ -225,11 +340,40 @@ class _ChatScreenState extends State<ChatScreen> {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
     _messageController.clear();
+    
+    final ChatMessageModel? replyMsg = _replyingTo;
+    
+    if (mounted && _replyingTo != null) {
+      setState(() {
+        _replyingTo = null;
+      });
+    }
+
     try {
+      String? replyToId;
+      String? replyToText;
+      String? replyToSenderName;
+      
+      if (replyMsg != null) {
+        replyToId = replyMsg.id;
+        replyToText = replyMsg.messageText.isNotEmpty
+            ? replyMsg.messageText
+            : (replyMsg.imageUrl != null ? '📷 صورة' : '📁 ملف');
+        
+        final isAr = Localizations.localeOf(context).languageCode == 'ar';
+        final isSenderMine = replyMsg.senderId == _myId;
+        replyToSenderName = isSenderMine 
+            ? (isAr ? 'أنت' : 'You') 
+            : widget.partnerName;
+      }
+
       await _chatService.sendMessage(
         senderId: _myId,
         receiverId: widget.partnerId,
         messageText: text,
+        replyToId: replyToId,
+        replyToText: replyToText,
+        replyToSenderName: replyToSenderName,
       );
       await _fetchMessagesSilently();
     } catch (e) {
@@ -244,7 +388,7 @@ class _ChatScreenState extends State<ChatScreen> {
     String? imageName;
     
     try {
-      if (!kIsWeb && Platform.isWindows) {
+      if (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) {
         final result = await FilePicker.pickFiles(
           type: FileType.image,
           allowMultiple: false,
@@ -283,7 +427,22 @@ class _ChatScreenState extends State<ChatScreen> {
     );
     if (result == null) return;
 
-    setState(() => _sendingImage = true);
+    final tempMsg = ChatMessageModel(
+      id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
+      senderId: _myId,
+      receiverId: widget.partnerId,
+      messageText: '',
+      isRead: false,
+      createdAt: DateTime.now(),
+      imageUrl: 'local_temp',
+      fileName: imageName ?? 'image.png',
+    );
+    setState(() {
+      _uploadingMessages.add(tempMsg);
+      _sendingImage = true;
+    });
+    _scrollToBottom();
+
     try {
       // result can be File (on Native) or Uint8List (on Web)
       final telegramFileId = await _telegramService.uploadFile(
@@ -313,7 +472,12 @@ class _ChatScreenState extends State<ChatScreen> {
         );
       }
     } finally {
-      if (mounted) setState(() => _sendingImage = false);
+      if (mounted) {
+        setState(() {
+          _sendingImage = false;
+          _uploadingMessages.removeWhere((m) => m.id == tempMsg.id);
+        });
+      }
     }
   }
 
@@ -350,7 +514,22 @@ class _ChatScreenState extends State<ChatScreen> {
       uploadSource = File(fileInfo.path!);
     }
 
-    setState(() => _sendingFile = true);
+    final tempMsg = ChatMessageModel(
+      id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
+      senderId: _myId,
+      receiverId: widget.partnerId,
+      messageText: '',
+      isRead: false,
+      createdAt: DateTime.now(),
+      fileUrl: 'local_temp',
+      fileName: fileInfo.name,
+    );
+    setState(() {
+      _uploadingMessages.add(tempMsg);
+      _sendingFile = true;
+    });
+    _scrollToBottom();
+
     try {
       // Upload to Telegram only (bypass Supabase Storage)
       final telegramFileId = await _telegramService.uploadFile(
@@ -378,11 +557,170 @@ class _ChatScreenState extends State<ChatScreen> {
         );
       }
     } finally {
-      if (mounted) setState(() => _sendingFile = false);
+      if (mounted) {
+        setState(() {
+          _sendingFile = false;
+          _uploadingMessages.removeWhere((m) => m.id == tempMsg.id);
+        });
+      }
     }
   }
 
-  Future<void> _startRecording() async {
+  Future<void> _handleDroppedFile(XFile file) async {
+    final l10n = AppLocalizations.of(context);
+    final size = await file.length();
+    final name = file.name;
+
+    // Enforce 10 MB size limit
+    if (size > 10 * 1024 * 1024) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.fileSizeLimitError),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+
+    final ext = name.split('.').last.toLowerCase();
+    final isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].contains(ext);
+
+    if (isImage) {
+      final imageBytes = await file.readAsBytes();
+      if (!mounted) return;
+
+      final dynamic result = await Navigator.of(context).push<dynamic>(
+        MaterialPageRoute(
+          builder: (_) => ImageEditorScreen(
+            imageBytes: imageBytes,
+            imageName: name,
+          ),
+        ),
+      );
+      if (result == null) return;
+
+      final tempMsg = ChatMessageModel(
+        id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
+        senderId: _myId,
+        receiverId: widget.partnerId,
+        messageText: '',
+        isRead: false,
+        createdAt: DateTime.now(),
+        imageUrl: 'local_temp',
+        fileName: name,
+      );
+      setState(() {
+        _uploadingMessages.add(tempMsg);
+        _sendingImage = true;
+      });
+      _scrollToBottom();
+
+      try {
+        final telegramFileId = await _telegramService.uploadFile(
+          result,
+          caption: 'صورة في المحادثة من $_myId إلى ${widget.partnerId} — ${DateTime.now().toIso8601String()}',
+          fileName: name,
+        );
+
+        final String finalName;
+        if (kIsWeb) {
+          finalName = name;
+        } else {
+          finalName = result is File ? result.path.split(Platform.pathSeparator).last : name;
+        }
+
+        await _chatService.sendMessage(
+          senderId: _myId,
+          receiverId: widget.partnerId,
+          messageText: '',
+          fileName: finalName,
+          telegramFileId: telegramFileId,
+        );
+        await _fetchMessagesSilently();
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.sendImageFailed(e.toString())),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _sendingImage = false;
+            _uploadingMessages.removeWhere((m) => m.id == tempMsg.id);
+          });
+        }
+      }
+    } else {
+      // Send as regular file
+      final tempMsg = ChatMessageModel(
+        id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
+        senderId: _myId,
+        receiverId: widget.partnerId,
+        messageText: '',
+        isRead: false,
+        createdAt: DateTime.now(),
+        fileUrl: 'local_temp',
+        fileName: name,
+      );
+      setState(() {
+        _uploadingMessages.add(tempMsg);
+        _sendingFile = true;
+      });
+      _scrollToBottom();
+
+      try {
+        final bytes = await file.readAsBytes();
+        final dynamic uploadSource;
+        if (kIsWeb) {
+          uploadSource = bytes;
+        } else {
+          uploadSource = File(file.path);
+        }
+
+        final telegramFileId = await _telegramService.uploadFile(
+          uploadSource,
+          caption: 'ملف في المحادثة ($name) من $_myId إلى ${widget.partnerId} — ${DateTime.now().toIso8601String()}',
+          fileName: name,
+        );
+
+        await _chatService.sendMessage(
+          senderId: _myId,
+          receiverId: widget.partnerId,
+          messageText: '',
+          fileName: name,
+          telegramFileId: telegramFileId,
+        );
+        await _fetchMessagesSilently();
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.fileUploadFailed(e.toString())),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _sendingFile = false;
+            _uploadingMessages.removeWhere((m) => m.id == tempMsg.id);
+          });
+        }
+      }
+    }
+  }
+
+  Future<void> _startRecording({bool startLocked = false}) async {
     try {
       debugPrint('[VoiceNote] Checking microphone permission...');
       final hasPermission = await _audioRecorder.hasPermission();
@@ -394,20 +732,27 @@ class _ChatScreenState extends State<ChatScreen> {
           path = '';
         } else {
           final tempDir = await getTemporaryDirectory();
-          path = '${tempDir.path}/audio_note_${DateTime.now().millisecondsSinceEpoch}.m4a';
+          final isWindows = !kIsWeb && Platform.isWindows;
+          final ext = isWindows ? 'wav' : 'm4a';
+          path = '${tempDir.path}/audio_note_${DateTime.now().millisecondsSinceEpoch}.$ext';
         }
         debugPrint('[VoiceNote] Starting recording at: $path');
         
         if (kIsWeb) {
           await _audioRecorder.start(const RecordConfig(encoder: AudioEncoder.opus), path: '');
+        } else if (!kIsWeb && Platform.isWindows) {
+          await _audioRecorder.start(const RecordConfig(encoder: AudioEncoder.wav), path: path);
         } else {
           await _audioRecorder.start(const RecordConfig(encoder: AudioEncoder.aacLc), path: path);
         }
         debugPrint('[VoiceNote] Recording started successfully!');
         
+        final bool isDesktop = !kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux);
+        final bool shouldLock = startLocked || kIsWeb || isDesktop;
+
         setState(() {
           _isRecording = true;
-          _isRecordingLocked = false;
+          _isRecordingLocked = shouldLock;
           _recordDuration = 0;
           _amplitudes = [];
         });
@@ -525,12 +870,12 @@ class _ChatScreenState extends State<ChatScreen> {
       dynamic uploadSource;
       if (kIsWeb) {
         debugPrint('[VoiceNote] Web: fetching blob bytes from $path');
-        final response = await Dio().get<List<int>>(
-          path,
-          options: Options(responseType: ResponseType.bytes),
-        );
-        if (response.data == null || response.data!.isEmpty) {
-          debugPrint('[VoiceNote] ERROR: web blob data is null/empty');
+        try {
+          final bytes = await fetchBlobBytes(path);
+          uploadSource = bytes;
+          debugPrint('[VoiceNote] Web blob size: ${bytes.length} bytes');
+        } catch (e) {
+          debugPrint('[VoiceNote] ERROR: web blob read failed: $e');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -544,8 +889,6 @@ class _ChatScreenState extends State<ChatScreen> {
           }
           return;
         }
-        uploadSource = Uint8List.fromList(response.data!);
-        debugPrint('[VoiceNote] Web blob size: ${(uploadSource as Uint8List).length} bytes');
       } else {
         final file = File(path);
         if (!file.existsSync()) {
@@ -656,7 +999,10 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _confirmDeleteMessage(ChatMessageModel msg) {
-    if (msg.isDeleted || msg.senderId != _myId) return;
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final isTeacher = auth.profile?.role == 'teacher';
+    final canDelete = msg.senderId == _myId || isTeacher;
+    if (msg.isDeleted || !canDelete) return;
 
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
     final isTr = Localizations.localeOf(context).languageCode == 'tr';
@@ -704,6 +1050,9 @@ class _ChatScreenState extends State<ChatScreen> {
   void _showMessageOptions(ChatMessageModel msg) {
     if (msg.isDeleted) return;
     final isMine = msg.senderId == _myId;
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final isTeacher = auth.profile?.role == 'teacher';
+    final canDelete = isMine || isTeacher;
 
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
     final isTr = Localizations.localeOf(context).languageCode == 'tr';
@@ -728,6 +1077,25 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
               const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.reply_rounded, color: AppColors.primary),
+                title: Text(isAr ? 'الرد على الرسالة' : (isTr ? 'Cevapla' : 'Reply')),
+                onTap: () {
+                  Navigator.pop(context);
+                  setState(() {
+                    _replyingTo = msg;
+                  });
+                },
+              ),
+              if (isTeacher)
+                ListTile(
+                  leading: const Icon(Icons.forward_rounded, color: AppColors.primary),
+                  title: Text(isAr ? 'تحويل الرسالة' : (isTr ? 'Mesajı İlet' : 'Forward Message')),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showForwardDialog(msg);
+                  },
+                ),
               if (msg.messageText.isNotEmpty)
                 ListTile(
                   leading: const Icon(Icons.copy_rounded, color: AppColors.primary),
@@ -743,7 +1111,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     );
                   },
                 ),
-              if (isMine)
+              if (canDelete)
                 ListTile(
                   leading: const Icon(Icons.delete_outline_rounded, color: AppColors.error),
                   title: Text(
@@ -762,6 +1130,233 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         );
       },
+    );
+  }
+
+  void _showForwardDialog(ChatMessageModel msg) async {
+    final l10n = AppLocalizations.of(context);
+    final isAr = l10n.localeName == 'ar';
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => const Center(
+        child: CircularProgressIndicator(color: AppColors.secondary),
+      ),
+    );
+
+    List<ProfileModel> students = [];
+    try {
+      students = await ProfileService().fetchStudents();
+    } catch (e) {
+      debugPrint("Error fetching students for forward: $e");
+    }
+
+    if (!mounted) return;
+    Navigator.pop(context); // Close loading dialog
+
+    if (students.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(isAr ? 'لا يوجد طلاب لتحويل الرسالة إليهم' : 'No students found to forward to'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    String searchQuery = '';
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            final filtered = students.where((s) =>
+                s.fullName.toLowerCase().contains(searchQuery.toLowerCase())).toList();
+
+            return AlertDialog(
+              title: Text(
+                isAr ? 'تحويل الرسالة إلى...' : 'Forward message to...',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      decoration: InputDecoration(
+                        hintText: isAr ? 'بحث عن طالب...' : 'Search student...',
+                        prefixIcon: const Icon(Icons.search, size: 20),
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
+                      onChanged: (val) {
+                        setDialogState(() {
+                          searchQuery = val;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    Flexible(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: filtered.length,
+                        itemBuilder: (context, index) {
+                          final student = filtered[index];
+                          return ListTile(
+                            leading: CircleAvatar(
+                              radius: 16,
+                              backgroundImage: student.avatarUrl != null && student.avatarUrl!.isNotEmpty
+                                  ? NetworkImage(student.avatarUrl!)
+                                  : null,
+                              child: student.avatarUrl == null || student.avatarUrl!.isEmpty
+                                  ? Text(student.fullName.isNotEmpty ? student.fullName[0].toUpperCase() : '؟')
+                                  : null,
+                            ),
+                            title: Text(student.fullName, style: const TextStyle(fontSize: 14)),
+                            onTap: () async {
+                              Navigator.pop(ctx);
+                              _forwardMessageTo(msg, student);
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(isAr ? 'إلغاء' : 'Cancel'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _forwardMessageTo(ChatMessageModel msg, ProfileModel student) async {
+    final l10n = AppLocalizations.of(context);
+    final isAr = l10n.localeName == 'ar';
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => const Center(
+        child: CircularProgressIndicator(color: AppColors.secondary),
+      ),
+    );
+
+    try {
+      await _chatService.sendMessage(
+        senderId: _myId,
+        receiverId: student.id,
+        messageText: msg.messageText,
+        imageUrl: msg.imageUrl,
+        fileUrl: msg.fileUrl,
+        fileName: msg.fileName,
+        telegramFileId: msg.telegramFileId,
+      );
+      
+      if (mounted) {
+        Navigator.pop(context); // Close loading overlay
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(isAr ? 'تم تحويل الرسالة بنجاح إلى ${student.fullName}' : 'Message forwarded to ${student.fullName}'),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // Close loading overlay
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(isAr ? 'فشل تحويل الرسالة: $e' : 'Failed to forward message: $e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildReplyPreview() {
+    if (_replyingTo == null) return const SizedBox.shrink();
+    
+    final l10n = AppLocalizations.of(context);
+    final isAr = l10n.localeName == 'ar';
+    final isMine = _replyingTo!.senderId == _myId;
+    final senderName = isMine 
+        ? (isAr ? 'أنت' : 'You') 
+        : (widget.partnerName);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        border: Border(
+          top: BorderSide(color: Colors.grey[300]!, width: 0.8),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 36,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  isAr ? 'الرد على $senderName' : 'Replying to $senderName',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _replyingTo!.messageText.isNotEmpty
+                      ? _replyingTo!.messageText
+                      : (_replyingTo!.imageUrl != null 
+                          ? (isAr ? '📷 صورة' : '📷 Photo') 
+                          : (isAr ? '📁 ملف' : '📁 File')),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.black54,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close_rounded, size: 20, color: Colors.black54),
+            onPressed: () {
+              setState(() {
+                _replyingTo = null;
+              });
+            },
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+        ],
+      ),
     );
   }
 
@@ -886,8 +1481,22 @@ class _ChatScreenState extends State<ChatScreen> {
                                         ),
                                       );
                                       if (editedResult != null) {
+                                        final tempMsg = ChatMessageModel(
+                                          id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
+                                          senderId: _myId,
+                                          receiverId: widget.partnerId,
+                                          messageText: '',
+                                          isRead: false,
+                                          createdAt: DateTime.now(),
+                                          imageUrl: 'local_temp',
+                                          fileName: 'edited_${message.fileName ?? "image.png"}',
+                                        );
                                         if (mounted) {
-                                          setState(() => _sendingImage = true);
+                                          setState(() {
+                                            _uploadingMessages.add(tempMsg);
+                                            _sendingImage = true;
+                                          });
+                                          _scrollToBottom();
                                         }
                                         try {
                                           final telegramFileId = await _telegramService.uploadFile(
@@ -906,7 +1515,10 @@ class _ChatScreenState extends State<ChatScreen> {
                                           await _fetchMessagesSilently();
                                         } finally {
                                           if (mounted) {
-                                            setState(() => _sendingImage = false);
+                                            setState(() {
+                                              _sendingImage = false;
+                                              _uploadingMessages.removeWhere((m) => m.id == tempMsg.id);
+                                            });
                                           }
                                         }
                                       }
@@ -974,112 +1586,401 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    
+    final allMessages = [..._messages, ..._uploadingMessages];
+    final searchQuery = _searchController.text.trim().toLowerCase();
+    
+    // Filter messages for the search overlay list
+    final displayedMessages = searchQuery.isEmpty
+        ? allMessages
+        : _messages.where((m) {
+            final textMatch = m.messageText.toLowerCase().contains(searchQuery);
+            final fileMatch = m.fileName != null && m.fileName!.toLowerCase().contains(searchQuery);
+            return textMatch || fileMatch;
+          }).toList();
+
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 0,
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: 18,
-              backgroundColor: Colors.white.withValues(alpha: 0.15),
-              backgroundImage: _partnerProfile?.avatarUrl != null && _partnerProfile!.avatarUrl!.isNotEmpty
-                  ? NetworkImage(_partnerProfile!.avatarUrl!)
-                  : null,
-              child: _partnerProfile?.avatarUrl == null || _partnerProfile!.avatarUrl!.isEmpty
-                  ? const Icon(Icons.person, color: AppColors.surface, size: 20)
-                  : null,
+        backgroundColor: _isSearching ? Colors.white : AppColors.primary,
+        foregroundColor: _isSearching ? AppColors.primary : Colors.white,
+        iconTheme: IconThemeData(
+          color: _isSearching ? AppColors.primary : AppColors.surface,
+        ),
+        title: _isSearching
+            ? Container(
+                height: 40,
+                margin: const EdgeInsets.only(right: 16, left: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Row(
+                  children: [
+                    const Icon(Icons.search, color: AppColors.primary, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        style: const TextStyle(color: AppColors.textPrimary, fontSize: 15),
+                        cursorColor: AppColors.primary,
+                        decoration: InputDecoration(
+                          hintText: Localizations.localeOf(context).languageCode == 'ar'
+                              ? 'بحث في المحادثة...'
+                              : 'Search chat...',
+                          hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                        ),
+                        autofocus: true,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () async {
+                  final ChatMessageModel? selectedMsg = await Navigator.push<ChatMessageModel?>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ChatMediaScreen(
+                        messages: _messages,
+                        partnerName: widget.partnerName,
+                      ),
+                    ),
+                  );
+                  if (selectedMsg != null && mounted) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (_scrollController.hasClients) {
+                        _scrollToMessage(selectedMsg.id);
+                      }
+                    });
+                  }
+                },
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 18,
+                      backgroundColor: Colors.white.withValues(alpha: 0.15),
+                      backgroundImage: _partnerProfile?.avatarUrl != null && _partnerProfile!.avatarUrl!.isNotEmpty
+                          ? NetworkImage(_partnerProfile!.avatarUrl!)
+                          : null,
+                      child: _partnerProfile?.avatarUrl == null || _partnerProfile!.avatarUrl!.isEmpty
+                          ? const Icon(Icons.person, color: AppColors.surface, size: 20)
+                          : null,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        widget.partnerName,
+                        style: AppTextStyles.heading1.copyWith(color: AppColors.surface),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+        actions: [
+          if (_isSearching)
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () {
+                setState(() {
+                  _isSearching = false;
+                  _searchController.clear();
+                });
+              },
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () {
+                setState(() {
+                  _isSearching = true;
+                });
+              },
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                widget.partnerName,
-                style: AppTextStyles.heading1.copyWith(color: AppColors.surface),
-                overflow: TextOverflow.ellipsis,
+        ],
+      ),
+      body: DropTarget(
+        onDragEntered: (details) {
+          setState(() {
+            _isDragging = true;
+          });
+        },
+        onDragExited: (details) {
+          setState(() {
+            _isDragging = false;
+          });
+        },
+        onDragDone: (details) async {
+          setState(() {
+            _isDragging = false;
+          });
+          if (kIsWeb) return;
+          if (details.files.isNotEmpty) {
+            for (final file in details.files) {
+              await _handleDroppedFile(file);
+            }
+          }
+        },
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                Expanded(
+                  child: _loading
+                      ? const Center(child: CircularProgressIndicator())
+                      : _hasError
+                          ? Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.wifi_off_rounded,
+                                      size: 48, color: AppColors.textSecondary),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    l10n.failedToLoadMessages,
+                                    style: const TextStyle(color: AppColors.textSecondary),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  TextButton.icon(
+                                    onPressed: () {
+                                      setState(() {
+                                        _loading = true;
+                                        _hasError = false;
+                                      });
+                                      _subscribeToMessages();
+                                    },
+                                    icon: const Icon(Icons.refresh),
+                                    label: Text(l10n.retryButton),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : allMessages.isEmpty
+                              ? Center(
+                                  child: Text(
+                                    l10n.startChatConversation,
+                                    style: const TextStyle(color: AppColors.textSecondary),
+                                  ),
+                                )
+                              : ListView.builder(
+                                  controller: _scrollController,
+                                  reverse: true,
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: AppSpacing.small),
+                                  itemCount: allMessages.length,
+                                  itemBuilder: (_, i) {
+                                    // In reverse mode, index i goes from 0 (newest/bottom) to length-1 (oldest/top)
+                                    final message = allMessages[allMessages.length - 1 - i];
+                                    final isTemp = message.id.startsWith('temp_');
+                                    final isHighlighted = message.id == _highlightedMessageId;
+                                    
+                                    return AnimatedContainer(
+                                      duration: const Duration(milliseconds: 500),
+                                      color: isHighlighted
+                                          ? AppColors.secondary.withValues(alpha: 0.3)
+                                          : Colors.transparent,
+                                      padding: const EdgeInsets.symmetric(vertical: 2),
+                                      child: GestureDetector(
+                                        onLongPress: isTemp ? null : () => _showMessageOptions(message),
+                                        onSecondaryTap: isTemp ? null : () => _showMessageOptions(message),
+                                        child: ChatBubble(
+                                          message: message,
+                                          isMine: message.senderId == _myId,
+                                          onImageTapped: isTemp ? null : _viewOrEditImage,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                ),
+                if (_replyingTo != null) _buildReplyPreview(),
+                _MessageInputBar(
+                  controller: _messageController,
+                  sendingImage: _sendingImage,
+                  sendingFile: _sendingFile,
+                  isRecording: _isRecording,
+                  isRecordingLocked: _isRecordingLocked,
+                  recordDuration: _recordDuration,
+                  amplitudes: _amplitudes,
+                  onSend: _send,
+                  onPickImage: _sendImage,
+                  onPickFile: _sendFile,
+                  onStartRecord: (locked) => _startRecording(startLocked: locked),
+                  onCancelRecord: _cancelRecording,
+                  onStopAndSendRecord: _stopAndSendRecording,
+                  onLockChanged: (val) {
+                    setState(() {
+                      _isRecordingLocked = val;
+                    });
+                  },
+                ),
+              ],
+            ),
+            // Search Results Overlay
+            if (_isSearching && searchQuery.isNotEmpty)
+              Positioned.fill(
+                child: Container(
+                  color: AppColors.background,
+                  child: displayedMessages.isEmpty
+                      ? Center(
+                          child: Text(
+                            Localizations.localeOf(context).languageCode == 'ar'
+                                ? 'لم يتم العثور على نتائج'
+                                : 'No results found',
+                            style: const TextStyle(color: AppColors.textSecondary),
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: displayedMessages.length,
+                          itemBuilder: (ctx, i) {
+                            final msg = displayedMessages[i];
+                            final isMine = msg.senderId == _myId;
+                            final dateStr = _timeLabel(msg.createdAt);
+                            final senderName = isMine
+                                ? (Localizations.localeOf(context).languageCode == 'ar' ? 'أنت' : 'You')
+                                : widget.partnerName;
+
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                                child: Icon(
+                                  msg.isImage
+                                      ? Icons.image_outlined
+                                      : (msg.isFile ? Icons.insert_drive_file_outlined : Icons.chat_bubble_outline_rounded),
+                                  color: AppColors.primary,
+                                  size: 20,
+                                ),
+                              ),
+                              title: Text(
+                                msg.messageText.isNotEmpty
+                                    ? msg.messageText
+                                    : (msg.fileName ?? ''),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(color: AppColors.textPrimary),
+                              ),
+                              subtitle: Text(
+                                '$senderName • $dateStr',
+                                style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                              ),
+                              onTap: () {
+                                setState(() {
+                                  _isSearching = false;
+                                  _searchController.clear();
+                                });
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  if (_scrollController.hasClients) {
+                                    _scrollToMessage(msg.id);
+                                  }
+                                });
+                              },
+                            );
+                          },
+                        ),
+                ),
+              ),
+            Positioned.fill(
+              child: IgnorePointer(
+                ignoring: !(_isDraggingWeb && kIsWeb),
+                child: kIsWeb
+                    ? DropzoneView(
+                        operation: DragOperation.copy,
+                        cursor: CursorType.Default,
+                        onCreated: (ctrl) => _dropzoneController = ctrl,
+                        onHover: () {},
+                        onLeave: () {},
+                        onDropFile: (_) {},
+                        onDropFiles: (htmlFiles) async {
+                          if (_dropzoneController != null && htmlFiles != null) {
+                            try {
+                              final List<XFile> xFiles = [];
+                              for (final htmlFile in htmlFiles) {
+                                final name = await _dropzoneController!.getFilename(htmlFile);
+                                final size = await _dropzoneController!.getFileSize(htmlFile);
+                                final bytes = await _dropzoneController!.getFileData(htmlFile);
+                                xFiles.add(XFile.fromData(bytes, name: name, length: size));
+                              }
+                              
+                              if (mounted) {
+                                setState(() {
+                                  _isDraggingWeb = false;
+                                });
+                              }
+                              
+                              for (final xFile in xFiles) {
+                                await _handleDroppedFile(xFile);
+                              }
+                            } catch (e) {
+                              debugPrint("Error handling web drop files list: $e");
+                              if (mounted) {
+                                setState(() {
+                                  _isDraggingWeb = false;
+                                });
+                              }
+                            }
+                          } else {
+                            if (mounted) {
+                              setState(() {
+                                _isDraggingWeb = false;
+                              });
+                            }
+                          }
+                        },
+                      )
+                    : const SizedBox.shrink(),
               ),
             ),
+            if (_isDragging || _isDraggingWeb)
+              IgnorePointer(
+                child: Container(
+                  color: Colors.black.withValues(alpha: 0.55),
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 10,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.cloud_upload_outlined,
+                            size: 48,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            Localizations.localeOf(context).languageCode == 'ar'
+                                ? 'أفلت الملفات هنا لإرسالها'
+                                : 'Drop files here to send them',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
-        backgroundColor: AppColors.primary,
-        iconTheme: const IconThemeData(color: AppColors.surface),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: _loading
-                ? const Center(child: CircularProgressIndicator())
-                : _hasError
-                    ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.wifi_off_rounded,
-                                size: 48, color: AppColors.textSecondary),
-                            const SizedBox(height: 12),
-                            Text(
-                              l10n.failedToLoadMessages,
-                              style: const TextStyle(color: AppColors.textSecondary),
-                            ),
-                            const SizedBox(height: 12),
-                            TextButton.icon(
-                              onPressed: () {
-                                setState(() {
-                                  _loading = true;
-                                  _hasError = false;
-                                });
-                                _subscribeToMessages();
-                              },
-                              icon: const Icon(Icons.refresh),
-                              label: Text(l10n.retryButton),
-                            ),
-                          ],
-                        ),
-                      )
-                    : _messages.isEmpty
-                        ? Center(
-                            child: Text(
-                              l10n.startChatConversation,
-                              style: const TextStyle(color: AppColors.textSecondary),
-                            ),
-                          )
-                        : ListView.builder(
-                            controller: _scrollController,
-                            padding: const EdgeInsets.symmetric(
-                                vertical: AppSpacing.small),
-                            itemCount: _messages.length,
-                            itemBuilder: (_, i) {
-                              final message = _messages[i];
-                              return GestureDetector(
-                                onLongPress: () => _showMessageOptions(message),
-                                child: ChatBubble(
-                                  message: message,
-                                  isMine: message.senderId == _myId,
-                                  onImageTapped: _viewOrEditImage,
-                                ),
-                              );
-                            },
-                          ),
-          ),
-          _MessageInputBar(
-            controller: _messageController,
-            sendingImage: _sendingImage,
-            sendingFile: _sendingFile,
-            isRecording: _isRecording,
-            isRecordingLocked: _isRecordingLocked,
-            recordDuration: _recordDuration,
-            amplitudes: _amplitudes,
-            onSend: _send,
-            onPickImage: _sendImage,
-            onPickFile: _sendFile,
-            onStartRecord: _startRecording,
-            onCancelRecord: _cancelRecording,
-            onStopAndSendRecord: _stopAndSendRecording,
-            onLockChanged: (val) {
-              setState(() {
-                _isRecordingLocked = val;
-              });
-            },
-          ),
-        ],
       ),
     );
   }
@@ -1096,7 +1997,7 @@ class _MessageInputBar extends StatelessWidget {
   final VoidCallback onSend;
   final VoidCallback onPickImage;
   final VoidCallback onPickFile;
-  final VoidCallback onStartRecord;
+  final ValueSetter<bool> onStartRecord;
   final VoidCallback onCancelRecord;
   final VoidCallback onStopAndSendRecord;
   final ValueSetter<bool> onLockChanged;
@@ -1172,26 +2073,17 @@ class _MessageInputBar extends StatelessWidget {
                           ),
                   ),
                 ),
-                if (isRecordingLocked) ...[
-                  IconButton(
-                    onPressed: onCancelRecord,
-                    icon: const Icon(Icons.delete_outline_rounded, color: AppColors.error),
-                    tooltip: l10n.cancel,
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    onPressed: onStopAndSendRecord,
-                    icon: const Icon(Icons.check_circle_outline_rounded, color: AppColors.success, size: 28),
-                    tooltip: l10n.localeName == 'ar' ? 'إرسال' : (l10n.localeName == 'tr' ? 'Gönder' : 'Send'),
-                  ),
-                ] else ...[
-                  const SizedBox(width: 12),
-                  Text(
-                    l10n.localeName == 'ar' ? 'أفلت للإرسال' : (l10n.localeName == 'tr' ? 'Bırak gönder' : 'Release to send'),
-                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 10, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: 12),
-                ],
+                IconButton(
+                  onPressed: onCancelRecord,
+                  icon: const Icon(Icons.delete_outline_rounded, color: AppColors.error),
+                  tooltip: l10n.cancel,
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: onStopAndSendRecord,
+                  icon: const Icon(Icons.check_circle_outline_rounded, color: AppColors.success, size: 28),
+                  tooltip: l10n.localeName == 'ar' ? 'إرسال' : (l10n.localeName == 'tr' ? 'Gönder' : 'Send'),
+                ),
               ],
             )
           : Row(
@@ -1345,7 +2237,7 @@ class _PulsingRecordIconState extends State<_PulsingRecordIcon> with SingleTicke
 }
 
 class _RecordingButton extends StatefulWidget {
-  final VoidCallback onStart;
+  final ValueSetter<bool> onStart;
   final VoidCallback onCancel;
   final VoidCallback onStopAndSend;
   final ValueSetter<bool> onLockChanged;
@@ -1373,7 +2265,7 @@ class _RecordingButtonState extends State<_RecordingButton> {
         setState(() {
           _isLocked = false;
         });
-        widget.onStart();
+        widget.onStart(false);
       },
       onLongPressMoveUpdate: (details) {
         if (_isLocked) return;
@@ -1393,7 +2285,7 @@ class _RecordingButtonState extends State<_RecordingButton> {
       },
       onTap: () {
         // Fallback tap: start immediately locked
-        widget.onStart();
+        widget.onStart(true);
         widget.onLockChanged(true);
       },
       child: Container(

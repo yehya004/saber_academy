@@ -10,6 +10,7 @@ class ProfileModel {
   final String? country;
   final String? avatarUrl;
   final String? email;           // stored in profiles for teacher visibility
+  final String? studentPassword; // raw student password for teacher visibility
   final int     level;         // manual level set by teacher
   final double  lessonInLevel; // lesson number or hours within the current level
   final double  totalInLevel;  // total hours or lessons in the current level
@@ -30,6 +31,7 @@ class ProfileModel {
     this.country,
     this.avatarUrl,
     this.email,
+    this.studentPassword,
     this.level         = 1,
     this.lessonInLevel = 0.0,
     this.totalInLevel  = 20.0,
@@ -55,6 +57,7 @@ class ProfileModel {
         country:       map['country']         as String?,
         avatarUrl:     map['avatar_url']      as String?,
         email:         map['email']           as String?,
+        studentPassword: map['student_password'] as String?,
         level:         (map['level']          as int?) ?? 1,
         lessonInLevel: ((map['lesson_in_level'] as num?) ?? 0.0).toDouble(),
         totalInLevel:  ((map['total_in_level']  as num?) ?? 20.0).toDouble(),
@@ -76,6 +79,7 @@ class ProfileModel {
         if (country       != null) 'country':         country,
         if (avatarUrl     != null) 'avatar_url':      avatarUrl,
         if (email         != null) 'email':           email,
+        if (studentPassword != null) 'student_password': studentPassword,
         'level':           level,
         'lesson_in_level': lessonInLevel,
         'total_in_level':  totalInLevel,

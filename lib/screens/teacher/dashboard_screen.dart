@@ -355,7 +355,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                           onViewDetail: () => context.push(
                             AppRoutes.studentDetail,
                             extra: s,
-                          ),
+                          ).then((_) => _load()),
                           onAttendance: () => context.push(
                             AppRoutes.attendance,
                             extra: {
@@ -363,7 +363,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                               'studentName': s.fullName,
                               'teacherId':   teacherId,
                             },
-                          ),
+                          ).then((_) {
+                            if (mounted) _load();
+                          }),
                           onHomework: () => context.push(
                             AppRoutes.teacherHomework,
                             extra: {
@@ -371,14 +373,18 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                               'studentName': s.fullName,
                               'teacherId':   teacherId,
                             },
-                          ),
+                          ).then((_) {
+                            if (mounted) _load();
+                          }),
                           onChat: () => context.push(
                             AppRoutes.chat,
                             extra: {
                               'partnerId':   s.id,
                               'partnerName': s.fullName,
                             },
-                          ),
+                          ).then((_) {
+                            if (mounted) _load();
+                          }),
                         ),
                       );
                     },
@@ -443,14 +449,19 @@ class _StudentCard extends StatelessWidget {
                 CircleAvatar(
                   radius:          22,
                   backgroundColor: AppColors.primary,
-                  child: Text(
-                    initials,
-                    style: const TextStyle(
-                      color:      AppColors.surface,
-                      fontWeight: FontWeight.bold,
-                      fontSize:   14,
-                    ),
-                  ),
+                  backgroundImage: student.avatarUrl != null && student.avatarUrl!.isNotEmpty
+                      ? NetworkImage(student.avatarUrl!)
+                      : null,
+                  child: student.avatarUrl == null || student.avatarUrl!.isEmpty
+                      ? Text(
+                          initials,
+                          style: const TextStyle(
+                            color:      AppColors.surface,
+                            fontWeight: FontWeight.bold,
+                            fontSize:   14,
+                          ),
+                        )
+                      : null,
                 ),
                 const SizedBox(width: AppSpacing.medium),
                 Expanded(
@@ -459,6 +470,8 @@ class _StudentCard extends StatelessWidget {
                     children: [
                       Text(
                         student.fullName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize:   15,
@@ -466,7 +479,10 @@ class _StudentCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 3),
-                      Row(
+                      Wrap(
+                        spacing: 4,
+                        runSpacing: 4,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
@@ -483,7 +499,6 @@ class _StudentCard extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(width: 4),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                             decoration: BoxDecoration(

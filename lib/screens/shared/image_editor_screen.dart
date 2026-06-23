@@ -417,7 +417,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
             child: Text(
               isAr ? 'إرسال' : (isTr ? 'Gönder' : 'Send'),
               style: const TextStyle(
-                color: AppColors.primary,
+                color: AppColors.secondary,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),

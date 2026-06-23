@@ -80,6 +80,9 @@ class ChatService {
     String? fileUrl,
     String? fileName,
     String? telegramFileId,
+    String? replyToId,
+    String? replyToText,
+    String? replyToSenderName,
   }) {
     final trimmed = messageText.trim();
     if (trimmed.isEmpty && imageUrl == null && fileUrl == null && telegramFileId == null) {
@@ -110,6 +113,9 @@ class ChatService {
       if (fileUrl != null) 'file_url': fileUrl,
       if (fileName != null) 'file_name': fileName,
       if (telegramFileId != null) 'telegram_file_id': telegramFileId,
+      if (replyToId != null) 'reply_to_id': replyToId,
+      if (replyToText != null) 'reply_to_text': replyToText,
+      if (replyToSenderName != null) 'reply_to_sender_name': replyToSenderName,
     });
   }
 

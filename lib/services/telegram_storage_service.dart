@@ -10,8 +10,10 @@ class TelegramStorageService {
   // ── Telegram credentials ──────────────────────────────────────────────────
   static const _botToken  = '8767281197:AAEQ0y2hussZGc_0CjM8dyI_w8bYX-4iNXE';
   static const _channelId = '-1003981828165';
-  static const _apiBase   = 'https://api.telegram.org/bot$_botToken';
-  static const _fileBase  = 'https://api.telegram.org/file/bot$_botToken';
+  static String get _apiBase => kIsWeb
+      ? 'https://cors.zme.ink/https://api.telegram.org/bot$_botToken'
+      : 'https://api.telegram.org/bot$_botToken';
+  static String get _fileBase => 'https://api.telegram.org/file/bot$_botToken';
 
   final _dio = Dio(
     BaseOptions(

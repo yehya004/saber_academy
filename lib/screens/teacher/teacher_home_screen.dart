@@ -795,14 +795,19 @@ class _StudentRow extends StatelessWidget {
               CircleAvatar(
                 radius: 20,
                 backgroundColor: AppColors.primary,
-                child: Text(
-                  initials,
-                  style: const TextStyle(
-                    color:      AppColors.surface,
-                    fontWeight: FontWeight.bold,
-                    fontSize:   13,
-                  ),
-                ),
+                backgroundImage: student.avatarUrl != null && student.avatarUrl!.isNotEmpty
+                    ? NetworkImage(student.avatarUrl!)
+                    : null,
+                child: student.avatarUrl == null || student.avatarUrl!.isEmpty
+                    ? Text(
+                        initials,
+                        style: const TextStyle(
+                          color:      AppColors.surface,
+                          fontWeight: FontWeight.bold,
+                          fontSize:   13,
+                        ),
+                      )
+                    : null,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -811,6 +816,8 @@ class _StudentRow extends StatelessWidget {
                   children: [
                     Text(
                       student.fullName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize:   14,
@@ -818,12 +825,14 @@ class _StudentRow extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Row(
+                    Wrap(
+                      spacing: 4,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         _LevelBadge(l10n.studentLevelAbbr(student.level),
                             AppColors.primary.withValues(alpha: 0.10),
                             AppColors.primary),
-                        const SizedBox(width: 4),
                         _LevelBadge(
                             student.studySystem == 'hours'
                                 ? (Localizations.localeOf(context).languageCode == 'ar'

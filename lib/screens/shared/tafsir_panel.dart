@@ -36,7 +36,6 @@ class _TafsirPanelState extends State<TafsirPanel>
     {'id': 'ar.abdulbasitmurattal', 'name': 'عبد الباسط عبد الصمد'},
     {'id': 'ar.yasseraddussari',    'name': 'ياسر الدوسري'},
     {'id': 'ar.shuraym',            'name': 'سعود الشريم'},
-    {'id': 'ar.faresabbad',         'name': 'فارس عباد'},
     {'id': 'ar.hudhaify',           'name': 'علي الحذيفي'},
     {'id': 'ar.nasseralqatami',      'name': 'ناصر القطامي'},
   ];
@@ -411,7 +410,6 @@ class _TafsirPanelState extends State<TafsirPanel>
       case 'ar.abdulbasitmurattal': return 'Abdul Basit Abdul Samad';
       case 'ar.yasseraddussari': return 'Yasser Al-Dosari';
       case 'ar.shuraym': return 'Saud Al-Shuraim';
-      case 'ar.faresabbad': return 'Fares Abbad';
       case 'ar.hudhaify': return 'Ali Al-Hudhaify';
       case 'ar.nasseralqatami': return 'Nasser Al-Qatami';
       default: return defaultName;

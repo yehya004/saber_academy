@@ -99,4 +99,27 @@ class ProfileService {
 
     return null;
   }
+
+  /// Permanently deletes a student's profile and cleans up their data.
+  Future<void> deleteStudent(String studentId) async {
+    // 1. Delete quiz assignments first since they reference auth.users instead of profiles(id)
+    await _client.from('quiz_assignments').delete().eq('student_id', studentId);
+    
+    // 2. Delete the profile row. All other tables referencing profiles(id) will cascade delete.
+    await _client.from('profiles').delete().eq('id', studentId);
+  }
+
+  /// Teacher updates student's credentials (email and/or password) via RPC.
+  Future<void> updateStudentCredentials({
+    required String studentId,
+    String? email,
+    String? password,
+  }) async {
+    await _client.rpc('update_student_auth', params: {
+      'student_id': studentId,
+      'new_email': email,
+      'new_password': password,
+    });
+  }
 }
+

@@ -154,7 +154,9 @@ class _StudentListScreenState extends State<StudentListScreen> {
                                   'studentName': s.fullName,
                                   'teacherId':   teacherId,
                                 },
-                              ),
+                              ).then((_) {
+                                if (mounted) _load();
+                              }),
                               onHomework: () => context.push(
                                 AppRoutes.teacherHomework,
                                 extra: {
@@ -162,19 +164,23 @@ class _StudentListScreenState extends State<StudentListScreen> {
                                   'studentName': s.fullName,
                                   'teacherId':   teacherId,
                                 },
-                              ),
+                              ).then((_) {
+                                if (mounted) _load();
+                              }),
                               onChat: () => context.push(
                                 AppRoutes.chat,
                                 extra: {
                                   'partnerId':   s.id,
                                   'partnerName': s.fullName,
                                 },
-                              ),
+                              ).then((_) {
+                                if (mounted) _load();
+                              }),
                               onEditLevel: () => _openLevelEditor(context, s),
                               onViewDetail: () => context.push(
                                 AppRoutes.studentDetail,
                                 extra: s,
-                              ),
+                              ).then((_) => _load()),
                             );
                           },
                         ),
@@ -244,14 +250,19 @@ class _StudentCard extends StatelessWidget {
                 CircleAvatar(
                   radius:          24,
                   backgroundColor: AppColors.primary,
-                  child: Text(
-                    initials,
-                    style: const TextStyle(
-                      color:      AppColors.surface,
-                      fontWeight: FontWeight.bold,
-                      fontSize:   16,
-                    ),
-                  ),
+                  backgroundImage: student.avatarUrl != null && student.avatarUrl!.isNotEmpty
+                      ? NetworkImage(student.avatarUrl!)
+                      : null,
+                  child: student.avatarUrl == null || student.avatarUrl!.isEmpty
+                      ? Text(
+                          initials,
+                          style: const TextStyle(
+                            color:      AppColors.surface,
+                            fontWeight: FontWeight.bold,
+                            fontSize:   16,
+                          ),
+                        )
+                      : null,
                 ),
                 const SizedBox(width: AppSpacing.medium),
 
@@ -262,14 +273,19 @@ class _StudentCard extends StatelessWidget {
                     children: [
                       Text(
                         student.fullName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize:   15,
                           color:      AppColors.textPrimary,
                         ),
                       ),
-                      const SizedBox(height: 3),
-                      Row(
+                      const SizedBox(height: 4),
+                      Wrap(
+                        spacing: 4,
+                        runSpacing: 4,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
@@ -286,8 +302,6 @@ class _StudentCard extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(width: 4),
-                          const SizedBox(width: 4),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                             decoration: BoxDecoration(
@@ -307,7 +321,6 @@ class _StudentCard extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(width: 4),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                             decoration: BoxDecoration(
@@ -325,8 +338,7 @@ class _StudentCard extends StatelessWidget {
                               ),
                             ),
                           ),
-                          if (student.isBlocked) ...[
-                            const SizedBox(width: 4),
+                          if (student.isBlocked)
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                               decoration: BoxDecoration(
@@ -343,7 +355,6 @@ class _StudentCard extends StatelessWidget {
                                 ),
                               ),
                             ),
-                          ],
                         ],
                       ),
                     ],
@@ -411,9 +422,6 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
     _lesson = widget.student.lessonInLevel;
     _total  = widget.student.totalInLevel;
     _studyBalance = widget.student.studyBalance;
-    if (_studyBalance == 0.0 && _total > _lesson) {
-      _studyBalance = _total - _lesson;
-    }
     _isPaid = widget.student.isPaid;
     _isBlocked = widget.student.isBlocked;
     _studySystem = widget.student.studySystem;

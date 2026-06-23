@@ -24,7 +24,7 @@ class LocalDatabaseService {
 
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE cached_chat_messages (
@@ -38,7 +38,10 @@ class LocalDatabaseService {
             file_url TEXT,
             file_name TEXT,
             telegram_file_id TEXT,
-            is_deleted INTEGER NOT NULL DEFAULT 0
+            is_deleted INTEGER NOT NULL DEFAULT 0,
+            reply_to_id TEXT,
+            reply_to_text TEXT,
+            reply_to_sender_name TEXT
           )
         ''');
       },
@@ -53,6 +56,15 @@ class LocalDatabaseService {
         if (oldVersion < 3) {
           try {
             await db.execute('ALTER TABLE cached_chat_messages ADD COLUMN is_deleted INTEGER NOT NULL DEFAULT 0;');
+          } catch (e) {
+            // Already exists or other SQLite error
+          }
+        }
+        if (oldVersion < 4) {
+          try {
+            await db.execute('ALTER TABLE cached_chat_messages ADD COLUMN reply_to_id TEXT;');
+            await db.execute('ALTER TABLE cached_chat_messages ADD COLUMN reply_to_text TEXT;');
+            await db.execute('ALTER TABLE cached_chat_messages ADD COLUMN reply_to_sender_name TEXT;');
           } catch (e) {
             // Already exists or other SQLite error
           }
@@ -87,6 +99,9 @@ class LocalDatabaseService {
           'file_name': msg.fileName,
           'telegram_file_id': msg.telegramFileId,
           'is_deleted': msg.isDeleted ? 1 : 0,
+          'reply_to_id': msg.replyToId,
+          'reply_to_text': msg.replyToText,
+          'reply_to_sender_name': msg.replyToSenderName,
         },
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
@@ -129,6 +144,9 @@ class LocalDatabaseService {
         fileName: map['file_name'] as String?,
         telegramFileId: map['telegram_file_id'] as String?,
         isDeleted: (map['is_deleted'] as int? ?? 0) == 1,
+        replyToId: map['reply_to_id'] as String?,
+        replyToText: map['reply_to_text'] as String?,
+        replyToSenderName: map['reply_to_sender_name'] as String?,
       );
     });
   }

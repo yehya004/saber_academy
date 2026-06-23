@@ -64,6 +64,7 @@ class StudentInviteService {
         'lesson_in_level': lessonInLevel,
         'total_in_level': totalInLevel,
         'email': email,
+        'student_password': password,
         'is_paid': isPaid,
         'study_system': studySystem,
         'study_balance': studyBalance,

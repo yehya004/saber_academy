@@ -1,6 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../core/constants/app_constants.dart';
 import '../models/session_model.dart';
 
 class AttendanceService {
@@ -32,6 +31,7 @@ class AttendanceService {
     double deductedAmount = 1.0,
     bool deductForAbsence = false,
   }) async {
+    // 1. Insert session record
     await _client.from('sessions').insert({
       'student_id': studentId,
       'teacher_id': teacherId,
@@ -46,58 +46,53 @@ class AttendanceService {
         'resource_url': resourceUrl,
     });
 
-    // Auto-increment lesson_in_level when present or late
-    if (status == 'present' || status == 'late') {
-      final profile = await _client
-          .from('profiles')
-          .select('level, lesson_in_level, study_system')
-          .eq('id', studentId)
-          .maybeSingle();
+    // 2. Fetch student profile details (fetch all details needed in a single SELECT query)
+    final profile = await _client
+        .from('profiles')
+        .select('level, lesson_in_level, study_system, total_in_level, study_balance')
+        .eq('id', studentId)
+        .maybeSingle();
 
-      int level = (profile?['level'] as int?) ?? 1;
-      double lesson = ((profile?['lesson_in_level'] as num?) ?? 0.0).toDouble();
-      final String studySystem = (profile?['study_system'] as String?) ?? 'classes';
+    if (profile != null) {
+      final Map<String, dynamic> updates = {};
+      final String studySystem = (profile['study_system'] as String?) ?? 'classes';
+      final double totalInLevel = ((profile['total_in_level'] as num?) ?? (studySystem == 'hours' ? 40.0 : 20.0)).toDouble();
 
-      if (studySystem == 'hours') {
-        lesson += deductedAmount;
-      } else {
-        lesson += 1.0;
-      }
+      // Calculate lesson and level progress (only if status is present or late)
+      if (status == 'present' || status == 'late') {
+        int level = (profile['level'] as int?) ?? 1;
+        double lesson = ((profile['lesson_in_level'] as num?) ?? 0.0).toDouble();
 
-      if (lesson >= AppConstants.lessonsPerLevel) {
-        level += 1;
-        lesson = 0.0;
-      }
-
-      await _client.from('profiles').update({
-        'level': level,
-        'lesson_in_level': lesson,
-      }).eq('id', studentId);
-    }
-
-    // Deduct from student balance
-    final shouldDeduct = (status == 'present' || status == 'late') || (status == 'absent' && deductForAbsence);
-    if (shouldDeduct) {
-      final profile = await _client
-          .from('profiles')
-          .select('study_balance, total_in_level, lesson_in_level')
-          .eq('id', studentId)
-          .maybeSingle();
-      if (profile != null) {
-        final double total = ((profile['total_in_level'] as num?) ?? 20.0).toDouble();
-        final double lesson = ((profile['lesson_in_level'] as num?) ?? 0.0).toDouble();
-        double currentBalance = ((profile['study_balance'] as num?) ?? 0.0).toDouble();
-        if (currentBalance == 0.0 && total > lesson) {
-          currentBalance = total - lesson;
+        if (studySystem == 'hours') {
+          lesson += deductedAmount;
+        } else {
+          lesson += 1.0;
         }
+
+        if (lesson >= totalInLevel) {
+          level += 1;
+          lesson = 0.0;
+        }
+
+        updates['level'] = level;
+        updates['lesson_in_level'] = lesson;
+      }
+
+      // Calculate new study balance deduction
+      final shouldDeduct = (status == 'present' || status == 'late') || (status == 'absent' && deductForAbsence);
+      if (shouldDeduct) {
+        double currentBalance = ((profile['study_balance'] as num?) ?? 0.0).toDouble();
         final double newBalance = (currentBalance - deductedAmount).clamp(0.0, 99999.0);
-        await _client.from('profiles').update({
-          'study_balance': newBalance,
-        }).eq('id', studentId);
+        updates['study_balance'] = newBalance;
+      }
+
+      // If there are profile fields to update, execute a single UPDATE query
+      if (updates.isNotEmpty) {
+        await _client.from('profiles').update(updates).eq('id', studentId);
       }
     }
 
-    // Auto-create a homework entry so it appears on the student's homework page
+    // 3. Auto-create a homework entry so it appears on the student's homework page
     if (homework != null && homework.isNotEmpty) {
       await _client.from('homeworks').insert({
         'student_id': studentId,
@@ -116,12 +111,14 @@ class AttendanceService {
     // ── Read manual level from profile ───────────────────────────
     final profile = await _client
         .from('profiles')
-        .select('level, lesson_in_level')
+        .select('level, lesson_in_level, study_system, total_in_level')
         .eq('id', studentId)
         .maybeSingle();
 
     final int manualLevel = (profile?['level'] as int?) ?? 1;
     final double manualLesson = ((profile?['lesson_in_level'] as num?) ?? 0.0).toDouble();
+    final String studySystem = (profile?['study_system'] as String?) ?? 'classes';
+    final double totalInLevel = ((profile?['total_in_level'] as num?) ?? (studySystem == 'hours' ? 40.0 : 20.0)).toDouble();
 
     // Count attended sessions for total_attended display
     final sessions = await _client
@@ -135,8 +132,8 @@ class AttendanceService {
       'total_attended': attended,
       'level': manualLevel,
       'progress_in_level': manualLesson,
-      'sessions_to_next_level': (AppConstants.lessonsPerLevel - manualLesson)
-          .clamp(0.0, AppConstants.lessonsPerLevel.toDouble()),
+      'sessions_to_next_level': (totalInLevel - manualLesson)
+          .clamp(0.0, totalInLevel),
     };
   }
 }

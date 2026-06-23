@@ -55,7 +55,6 @@ class _DownloadsScreenState extends State<DownloadsScreen> with SingleTickerProv
     {'id': 'ar.abdulbasitmurattal', 'name': 'عبد الباسط عبد الصمد', 'nameEn': 'Abdul Basit Abdul Samad'},
     {'id': 'ar.yasseraddussari',    'name': 'ياسر الدوسري', 'nameEn': 'Yasser Al-Dossari'},
     {'id': 'ar.shuraym',            'name': 'سعود الشريم', 'nameEn': 'Saud Al-Shuraim'},
-    {'id': 'ar.faresabbad',         'name': 'فارس عباد', 'nameEn': 'Fares Abbad'},
     {'id': 'ar.hudhaify',           'name': 'علي الحذيفي', 'nameEn': 'Ali Al-Huthaify'},
     {'id': 'ar.nasseralqatami',      'name': 'ناصر القطامي', 'nameEn': 'Nasser Al-Qatami'},
   ];

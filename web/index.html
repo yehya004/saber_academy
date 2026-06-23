@@ -41,6 +41,14 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
+  <script>
+    window.addEventListener("dragover", function(e) {
+      e.preventDefault();
+    }, false);
+    window.addEventListener("drop", function(e) {
+      e.preventDefault();
+    }, false);
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

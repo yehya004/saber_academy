@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -243,6 +244,84 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
       final refreshed = await _profileService.fetchStudentById(_student.id);
       if (refreshed != null && mounted) {
         setState(() => _student = refreshed);
+      }
+    }
+  }
+
+  Future<void> _deleteStudentDialog() async {
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final isTr = Localizations.localeOf(context).languageCode == 'tr';
+    
+    String title = 'Delete Student';
+    String message = 'Are you sure you want to permanently delete this student? All their sessions, homeworks, messages, and progress will be lost forever. This action cannot be undone.';
+    String confirmLabel = 'Delete';
+    String cancelLabel = 'Cancel';
+    
+    if (isAr) {
+      title = 'حذف الطالب';
+      message = 'هل أنت متأكد من حذف هذا الطالب نهائياً؟ سيتم حذف جميع الحصص والواجبات والرسائل والبيانات الخاصة به ولا يمكن التراجع عن هذا الإجراء.';
+      confirmLabel = 'حذف';
+      cancelLabel = 'إلغاء';
+    } else if (isTr) {
+      title = 'Öğrenciyi Sil';
+      message = 'Bu öğrenciyi kalıcı olarak silmek istediğinizden emin misiniz? Tüm dersleri, ödevleri, mesajları ve ilerlemesi kalıcı olarak kaybolacaktır. Bu işlem geri alınamaz.';
+      confirmLabel = 'Sil';
+      cancelLabel = 'İptal';
+    }
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.warning_amber_rounded, color: AppColors.error, size: 24),
+            const SizedBox(width: 8),
+            Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Text(message, style: const TextStyle(fontSize: 14)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(cancelLabel, style: const TextStyle(color: AppColors.textSecondary)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: Text(confirmLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    setState(() => _loading = true);
+    try {
+      await _profileService.deleteStudent(_student.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(isAr ? 'تم حذف الطالب بنجاح' : isTr ? 'Öğrenci başarıyla silindi' : 'Student deleted successfully'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+        Navigator.of(context).pop(true);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _loading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: AppColors.error,
+          ),
+        );
       }
     }
   }
@@ -562,6 +641,13 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
               l10n.studentDetailsTitle,
               style: const TextStyle(color: AppColors.surface, fontWeight: FontWeight.bold),
             ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.delete_outline, color: AppColors.surface),
+                tooltip: Localizations.localeOf(context).languageCode == 'ar' ? 'حذف الطالب' : 'Delete Student',
+                onPressed: _deleteStudentDialog,
+              ),
+            ],
           ),
 
           // ── Body ──────────────────────────────────────────────────────
@@ -623,9 +709,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
                                 Builder(
                                   builder: (ctx) {
                                     final isHours = _student.studySystem == 'hours';
-                                    final double balance = (_student.studyBalance == 0.0 && _student.totalInLevel > _student.lessonInLevel)
-                                        ? _student.totalInLevel - _student.lessonInLevel
-                                        : _student.studyBalance;
+                                    final double balance = _student.studyBalance;
                                     String valStr = '';
                                     String lblStr = '';
                                     if (isHours) {
@@ -1110,6 +1194,39 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
                       ),
                       const Divider(height: 1, indent: 44, color: AppColors.progressTrack),
                       _DetailRow(
+                        icon:  Icons.lock_outline,
+                        color: AppColors.warning,
+                        label: Localizations.localeOf(context).languageCode == 'ar'
+                            ? 'كلمة المرور'
+                            : Localizations.localeOf(context).languageCode == 'tr'
+                                ? 'Şifre'
+                                : 'Password',
+                        value: (_student.studentPassword != null && _student.studentPassword!.isNotEmpty)
+                            ? _student.studentPassword!
+                            : '—',
+                        trailing: (_student.studentPassword != null && _student.studentPassword!.isNotEmpty)
+                            ? IconButton(
+                                icon: const Icon(Icons.copy, size: 16, color: AppColors.textSecondary),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                                onPressed: () {
+                                  Clipboard.setData(ClipboardData(text: _student.studentPassword!));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(Localizations.localeOf(context).languageCode == 'ar'
+                                          ? 'تم نسخ كلمة المرور'
+                                          : Localizations.localeOf(context).languageCode == 'tr'
+                                              ? 'Şifre kopyalandı'
+                                              : 'Password copied'),
+                                      backgroundColor: AppColors.success,
+                                    ),
+                                  );
+                                },
+                              )
+                            : null,
+                      ),
+                      const Divider(height: 1, indent: 44, color: AppColors.progressTrack),
+                      _DetailRow(
                         icon:  Icons.chat_outlined,
                         color: const Color(0xFF25D366),
                         label: l10n.whatsappLabel,
@@ -1159,42 +1276,51 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
                         icon:    Icons.check_circle_outline,
                         color:   AppColors.success,
                         label:   l10n.attendanceLog,
-                        onTap: () => context.push(
-                          AppRoutes.attendance,
-                          extra: {
-                            'studentId':   _student.id,
-                            'studentName': _student.fullName,
-                            'teacherId':   context.read<AuthProvider>().profile?.id ?? '',
-                          },
-                        ),
+                        onTap: () async {
+                          await context.push(
+                            AppRoutes.attendance,
+                            extra: {
+                              'studentId':   _student.id,
+                              'studentName': _student.fullName,
+                              'teacherId':   context.read<AuthProvider>().profile?.id ?? '',
+                            },
+                          );
+                          if (mounted) _load();
+                        },
                       ),
                       const Divider(height: 1, indent: 44, color: AppColors.progressTrack),
                       _ActionTile(
                         icon:    Icons.assignment_outlined,
                         color:   AppColors.warning,
                         label:   l10n.homework,
-                        onTap: () => context.push(
-                          AppRoutes.teacherHomework,
-                          extra: {
-                            'studentId':   _student.id,
-                            'studentName': _student.fullName,
-                            'teacherId':   context.read<AuthProvider>().profile?.id ?? '',
-                          },
-                        ),
+                        onTap: () async {
+                          await context.push(
+                            AppRoutes.teacherHomework,
+                            extra: {
+                              'studentId':   _student.id,
+                              'studentName': _student.fullName,
+                              'teacherId':   context.read<AuthProvider>().profile?.id ?? '',
+                            },
+                          );
+                          if (mounted) _load();
+                        },
                       ),
                       const Divider(height: 1, indent: 44, color: AppColors.progressTrack),
                       _ActionTile(
                         icon:    Icons.quiz_outlined,
                         color:   AppColors.secondary,
                         label:   l10n.quizzes,
-                        onTap: () => context.push(
-                          AppRoutes.teacherStudentQuizzes,
-                          extra: {
-                            'studentId':   _student.id,
-                            'studentName': _student.fullName,
-                            'teacherId':   context.read<AuthProvider>().profile?.id ?? '',
-                          },
-                        ),
+                        onTap: () async {
+                          await context.push(
+                            AppRoutes.teacherStudentQuizzes,
+                            extra: {
+                              'studentId':   _student.id,
+                              'studentName': _student.fullName,
+                              'teacherId':   context.read<AuthProvider>().profile?.id ?? '',
+                            },
+                          );
+                          if (mounted) _load();
+                        },
                       ),
                       const Divider(height: 1, indent: 44, color: AppColors.progressTrack),
                       _ActionTile(
@@ -1243,7 +1369,9 @@ class _EditContactDialog extends StatefulWidget {
 class _EditContactDialogState extends State<_EditContactDialog> {
   late final TextEditingController _phoneCtrl;
   late final TextEditingController _messengerCtrl;
-  late final TextEditingController _countryCtrl;
+  late final TextEditingController _emailCtrl;
+  late final TextEditingController _passwordCtrl;
+  String? _country;
   bool _saving = false;
 
   @override
@@ -1251,25 +1379,41 @@ class _EditContactDialogState extends State<_EditContactDialog> {
     super.initState();
     _phoneCtrl     = TextEditingController(text: widget.student.phone ?? '');
     _messengerCtrl = TextEditingController(text: widget.student.messengerLink ?? '');
-    _countryCtrl   = TextEditingController(text: widget.student.country ?? '');
+    _emailCtrl     = TextEditingController(text: widget.student.email ?? '');
+    _passwordCtrl  = TextEditingController(text: widget.student.studentPassword ?? '');
+    _country       = widget.student.country;
   }
 
   @override
   void dispose() {
     _phoneCtrl.dispose();
     _messengerCtrl.dispose();
-    _countryCtrl.dispose();
+    _emailCtrl.dispose();
+    _passwordCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _save() async {
     setState(() => _saving = true);
     try {
+      final oldEmail = widget.student.email?.trim() ?? '';
+      final newEmail = _emailCtrl.text.trim();
+      final oldPassword = widget.student.studentPassword?.trim() ?? '';
+      final newPassword = _passwordCtrl.text.trim();
+
+      if (newEmail != oldEmail || newPassword != oldPassword) {
+        await ProfileService().updateStudentCredentials(
+          studentId: widget.student.id,
+          email: newEmail == oldEmail ? null : newEmail,
+          password: newPassword == oldPassword ? null : (newPassword.isEmpty ? null : newPassword),
+        );
+      }
+
       await ProfileService().updateStudentContact(
         studentId:    widget.student.id,
         phone:        _phoneCtrl.text.trim().isEmpty ? null : _phoneCtrl.text.trim(),
         messengerLink: _messengerCtrl.text.trim().isEmpty ? null : _messengerCtrl.text.trim(),
-        country:      _countryCtrl.text.trim().isEmpty ? null : _countryCtrl.text.trim(),
+        country:      _country,
       );
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
@@ -1311,6 +1455,31 @@ class _EditContactDialogState extends State<_EditContactDialog> {
           children: [
             const SizedBox(height: 12),
             TextField(
+              controller: _emailCtrl,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                labelText: l10n.email,
+                prefixIcon: const Icon(Icons.email_outlined, color: AppColors.primary),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _passwordCtrl,
+              decoration: InputDecoration(
+                labelText: Localizations.localeOf(context).languageCode == 'ar'
+                    ? 'كلمة المرور'
+                    : Localizations.localeOf(context).languageCode == 'tr'
+                        ? 'Şifre'
+                        : 'Password',
+                prefixIcon: const Icon(Icons.lock_outline, color: AppColors.warning),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
               controller: _phoneCtrl,
               keyboardType: TextInputType.phone,
               decoration: InputDecoration(
@@ -1332,14 +1501,23 @@ class _EditContactDialogState extends State<_EditContactDialog> {
               ),
             ),
             const SizedBox(height: 12),
-            TextField(
-              controller: _countryCtrl,
+            DropdownButtonFormField<String>(
+              initialValue: _country,
+              isExpanded: true,
               decoration: InputDecoration(
                 labelText: l10n.countryLabel,
                 prefixIcon: const Icon(Icons.flag_outlined, color: AppColors.secondary),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               ),
+              hint: Text(
+                l10n.chooseStudentCountry,
+                style: const TextStyle(color: AppColors.textSecondary),
+              ),
+              items: _kCountries
+                  .map((c) => DropdownMenuItem(value: c, child: Text(getLocalizedCountry(context, c))))
+                  .toList(),
+              onChanged: (v) => setState(() => _country = v),
             ),
             const SizedBox(height: 8),
           ],
@@ -1396,9 +1574,6 @@ class _EditLevelDialogState extends State<_EditLevelDialog> {
     _lesson = widget.student.lessonInLevel;
     _total  = widget.student.totalInLevel;
     _studyBalance = widget.student.studyBalance;
-    if (_studyBalance == 0.0 && _total > _lesson) {
-      _studyBalance = _total - _lesson;
-    }
     _isPaid = widget.student.isPaid;
     _isBlocked = widget.student.isBlocked;
     _studySystem = widget.student.studySystem;
@@ -1832,12 +2007,14 @@ class _DetailRow extends StatelessWidget {
     required this.label,
     required this.value,
     this.onTap,
+    this.trailing,
   });
   final IconData   icon;
   final Color      color;
   final String     label;
   final String     value;
   final VoidCallback? onTap;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -1865,7 +2042,8 @@ class _DetailRow extends StatelessWidget {
               ),
             ),
           ),
-          if (onTap != null)
+          if (trailing != null) trailing!,
+          if (onTap != null && trailing == null)
             const Icon(Icons.open_in_new, size: 14, color: AppColors.textSecondary),
         ],
       ),
@@ -2010,6 +2188,70 @@ class _DayChip extends StatelessWidget {
       );
 }
 
+const List<String> _kCountries = [
+  'المملكة العربية السعودية',
+  'مصر',
+  'الأردن',
+  'فلسطين',
+  'الإمارات العربية المتحدة',
+  'الكويت',
+  'البحرين',
+  'قطر',
+  'عُمان',
+  'اليمن',
+  'العراق',
+  'سوريا',
+  'لبنان',
+  'ليبيا',
+  'تونس',
+  'الجزائر',
+  'المغرب',
+  'السودان',
+  'الصومال',
+  'موريتانيا',
+  'تركيا',
+  'باكستان',
+  'أفغانستان',
+  'بنغلاديش',
+  'الهند',
+  'الصين',
+  'اليابان',
+  'ماليزيا',
+  'إندونيسيا',
+  'تركمنستان',
+  'أوزبكستان',
+  'طاجيكستان',
+  'قيرغيزستان',
+  'كازاخستان',
+  'أذربيجان',
+  'جورجيا',
+  'أرمينيا',
+  'المملكة المتحدة',
+  'ألمانيا',
+  'فرنسا',
+  'السويد',
+  'النرويج',
+  'الدنمارك',
+  'هولندا',
+  'بلجيكا',
+  'سويسرا',
+  'إيطاليا',
+  'إسبانيا',
+  'البرتغال',
+  'النمسا',
+  'اليونان',
+  'بولندا',
+  'أوكرانيا',
+  'روسيا',
+  'الولايات المتحدة الأمريكية',
+  'كندا',
+  'البرازيل',
+  'الأرجنتين',
+  'أستراليا',
+  'جنوب إفريقيا',
+  'دولة أخرى',
+];
+
 String getLocalizedCountry(BuildContext context, String countryName) {
   final locale = Localizations.localeOf(context).languageCode;
   if (locale == 'en') {
@@ -2036,14 +2278,44 @@ String getLocalizedCountry(BuildContext context, String countryName) {
       case 'موريتانيا': return 'Mauritania';
       case 'تركيا': return 'Turkey';
       case 'باكستان': return 'Pakistan';
+      case 'أفغانستان': return 'Afghanistan';
+      case 'بنغلاديش': return 'Bangladesh';
+      case 'الهند': return 'India';
+      case 'الصين': return 'China';
+      case 'اليابان': return 'Japan';
       case 'ماليزيا': return 'Malaysia';
       case 'إندونيسيا': return 'Indonesia';
+      case 'تركمنستان': return 'Turkmenistan';
+      case 'أوزبكستان': return 'Uzbekistan';
+      case 'طاجيكستان': return 'Tajikistan';
+      case 'قيرغيزستان': return 'Kyrgyzstan';
+      case 'كازاخستان': return 'Kazakhstan';
+      case 'أذربيجان': return 'Azerbaijan';
+      case 'جورجيا': return 'Georgia';
+      case 'أرمينيا': return 'Armenia';
       case 'المملكة المتحدة': return 'United Kingdom';
       case 'ألمانيا': return 'Germany';
       case 'فرنسا': return 'France';
+      case 'السويد': return 'Sweden';
+      case 'النرويج': return 'Norway';
+      case 'الدنمارك': return 'Denmark';
+      case 'هولندا': return 'Netherlands';
+      case 'بلجيكا': return 'Belgium';
+      case 'سويسرا': return 'Switzerland';
+      case 'إيطاليا': return 'Italy';
+      case 'إسبانيا': return 'Spain';
+      case 'البرتغال': return 'Portugal';
+      case 'النمسا': return 'Austria';
+      case 'اليونان': return 'Greece';
+      case 'بولندا': return 'Poland';
+      case 'أوكرانيا': return 'Ukraine';
+      case 'روسيا': return 'Russia';
       case 'الولايات المتحدة الأمريكية': return 'United States';
       case 'كندا': return 'Canada';
+      case 'البرازيل': return 'Brazil';
+      case 'الأرجنتين': return 'Argentina';
       case 'أستراليا': return 'Australia';
+      case 'جنوب إفريقيا': return 'South Africa';
       case 'دولة أخرى': return 'Other Country';
       default: return countryName;
     }
@@ -2071,14 +2343,44 @@ String getLocalizedCountry(BuildContext context, String countryName) {
       case 'موريتانيا': return 'Moritanya';
       case 'تركيا': return 'Türkiye';
       case 'باكستان': return 'Pakistan';
+      case 'أفغانستان': return 'Afganistan';
+      case 'بنغلاديش': return 'Bangladeş';
+      case 'الهند': return 'Hindistan';
+      case 'الصين': return 'Çin';
+      case 'اليابان': return 'Japonya';
       case 'ماليزيا': return 'Malezya';
       case 'إندونيسيا': return 'Endonezya';
+      case 'تركمنستان': return 'Türkmenistan';
+      case 'أوزبكستان': return 'Özbekistan';
+      case 'طاجيكستان': return 'Tacikistan';
+      case 'قيرغيزستان': return 'Kırgızistan';
+      case 'كازاخستان': return 'Kazakistan';
+      case 'أذربيجان': return 'Azerbaycan';
+      case 'جورجيا': return 'Gürcistan';
+      case 'أرمينيا': return 'Ermenistan';
       case 'المملكة المتحدة': return 'Birleşik Krallık';
       case 'ألمانيا': return 'Almanya';
       case 'فرنسا': return 'Fransa';
+      case 'السويد': return 'İsveç';
+      case 'النرويج': return 'Norveç';
+      case 'الدنمارك': return 'Danimarka';
+      case 'هولندا': return 'Hollanda';
+      case 'بلجيكا': return 'Belçika';
+      case 'سويسرا': return 'İsviçre';
+      case 'إيطاليا': return 'İtalya';
+      case 'إسبانيا': return 'İspanya';
+      case 'البرتغال': return 'Portekiz';
+      case 'النمسا': return 'Avusturya';
+      case 'اليونان': return 'Yunanistan';
+      case 'بولندا': return 'Polonya';
+      case 'أوكرانيا': return 'Ukrayna';
+      case 'روسيا': return 'Rusya';
       case 'الولايات المتحدة الأمريكية': return 'Amerika Birleşik Devletleri';
       case 'كندا': return 'Kanada';
+      case 'البرازيل': return 'Brezilya';
+      case 'الأرجنتين': return 'Arjantin';
       case 'أستراليا': return 'Avustralya';
+      case 'جنوب إفريقيا': return 'Güney Afrika';
       case 'دولة أخرى': return 'Diğer Ülke';
       default: return countryName;
     }

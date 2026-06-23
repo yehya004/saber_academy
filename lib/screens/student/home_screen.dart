@@ -149,7 +149,16 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
         final cached = jsonDecode(cachedStr) as Map<String, dynamic>;
         
         final levelData = Map<String, num>.from(cached['levelData'] ?? {});
-        final teacher = cached['teacher'] != null ? ProfileModel.fromMap(cached['teacher']) : null;
+        final teacher = cached['teacher'] != null 
+            ? ProfileModel.fromMap(cached['teacher']) 
+            : ProfileModel(
+                id: '6cafba0b-02d1-4c2a-913d-ae4d45db62e9',
+                fullName: 'إدارة الأكاديمية (أ/ صابر)',
+                role: 'teacher',
+                avatarUrl: 'https://hgbefqwtjkpowktumkgz.supabase.co/storage/v1/object/public/avatars/6cafba0b-02d1-4c2a-913d-ae4d45db62e9/avatar.jpg',
+                languagePreference: 'ar',
+                createdAt: DateTime(2026, 1, 1),
+              );
         final schedule = cached['schedule'] != null ? LessonScheduleModel.fromMap(cached['schedule']) : null;
         final recentSessions = (cached['recentSessions'] as List? ?? [])
             .map((s) => SessionModel.fromMap(s as Map<String, dynamic>))
@@ -216,7 +225,14 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       ]);
 
       final levelData = results[0] as Map<String, num>;
-      final teacher   = results[1] as ProfileModel?;
+      final teacher   = (results[1] as ProfileModel?) ?? ProfileModel(
+        id: '6cafba0b-02d1-4c2a-913d-ae4d45db62e9',
+        fullName: 'إدارة الأكاديمية (أ/ صابر)',
+        role: 'teacher',
+        avatarUrl: 'https://hgbefqwtjkpowktumkgz.supabase.co/storage/v1/object/public/avatars/6cafba0b-02d1-4c2a-913d-ae4d45db62e9/avatar.jpg',
+        languagePreference: 'ar',
+        createdAt: DateTime(2026, 1, 1),
+      );
       final schedule  = results[2] as LessonScheduleModel?;
       final allSessions = results[3] as List<SessionModel>;
       final unreadMessages = results[4] as int;
@@ -272,7 +288,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       // Save fresh data to local cache
       final dataToCache = {
         'levelData': levelData,
-        'teacher': teacher?.toMap(),
+        'teacher': teacher.toMap(),
         'schedule': schedule?.toMap(),
         'recentSessions': recentSessions.map((s) => s.toMap()).toList(),
         'unreadMessages': unreadMessages,
@@ -421,13 +437,13 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                     ).then((_) => _loadData());
                   },
                   child: Stack(
-                    alignment: Alignment.center,
+                    clipBehavior: Clip.none,
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: CircleAvatar(
                           radius: 18,
-                          backgroundColor: Colors.white.withValues(alpha: 0.15),
+                          backgroundColor: Colors.white.withValues(alpha: 0.20),
                           backgroundImage: _teacher?.avatarUrl != null && _teacher!.avatarUrl!.isNotEmpty
                               ? NetworkImage(_teacher!.avatarUrl!)
                               : null,
@@ -436,23 +452,45 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                               : null,
                         ),
                       ),
+                      // Small chat bubble icon badge at bottom-right of the avatar
+                      Positioned(
+                        bottom: -2,
+                        right: 4,
+                        child: Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            color: AppColors.secondary, // Golden accent
+                            shape: BoxShape.circle,
+                            border: Border.all(color: AppColors.primary, width: 1.5),
+                          ),
+                          child: const Icon(
+                            Icons.chat_bubble_rounded,
+                            size: 10,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                       if (_unreadMessages > 0)
                         Positioned(
-                          top: 4,
-                          right: 4,
+                          top: -4,
+                          right: 2,
                           child: Container(
-                            width: 16,
-                            height: 16,
-                            decoration: const BoxDecoration(
+                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                            decoration: BoxDecoration(
                               color: AppColors.error,
-                              shape: BoxShape.circle,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: AppColors.primary, width: 1.5),
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 16,
+                              minHeight: 16,
                             ),
                             child: Center(
                               child: Text(
                                 _unreadMessages > 9 ? '9+' : '$_unreadMessages',
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 9,
+                                  fontSize: 8,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -1014,7 +1052,9 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                               ),
                               icon: const Icon(Icons.chat_bubble_outline, size: 22, color: Colors.white),
                               label: Text(
-                                l10n.chatWithTeacher,
+                                _teacher!.id == '6cafba0b-02d1-4c2a-913d-ae4d45db62e9' && (_schedule == null || _schedule!.daySchedules.isEmpty)
+                                    ? (l10n.localeName == 'ar' ? 'تواصل مع الدعم / الأكاديمية' : 'Contact Support / Academy')
+                                    : l10n.chatWithTeacher,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,

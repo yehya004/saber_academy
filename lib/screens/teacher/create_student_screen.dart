@@ -865,14 +865,44 @@ const List<String> _kCountries = [
   'موريتانيا',
   'تركيا',
   'باكستان',
+  'أفغانستان',
+  'بنغلاديش',
+  'الهند',
+  'الصين',
+  'اليابان',
   'ماليزيا',
   'إندونيسيا',
+  'تركمنستان',
+  'أوزبكستان',
+  'طاجيكستان',
+  'قيرغيزستان',
+  'كازاخستان',
+  'أذربيجان',
+  'جورجيا',
+  'أرمينيا',
   'المملكة المتحدة',
   'ألمانيا',
   'فرنسا',
+  'السويد',
+  'النرويج',
+  'الدنمارك',
+  'هولندا',
+  'بلجيكا',
+  'سويسرا',
+  'إيطاليا',
+  'إسبانيا',
+  'البرتغال',
+  'النمسا',
+  'اليونان',
+  'بولندا',
+  'أوكرانيا',
+  'روسيا',
   'الولايات المتحدة الأمريكية',
   'كندا',
+  'البرازيل',
+  'الأرجنتين',
   'أستراليا',
+  'جنوب إفريقيا',
   'دولة أخرى',
 ];
 
@@ -902,14 +932,44 @@ String getLocalizedCountry(BuildContext context, String countryName) {
       case 'موريتانيا': return 'Mauritania';
       case 'تركيا': return 'Turkey';
       case 'باكستان': return 'Pakistan';
+      case 'أفغانستان': return 'Afghanistan';
+      case 'بنغلاديش': return 'Bangladesh';
+      case 'الهند': return 'India';
+      case 'الصين': return 'China';
+      case 'اليابان': return 'Japan';
       case 'ماليزيا': return 'Malaysia';
       case 'إندونيسيا': return 'Indonesia';
+      case 'تركمنستان': return 'Turkmenistan';
+      case 'أوزبكستان': return 'Uzbekistan';
+      case 'طاجيكستان': return 'Tajikistan';
+      case 'قيرغيزستان': return 'Kyrgyzstan';
+      case 'كازاخستان': return 'Kazakhstan';
+      case 'أذربيجان': return 'Azerbaijan';
+      case 'جورجيا': return 'Georgia';
+      case 'أرمينيا': return 'Armenia';
       case 'المملكة المتحدة': return 'United Kingdom';
       case 'ألمانيا': return 'Germany';
       case 'فرنسا': return 'France';
+      case 'السويد': return 'Sweden';
+      case 'النرويج': return 'Norway';
+      case 'الدنمارك': return 'Denmark';
+      case 'هولندا': return 'Netherlands';
+      case 'بلجيكا': return 'Belgium';
+      case 'سويسرا': return 'Switzerland';
+      case 'إيطاليا': return 'Italy';
+      case 'إسبانيا': return 'Spain';
+      case 'البرتغال': return 'Portugal';
+      case 'النمسا': return 'Austria';
+      case 'اليونان': return 'Greece';
+      case 'بولندا': return 'Poland';
+      case 'أوكرانيا': return 'Ukraine';
+      case 'روسيا': return 'Russia';
       case 'الولايات المتحدة الأمريكية': return 'United States';
       case 'كندا': return 'Canada';
+      case 'البرازيل': return 'Brazil';
+      case 'الأرجنتين': return 'Argentina';
       case 'أستراليا': return 'Australia';
+      case 'جنوب إفريقيا': return 'South Africa';
       case 'دولة أخرى': return 'Other Country';
       default: return countryName;
     }
@@ -937,14 +997,44 @@ String getLocalizedCountry(BuildContext context, String countryName) {
       case 'موريتانيا': return 'Moritanya';
       case 'تركيا': return 'Türkiye';
       case 'باكستان': return 'Pakistan';
+      case 'أفغانستان': return 'Afganistan';
+      case 'بنغلاديش': return 'Bangladeş';
+      case 'الهند': return 'Hindistan';
+      case 'الصين': return 'Çin';
+      case 'اليابان': return 'Japonya';
       case 'ماليزيا': return 'Malezya';
       case 'إندونيسيا': return 'Endonezya';
+      case 'تركمنستان': return 'Türkmenistan';
+      case 'أوزبكستان': return 'Özbekistan';
+      case 'طاجيكستان': return 'Tacikistan';
+      case 'قيرغيزستان': return 'Kırgızistan';
+      case 'كازاخستان': return 'Kazakistan';
+      case 'أذربيجان': return 'Azerbaycan';
+      case 'جورجيا': return 'Gürcistan';
+      case 'أرمينيا': return 'Ermenistan';
       case 'المملكة المتحدة': return 'Birleşik Krallık';
       case 'ألمانيا': return 'Almanya';
       case 'فرنسا': return 'Fransa';
+      case 'السويد': return 'İsveç';
+      case 'النرويج': return 'Norveç';
+      case 'الدنمارك': return 'Danimarka';
+      case 'هولندا': return 'Hollanda';
+      case 'بلجيكا': return 'Belçika';
+      case 'سويسرا': return 'İsviçre';
+      case 'إيطاليا': return 'İtalya';
+      case 'إسبانيا': return 'İspanya';
+      case 'البرتغال': return 'Portekiz';
+      case 'النمسا': return 'Avusturya';
+      case 'اليونان': return 'Yunanistan';
+      case 'بولندا': return 'Polonya';
+      case 'أوكرانيا': return 'Ukrayna';
+      case 'روسيا': return 'Rusya';
       case 'الولايات المتحدة الأمريكية': return 'Amerika Birleşik Devletleri';
       case 'كندا': return 'Kanada';
+      case 'البرازيل': return 'Brezilya';
+      case 'الأرجنتين': return 'Arjantin';
       case 'أستراليا': return 'Avustralya';
+      case 'جنوب إفريقيا': return 'Güney Afrika';
       case 'دولة أخرى': return 'Diğer Ülke';
       default: return countryName;
     }

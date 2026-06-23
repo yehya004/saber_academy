@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
@@ -20,6 +21,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey   = GlobalKey<FormState>();
   final _nameCtrl  = TextEditingController();
   final _phoneCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _passwordCtrl = TextEditingController();
 
   String? _country;
   String? _avatarUrl;
@@ -36,12 +39,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       _country        = p.country;
       _avatarUrl      = p.avatarUrl;
     }
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      _emailCtrl.text = user.email ?? '';
+    }
   }
 
   @override
   void dispose() {
     _nameCtrl.dispose();
     _phoneCtrl.dispose();
+    _emailCtrl.dispose();
+    _passwordCtrl.dispose();
     super.dispose();
   }
 
@@ -92,36 +101,79 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+    final auth = context.read<AuthProvider>();
+    final isStudent = auth.profile?.role == 'student';
     setState(() => _saving = true);
 
-    final auth = context.read<AuthProvider>();
-    final ok   = await auth.updateProfile(
-      fullName:  _nameCtrl.text.trim(),
-      phone:     _phoneCtrl.text.trim().isEmpty ? null : _phoneCtrl.text.trim(),
-      country:   _country,
-      avatarUrl: _avatarUrl,
-    );
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user != null) {
+        final currentEmail = user.email ?? '';
+        final newEmail = _emailCtrl.text.trim();
+        final newPassword = _passwordCtrl.text.trim();
 
-    if (!mounted) return;
-    setState(() => _saving = false);
+        if (newEmail != currentEmail || newPassword.isNotEmpty) {
+          final updates = UserAttributes(
+            email: newEmail != currentEmail ? newEmail : null,
+            password: newPassword.isNotEmpty ? newPassword : null,
+          );
+          await Supabase.instance.client.auth.updateUser(updates);
 
-    if (ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).profileSavedSuccess),
-          backgroundColor: AppColors.success,
-        ),
+          final profileUpdates = <String, dynamic>{};
+          if (newEmail != currentEmail) {
+            profileUpdates['email'] = newEmail;
+          }
+          if (newPassword.isNotEmpty && isStudent) {
+            profileUpdates['student_password'] = newPassword;
+          }
+
+          if (profileUpdates.isNotEmpty) {
+            await Supabase.instance.client
+                .from('profiles')
+                .update(profileUpdates)
+                .eq('id', user.id);
+          }
+        }
+      }
+
+      final ok   = await auth.updateProfile(
+        fullName:  _nameCtrl.text.trim(),
+        phone:     _phoneCtrl.text.trim().isEmpty ? null : _phoneCtrl.text.trim(),
+        country:   _country,
+        avatarUrl: _avatarUrl,
       );
-      context.pop();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context).profileSaveError,
+
+      if (!mounted) return;
+      setState(() => _saving = false);
+
+      if (ok) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context).profileSavedSuccess),
+            backgroundColor: AppColors.success,
           ),
-          backgroundColor: AppColors.error,
-        ),
-      );
+        );
+        context.pop();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context).profileSaveError,
+            ),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _saving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     }
   }
 
@@ -269,6 +321,41 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                     const SizedBox(height: AppSpacing.large),
 
+                    // ── Account credentials card ─────────────
+                    _SectionLabel(
+                      label: l10n.localeName == 'ar'
+                          ? 'بيانات الحساب'
+                          : l10n.localeName == 'tr'
+                              ? 'Hesap Bilgileri'
+                              : 'Account Credentials',
+                    ),
+                    const SizedBox(height: AppSpacing.small),
+                    _Card(
+                      children: [
+                        _FieldTile(
+                          controller: _emailCtrl,
+                          label:      l10n.email,
+                          icon:       Icons.email_outlined,
+                          keyboard:   TextInputType.emailAddress,
+                          validator:  (v) => (v == null || v.trim().isEmpty)
+                              ? (l10n.localeName == 'ar' ? 'البريد الإلكتروني مطلوب' : 'Email is required')
+                              : null,
+                        ),
+                        _divider(),
+                        _FieldTile(
+                          controller: _passwordCtrl,
+                          label:      l10n.localeName == 'ar'
+                              ? 'كلمة المرور الجديدة'
+                              : l10n.localeName == 'tr'
+                                  ? 'Yeni Şifre'
+                                  : 'New Password',
+                          icon:       Icons.lock_outline,
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: AppSpacing.large),
+
                     // ── Save button ──────────────────────────
                     SizedBox(
                       width:  double.infinity,
@@ -391,6 +478,7 @@ class _FieldTile extends StatelessWidget {
           keyboardType: keyboard,
           validator:   validator,
           onChanged:   onChanged,
+          obscureText: icon == Icons.lock_outline,
           textAlign:   TextAlign.right,
           textDirection: TextDirection.rtl,
           decoration: InputDecoration(
@@ -468,14 +556,44 @@ const List<String> _kCountries = [
   'موريتانيا',
   'تركيا',
   'باكستان',
+  'أفغانستان',
+  'بنغلاديش',
+  'الهند',
+  'الصين',
+  'اليابان',
   'ماليزيا',
   'إندونيسيا',
+  'تركمنستان',
+  'أوزبكستان',
+  'طاجيكستان',
+  'قيرغيزستان',
+  'كازاخستان',
+  'أذربيجان',
+  'جورجيا',
+  'أرمينيا',
   'المملكة المتحدة',
   'ألمانيا',
   'فرنسا',
+  'السويد',
+  'النرويج',
+  'الدنمارك',
+  'هولندا',
+  'بلجيكا',
+  'سويسرا',
+  'إيطاليا',
+  'إسبانيا',
+  'البرتغال',
+  'النمسا',
+  'اليونان',
+  'بولندا',
+  'أوكرانيا',
+  'روسيا',
   'الولايات المتحدة الأمريكية',
   'كندا',
+  'البرازيل',
+  'الأرجنتين',
   'أستراليا',
+  'جنوب إفريقيا',
   'دولة أخرى',
 ];
 
@@ -505,14 +623,44 @@ String getLocalizedCountry(BuildContext context, String countryName) {
       case 'موريتانيا': return 'Mauritania';
       case 'تركيا': return 'Turkey';
       case 'باكستان': return 'Pakistan';
+      case 'أفغانستان': return 'Afghanistan';
+      case 'بنغلاديش': return 'Bangladesh';
+      case 'الهند': return 'India';
+      case 'الصين': return 'China';
+      case 'اليابان': return 'Japan';
       case 'ماليزيا': return 'Malaysia';
       case 'إندونيسيا': return 'Indonesia';
+      case 'تركمنستان': return 'Turkmenistan';
+      case 'أوزبكستان': return 'Uzbekistan';
+      case 'طاجيكستان': return 'Tajikistan';
+      case 'قيرغيزستان': return 'Kyrgyzstan';
+      case 'كازاخستان': return 'Kazakhstan';
+      case 'أذربيجان': return 'Azerbaijan';
+      case 'جورجيا': return 'Georgia';
+      case 'أرمينيا': return 'Armenia';
       case 'المملكة المتحدة': return 'United Kingdom';
       case 'ألمانيا': return 'Germany';
       case 'فرنسا': return 'France';
+      case 'السويد': return 'Sweden';
+      case 'النرويج': return 'Norway';
+      case 'الدنمارك': return 'Denmark';
+      case 'هولندا': return 'Netherlands';
+      case 'بلجيكا': return 'Belgium';
+      case 'سويسرا': return 'Switzerland';
+      case 'إيطاليا': return 'Italy';
+      case 'إسبانيا': return 'Spain';
+      case 'البرتغال': return 'Portugal';
+      case 'النمسا': return 'Austria';
+      case 'اليونان': return 'Greece';
+      case 'بولندا': return 'Poland';
+      case 'أوكرانيا': return 'Ukraine';
+      case 'روسيا': return 'Russia';
       case 'الولايات المتحدة الأمريكية': return 'United States';
       case 'كندا': return 'Canada';
+      case 'البرازيل': return 'Brazil';
+      case 'الأرجنتين': return 'Argentina';
       case 'أستراليا': return 'Australia';
+      case 'جنوب إفريقيا': return 'South Africa';
       case 'دولة أخرى': return 'Other Country';
       default: return countryName;
     }
@@ -540,14 +688,44 @@ String getLocalizedCountry(BuildContext context, String countryName) {
       case 'موريتانيا': return 'Moritanya';
       case 'تركيا': return 'Türkiye';
       case 'باكستان': return 'Pakistan';
+      case 'أفغانستان': return 'Afganistan';
+      case 'بنغلاديش': return 'Bangladeş';
+      case 'الهند': return 'Hindistan';
+      case 'الصين': return 'Çin';
+      case 'اليابان': return 'Japonya';
       case 'ماليزيا': return 'Malezya';
       case 'إندونيسيا': return 'Endonezya';
+      case 'تركمنستان': return 'Türkmenistan';
+      case 'أوزبكستان': return 'Özbekistan';
+      case 'طاجيكستان': return 'Tacikistan';
+      case 'قيرغيزستان': return 'Kırgızistan';
+      case 'كازاخستان': return 'Kazakistan';
+      case 'أذربيجان': return 'Azerbaycan';
+      case 'جورجيا': return 'Gürcistan';
+      case 'أرمينيا': return 'Ermenistan';
       case 'المملكة المتحدة': return 'Birleşik Krallık';
       case 'ألمانيا': return 'Almanya';
       case 'فرنسا': return 'Fransa';
+      case 'السويد': return 'İsveç';
+      case 'النرويج': return 'Norveç';
+      case 'الدنمارك': return 'Danimarka';
+      case 'هولندا': return 'Hollanda';
+      case 'بلجيكا': return 'Belçika';
+      case 'سويسرا': return 'İsviçre';
+      case 'إيطاليا': return 'İtalya';
+      case 'إسبانيا': return 'İspanya';
+      case 'البرتغال': return 'Portekiz';
+      case 'النمسا': return 'Avusturya';
+      case 'اليونان': return 'Yunanistan';
+      case 'بولندا': return 'Polonya';
+      case 'أوكرانيا': return 'Ukrayna';
+      case 'روسيا': return 'Rusya';
       case 'الولايات المتحدة الأمريكية': return 'Amerika Birleşik Devletleri';
       case 'كندا': return 'Kanada';
+      case 'البرازيل': return 'Brezilya';
+      case 'الأرجنتين': return 'Arjantin';
       case 'أستراليا': return 'Avustralya';
+      case 'جنوب إفريقيا': return 'Güney Afrika';
       case 'دولة أخرى': return 'Diğer Ülke';
       default: return countryName;
     }

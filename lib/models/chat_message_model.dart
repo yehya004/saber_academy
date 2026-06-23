@@ -11,6 +11,9 @@ class ChatMessageModel {
   final String? fileName;   // optional general file name
   final String? telegramFileId; // optional Telegram file ID
   final bool    isDeleted;
+  final String? replyToId;
+  final String? replyToText;
+  final String? replyToSenderName;
 
   const ChatMessageModel({
     required this.id,
@@ -24,6 +27,9 @@ class ChatMessageModel {
     this.fileName,
     this.telegramFileId,
     this.isDeleted = false,
+    this.replyToId,
+    this.replyToText,
+    this.replyToSenderName,
   });
 
   bool get wasAttachment =>
@@ -71,6 +77,9 @@ class ChatMessageModel {
         fileName:    map['file_name']    as String?,
         telegramFileId: map['telegram_file_id'] as String?,
         isDeleted:   map['is_deleted']   as bool? ?? false,
+        replyToId:         map['reply_to_id']         as String?,
+        replyToText:       map['reply_to_text']       as String?,
+        replyToSenderName: map['reply_to_sender_name'] as String?,
       );
 
   Map<String, dynamic> toMap() => {
@@ -85,6 +94,9 @@ class ChatMessageModel {
         if (fileUrl != null) 'file_url': fileUrl,
         if (fileName != null) 'file_name': fileName,
         if (telegramFileId != null) 'telegram_file_id': telegramFileId,
+        if (replyToId != null) 'reply_to_id': replyToId,
+        if (replyToText != null) 'reply_to_text': replyToText,
+        if (replyToSenderName != null) 'reply_to_sender_name': replyToSenderName,
       };
 }
 

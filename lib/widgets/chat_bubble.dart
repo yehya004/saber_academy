@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
+import '../utils/web_audio_player.dart';
 
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_spacing.dart';
@@ -118,38 +120,98 @@ class ChatBubble extends StatelessWidget {
             bottomRight: Radius.circular(isMine ? 4 : AppSpacing.chatBubbleRadius),
           ),
         ),
-        child: message.telegramFileId != null
-            ? TelegramMediaWidget(
-                telegramFileId: message.telegramFileId!,
-                builder: (context, url, isImage, fileName) {
-                  final tempMsg = ChatMessageModel(
-                    id: message.id,
-                    senderId: message.senderId,
-                    receiverId: message.receiverId,
-                    messageText: message.messageText,
-                    isRead: message.isRead,
-                    createdAt: message.createdAt,
-                    imageUrl: isImage ? url : null,
-                    fileUrl: !isImage ? url : null,
-                    fileName: fileName,
-                    telegramFileId: message.telegramFileId,
-                  );
-                  return tempMsg.isImage
-                      ? _ImageContent(message: tempMsg, isMine: isMine, onImageTapped: onImageTapped)
-                      : tempMsg.isAudio
-                          ? _AudioContent(message: tempMsg, isMine: isMine)
-                          : _FileContent(message: tempMsg, isMine: isMine);
-                },
+        child: message.replyToId != null
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildReplyQuoteBox(context),
+                  _buildBubbleContent(context),
+                ],
               )
-            : message.isImage
-                ? _ImageContent(message: message, isMine: isMine, onImageTapped: onImageTapped)
-                : message.isAudio
-                    ? _AudioContent(message: message, isMine: isMine)
-                    : message.isFile
-                        ? _FileContent(message: message, isMine: isMine)
-                        : _TextContent(message: message, isMine: isMine),
+            : _buildBubbleContent(context),
       ),
     );
+  }
+
+  Widget _buildReplyQuoteBox(BuildContext context) {
+    final activeTextColor = isMine ? Colors.white70 : Colors.black54;
+    final senderNameColor = isMine ? AppColors.secondary : AppColors.primary;
+    final bgCol = isMine 
+        ? Colors.black.withValues(alpha: 0.12) 
+        : Colors.black.withValues(alpha: 0.05);
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: bgCol,
+        borderRadius: BorderRadius.circular(8),
+        border: Border(
+          left: BorderSide(
+            color: isMine ? AppColors.secondary : AppColors.primary,
+            width: 3.5,
+          ),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            message.replyToSenderName ?? '',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: senderNameColor,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            message.replyToText ?? '',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 12,
+              color: activeTextColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBubbleContent(BuildContext context) {
+    return message.telegramFileId != null
+        ? TelegramMediaWidget(
+            telegramFileId: message.telegramFileId!,
+            builder: (context, url, isImage, fileName) {
+              final tempMsg = ChatMessageModel(
+                id: message.id,
+                senderId: message.senderId,
+                receiverId: message.receiverId,
+                messageText: message.messageText,
+                isRead: message.isRead,
+                createdAt: message.createdAt,
+                imageUrl: isImage ? url : null,
+                fileUrl: !isImage ? url : null,
+                fileName: message.fileName ?? fileName,
+                telegramFileId: message.telegramFileId,
+              );
+              return tempMsg.isImage
+                  ? _ImageContent(message: tempMsg, isMine: isMine, onImageTapped: onImageTapped)
+                  : tempMsg.isAudio
+                      ? _AudioContent(message: tempMsg, isMine: isMine)
+                      : _FileContent(message: tempMsg, isMine: isMine);
+            },
+          )
+        : message.isImage
+            ? _ImageContent(message: message, isMine: isMine, onImageTapped: onImageTapped)
+            : message.isAudio
+                ? _AudioContent(message: message, isMine: isMine)
+                : message.isFile
+                    ? _FileContent(message: message, isMine: isMine)
+                    : _TextContent(message: message, isMine: isMine);
   }
 }
 
@@ -217,6 +279,7 @@ class _ImageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isTemp = message.id.startsWith('temp_');
     final imageWidget = ClipRRect(
       borderRadius: BorderRadius.only(
         topLeft:     const Radius.circular(AppSpacing.chatBubbleRadius),
@@ -224,12 +287,24 @@ class _ImageContent extends StatelessWidget {
         bottomLeft:  Radius.circular(isMine ? AppSpacing.chatBubbleRadius : 4),
         bottomRight: Radius.circular(isMine ? 4 : AppSpacing.chatBubbleRadius),
       ),
-      child: buildWebFriendlyImage(
-        imageUrl: message.imageUrl!,
-        width: 220,
-        height: 180,
-        fit: BoxFit.cover,
-      ),
+      child: isTemp
+          ? Container(
+              width: 220,
+              height: 180,
+              color: Colors.black26,
+              child: const Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.secondary),
+                ),
+              ),
+            )
+          : buildWebFriendlyImage(
+              imageUrl: message.imageUrl!,
+              width: 220,
+              height: 180,
+              fit: BoxFit.cover,
+            ),
     );
 
     return Stack(
@@ -287,14 +362,17 @@ class _FileContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final isTemp = message.id.startsWith('temp_');
     return InkWell(
-      onTap: () async {
-        final url = message.fileUrl;
-        if (url != null && url.isNotEmpty) {
-          final uri = Uri.parse(url);
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
-        }
-      },
+      onTap: isTemp
+          ? null
+          : () async {
+              final url = message.fileUrl;
+              if (url != null && url.isNotEmpty) {
+                final uri = Uri.parse(url);
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
+              }
+            },
       borderRadius: BorderRadius.circular(AppSpacing.chatBubbleRadius),
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -308,11 +386,20 @@ class _FileContent extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.insert_drive_file_rounded,
-                  color: isMine ? AppColors.surface : AppColors.primary,
-                  size: 28,
-                ),
+                isTemp
+                    ? const SizedBox(
+                        width: 28,
+                        height: 28,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.secondary),
+                        ),
+                      )
+                    : Icon(
+                        Icons.insert_drive_file_rounded,
+                        color: isMine ? AppColors.surface : AppColors.primary,
+                        size: 28,
+                      ),
                 const SizedBox(width: 8),
                 Flexible(
                   child: Column(
@@ -331,7 +418,9 @@ class _FileContent extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        l10n.downloadFile,
+                        isTemp
+                            ? (Localizations.localeOf(context).languageCode == 'ar' ? 'جاري الرفع...' : 'Uploading...')
+                            : l10n.downloadFile,
                         style: TextStyle(
                           color: isMine
                               ? AppColors.surface.withValues(alpha: 0.70)
@@ -393,7 +482,8 @@ class _AudioContent extends StatefulWidget {
 }
 
 class _AudioContentState extends State<_AudioContent> {
-  late final AudioPlayer _audioPlayer;
+  AudioPlayer? _audioPlayer;
+  WebAudioPlayer? _webPlayer;
   PlayerState _playerState = PlayerState.stopped;
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
@@ -403,49 +493,96 @@ class _AudioContentState extends State<_AudioContent> {
   @override
   void initState() {
     super.initState();
-    _audioPlayer = AudioPlayer();
-    
-    _audioPlayer.onPlayerStateChanged.listen((state) {
-      if (mounted) setState(() => _playerState = state);
-    });
-    
-    _audioPlayer.onDurationChanged.listen((d) {
-      if (mounted) setState(() => _duration = d);
-    });
-    
-    _audioPlayer.onPositionChanged.listen((p) {
-      if (mounted) setState(() => _position = p);
-    });
-    
-    _audioPlayer.onPlayerComplete.listen((_) {
-      if (mounted) {
+    if (kIsWeb) {
+      final playerId = 'bubble_${widget.message.fileUrl.hashCode}';
+      _webPlayer = WebAudioPlayer(playerId);
+      _webPlayer!.onStateChanged = (stateStr) {
+        if (!mounted) return;
+        setState(() {
+          if (stateStr == 'playing') {
+            _playerState = PlayerState.playing;
+          } else if (stateStr == 'paused') {
+            _playerState = PlayerState.paused;
+          } else if (stateStr == 'completed') {
+            _playerState = PlayerState.completed;
+          }
+        });
+      };
+      _webPlayer!.onDurationChanged = (durSecs) {
+        if (!mounted) return;
+        setState(() {
+          _duration = Duration(milliseconds: (durSecs * 1000).toInt());
+        });
+      };
+      _webPlayer!.onPositionChanged = (posSecs) {
+        if (!mounted) return;
+        setState(() {
+          _position = Duration(milliseconds: (posSecs * 1000).toInt());
+        });
+      };
+      _webPlayer!.onComplete = () {
+        if (!mounted) return;
         setState(() {
           _position = Duration.zero;
           _playerState = PlayerState.completed;
         });
-      }
-    });
+      };
+    } else {
+      _audioPlayer = AudioPlayer();
+      _audioPlayer!.onPlayerStateChanged.listen((state) {
+        if (mounted) setState(() => _playerState = state);
+      });
+      _audioPlayer!.onDurationChanged.listen((d) {
+        if (mounted) setState(() => _duration = d);
+      });
+      _audioPlayer!.onPositionChanged.listen((p) {
+        if (mounted) setState(() => _position = p);
+      });
+      _audioPlayer!.onPlayerComplete.listen((_) {
+        if (mounted) {
+          setState(() {
+            _position = Duration.zero;
+            _playerState = PlayerState.completed;
+          });
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
-    _audioPlayer.dispose();
+    if (kIsWeb) {
+      _webPlayer?.dispose();
+    } else {
+      _audioPlayer?.dispose();
+    }
     super.dispose();
   }
 
   Future<void> _togglePlay() async {
-    final url = widget.message.fileUrl;
+    var url = widget.message.fileUrl;
     if (url == null || url.isEmpty) return;
 
+    // On web, direct playback of Telegram URLs is supported natively by the audio tag without a CORS proxy
+
     if (_playerState == PlayerState.playing) {
-      await _audioPlayer.pause();
-    } else {
-      if (!_isInit) {
-        await _audioPlayer.setSourceUrl(url);
-        _isInit = true;
+      if (kIsWeb) {
+        _webPlayer?.pause();
+      } else {
+        await _audioPlayer?.pause();
       }
-      await _audioPlayer.resume();
-      await _audioPlayer.setPlaybackRate(_playbackRate);
+    } else {
+      if (kIsWeb) {
+        _webPlayer?.play(url, playbackRate: _playbackRate);
+        _isInit = true;
+      } else {
+        if (!_isInit) {
+          await _audioPlayer?.setSourceUrl(url);
+          _isInit = true;
+        }
+        await _audioPlayer?.resume();
+        await _audioPlayer?.setPlaybackRate(_playbackRate);
+      }
     }
   }
 
@@ -460,7 +597,11 @@ class _AudioContentState extends State<_AudioContent> {
       }
     });
     if (_playerState == PlayerState.playing) {
-      _audioPlayer.setPlaybackRate(_playbackRate);
+      if (kIsWeb) {
+        _webPlayer?.setPlaybackRate(_playbackRate);
+      } else {
+        _audioPlayer?.setPlaybackRate(_playbackRate);
+      }
     }
   }
 
@@ -522,7 +663,11 @@ class _AudioContentState extends State<_AudioContent> {
                         : 100.0,
                     onChanged: (val) async {
                       final pos = Duration(milliseconds: val.toInt());
-                      await _audioPlayer.seek(pos);
+                      if (kIsWeb) {
+                        _webPlayer?.seek(val / 1000.0);
+                      } else {
+                        await _audioPlayer?.seek(pos);
+                      }
                     },
                   ),
                 ),

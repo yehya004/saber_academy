@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../utils/web_audio_player.dart';
 import 'quran_api_service.dart';
 
 class QuranAudioService extends ChangeNotifier {
@@ -12,29 +13,39 @@ class QuranAudioService extends ChangeNotifier {
 
   QuranAudioService._internal() {
     _initPrefs();
-    _player.onPlayerStateChanged.listen((s) {
-      _isPlaying = s == PlayerState.playing;
-      notifyListeners();
-    });
-    _player.onPlayerComplete.listen((_) {
-      _handleAyahCompletion();
-    });
+    if (kIsWeb) {
+      _webPlayer = WebAudioPlayer('quran_audio_player');
+      _webPlayer!.onStateChanged = (stateStr) {
+        _isPlaying = stateStr == 'playing';
+        notifyListeners();
+      };
+      _webPlayer!.onComplete = () {
+        _handleAyahCompletion();
+      };
+    } else {
+      _player = AudioPlayer();
+      _player!.onPlayerStateChanged.listen((s) {
+        _isPlaying = s == PlayerState.playing;
+        notifyListeners();
+      });
+      _player!.onPlayerComplete.listen((_) {
+        _handleAyahCompletion();
+      });
+    }
   }
 
   Future<void> unlockWeb() async {
     if (kIsWeb) {
       try {
-        await _player.play(
-          UrlSource('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAAA'),
-          volume: 0.0,
-        );
+        _webPlayer?.play('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAAA');
       } catch (e) {
         debugPrint("Web audio unlock error: $e");
       }
     }
   }
 
-  final _player = AudioPlayer();
+  AudioPlayer? _player;
+  WebAudioPlayer? _webPlayer;
   final _dio = Dio();
   SharedPreferences? _prefs;
 
@@ -114,7 +125,11 @@ class QuranAudioService extends ChangeNotifier {
     if (speed == _playbackSpeed) return;
     _playbackSpeed = speed;
     if (_isPlaying) {
-      await _player.setPlaybackRate(speed);
+      if (kIsWeb) {
+        _webPlayer?.setPlaybackRate(speed);
+      } else {
+        await _player?.setPlaybackRate(speed);
+      }
     }
     notifyListeners();
   }
@@ -125,11 +140,27 @@ class QuranAudioService extends ChangeNotifier {
     notifyListeners();
   }
 
+  static const Map<String, String> _everyAyahFolders = {
+    'ar.alafasy': 'Alafasy_128kbps',
+    'ar.abdurrahmaansudais': 'Abdurrahmaan_As-Sudais_192kbps',
+    'ar.mahermuaiqly': 'Maher_AlMuaiqly_64kbps',
+    'ar.husary': 'Husary_128kbps',
+    'ar.minshawi': 'Minshawy_Murattal_128kbps',
+    'ar.ghamadi': 'Ghamadi_40kbps',
+    'ar.ahmedajamy': 'Ahmed_ibn_Ali_al-Ajamy_128kbps_ketaballah.net',
+    'ar.abdulbasitmurattal': 'Abdul_Basit_Murattal_192kbps',
+    'ar.yasseraddussari': 'Yasser_Ad-Dussary_128kbps',
+    'ar.shuraym': 'Saood_ash-Shuraym_128kbps',
+    'ar.hudhaify': 'Hudhaify_128kbps',
+    'ar.nasseralqatami': 'Nasser_Alqatami_128kbps',
+  };
+
   String _getAudioUrl(String qari, int absoluteAyah, int surahNum, int numberInSurah) {
-    if (qari == 'ar.nasseralqatami') {
+    final folder = _everyAyahFolders[qari];
+    if (folder != null) {
       final s = surahNum.toString().padLeft(3, '0');
       final a = numberInSurah.toString().padLeft(3, '0');
-      return 'https://everyayah.com/data/Nasser_Alqatami_128kbps/$s$a.mp3';
+      return 'https://everyayah.com/data/$folder/$s$a.mp3';
     }
     return 'https://cdn.islamic.network/quran/audio/128/$qari/$absoluteAyah.mp3';
   }
@@ -217,21 +248,24 @@ class QuranAudioService extends ChangeNotifier {
     final ayah = _bundle!.arabic[_playingAyahIndex];
     
     try {
-      await _player.stop();
       if (kIsWeb) {
         final url = _getAudioUrl(_selectedQari, ayah.number, ayah.surahNumber, ayah.numberInSurah);
-        await _player.play(UrlSource(url));
-      } else {
-        final localPath = await _getLocalAudioPath(_selectedQari, ayah.number);
-        final localFile = File(localPath);
-        if (await localFile.exists() && localFile.lengthSync() > 0) {
-          await _player.play(DeviceFileSource(localPath));
-        } else {
-          final url = _getAudioUrl(_selectedQari, ayah.number, ayah.surahNumber, ayah.numberInSurah);
-          await _player.play(UrlSource(url));
-        }
+        _webPlayer?.play(url, playbackRate: _playbackSpeed);
+        _isPlaying = true;
+        notifyListeners();
+        return;
       }
-      await _player.setPlaybackRate(_playbackSpeed);
+
+      await _player?.stop();
+      final localPath = await _getLocalAudioPath(_selectedQari, ayah.number);
+      final localFile = File(localPath);
+      if (await localFile.exists() && localFile.lengthSync() > 0) {
+        await _player?.play(DeviceFileSource(localPath));
+      } else {
+        final url = _getAudioUrl(_selectedQari, ayah.number, ayah.surahNumber, ayah.numberInSurah);
+        await _player?.play(UrlSource(url));
+      }
+      await _player?.setPlaybackRate(_playbackSpeed);
       _isPlaying = true;
       notifyListeners();
     } catch (e) {
@@ -243,7 +277,11 @@ class QuranAudioService extends ChangeNotifier {
     if (_playingPage == -1 || _bundle == null || _bundle!.arabic.isEmpty) return;
     
     if (_isPlaying) {
-      await _player.pause();
+      if (kIsWeb) {
+        _webPlayer?.pause();
+      } else {
+        await _player?.pause();
+      }
     } else {
       if (_playingAyahIndex == -1) {
         _playingAyahIndex = 0;
@@ -254,7 +292,11 @@ class QuranAudioService extends ChangeNotifier {
 
   Future<void> toggleAyah(int idx) async {
     if (_playingAyahIndex == idx && _isPlaying) {
-      await _player.pause();
+      if (kIsWeb) {
+        _webPlayer?.pause();
+      } else {
+        await _player?.pause();
+      }
     } else {
       _playingAyahIndex = idx;
       await _playActiveAyah();
@@ -270,7 +312,11 @@ class QuranAudioService extends ChangeNotifier {
   }
 
   Future<void> stop() async {
-    await _player.stop();
+    if (kIsWeb) {
+      _webPlayer?.dispose();
+    } else {
+      await _player?.stop();
+    }
     _playingAyahIndex = -1;
     _playingPage = -1;
     _isPlaying = false;
@@ -530,7 +576,11 @@ class QuranAudioService extends ChangeNotifier {
 
   @override
   void dispose() {
-    _player.dispose();
+    if (kIsWeb) {
+      _webPlayer?.dispose();
+    } else {
+      _player?.dispose();
+    }
     super.dispose();
   }
 }
